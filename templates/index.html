@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BhoomiSetu - AI Agricultural Advisor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #2E8B57 0%, #228B22 100%);
+            color: white;
+            padding: 80px 0;
+        }
+        .feature-card {
+            border: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            color: #2E8B57;
+            margin-bottom: 1rem;
+        }
+        .chat-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #2E8B57;
+            color: white;
+            border: none;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        .chat-btn:hover {
+            background: #228B22;
+            transform: scale(1.1);
+        }
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        .stats-section {
+            background: #f8f9fa;
+            padding: 60px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2E8B57;">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-seedling"></i> BhoomiSetu</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/weather/Mumbai">Weather</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/prices">Prices</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/schemes">Schemes</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-4">
+                <i class="fas fa-seedling"></i> BhoomiSetu
+            </h1>
+            <p class="lead mb-4">
+                AI-powered agricultural advisor helping Indian farmers make informed decisions
+            </p>
+            <p class="fs-5 mb-5">
+                Get expert advice on irrigation, crop selection, weather forecasts, market prices, and government schemes - all in your local language!
+            </p>
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <a href="/chat" class="btn btn-light btn-lg me-3">
+                        <i class="fas fa-comments"></i> Start Chatting
+                    </a>
+                    <a href="https://t.me/neokisan_bot" target="_blank" class="btn btn-outline-light btn-lg">
+                        <i class="fab fa-telegram"></i> Telegram Bot
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="py-5">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col">
+                    <h2 class="fw-bold">How Can I Help You?</h2>
+                    <p class="text-muted">Ask me anything about farming - I understand multiple Indian languages!</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="card feature-card text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <h5 class="fw-bold">Irrigation Guidance</h5>
+                        <p class="text-muted">Get personalized advice on when and how to irrigate your crops based on weather and soil conditions.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h5 class="fw-bold">Crop Selection</h5>
+                        <p class="text-muted">Choose the right seed varieties for your climate, soil type, and market conditions.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-cloud-sun"></i>
+                        </div>
+                        <h5 class="fw-bold">Weather Forecasts</h5>
+                        <p class="text-muted">Real-time weather data and forecasts to help you plan your farming activities.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h5 class="fw-bold">Market Prices</h5>
+                        <p class="text-muted">Current commodity prices from various mandis to help you make selling decisions.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <h5 class="fw-bold">Financial Schemes</h5>
+                        <p class="text-muted">Information about government schemes, loans, and subsidies available for farmers.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card feature-card text-center p-4">
+                        <div class="feature-icon">
+                            <i class="fas fa-bug"></i>
+                        </div>
+                        <h5 class="fw-bold">Pest Management</h5>
+                        <p class="text-muted">Expert advice on identifying and managing crop diseases and pest infestations.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Start Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col">
+                    <h3 class="fw-bold mb-4">Quick Start Examples</h3>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 p-4">
+                        <h5 class="text-success"><i class="fas fa-question-circle"></i> English</h5>
+                        <ul class="list-unstyled">
+                            <li>"When should I irrigate my tomatoes?"</li>
+                            <li>"What are today's onion prices?"</li>
+                            <li>"Which wheat variety is best for Punjab?"</li>
+                            <li>"How can I get a farm loan?"</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card h-100 p-4">
+                        <h5 class="text-success"><i class="fas fa-language"></i> हिंदी / తెలుగు</h5>
+                        <ul class="list-unstyled">
+                            <li>"मुझे अपनी फसल कब सिंचाई करनी चाहिए?"</li>
+                            <li>"आज प्याज का भाव क्या है?"</li>
+                            <li>"నేను నా వరిని ఎప్పుడు నీరుపట్టాలి?"</li>
+                            <li>"కేసీసీ లోన్ ఎలా తీసుకోవాలి?"</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4">
+        <div class="container text-center">
+            <div class="row">
+                <div class="col">
+                    <h5><i class="fas fa-seedling"></i> BhoomiSetu</h5>
+                    <p class="mb-0">AI-powered agricultural advisor for Indian farmers</p>
+                    <p class="small text-muted">Empowering farmers with technology and knowledge</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Floating Chat Button -->
+    <a href="/chat" class="chat-btn">
+        <i class="fas fa-comments"></i>
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

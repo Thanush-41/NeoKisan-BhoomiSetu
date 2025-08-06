@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather - BhoomiSetu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2E8B57;">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-seedling"></i> BhoomiSetu</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">Home</a>
+                <a class="nav-link" href="/chat">Chat</a>
+                <a class="nav-link active" href="#">Weather</a>
+                <a class="nav-link" href="/prices">Prices</a>
+                <a class="nav-link" href="/schemes">Schemes</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2><i class="fas fa-cloud-sun"></i> Weather Information for {{ location }}</h2>
+        
+        {% if weather.error %}
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> {{ weather.error }}
+        </div>
+        {% else %}
+        
+        <!-- Current Weather -->
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-thermometer-half"></i> Current Weather</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <h3>{{ weather.current.temperature }}°C</h3>
+                                <p class="text-muted">{{ weather.current.description }}</p>
+                            </div>
+                            <div class="col-6">
+                                <p><i class="fas fa-eye"></i> Humidity: {{ weather.current.humidity }}%</p>
+                                <p><i class="fas fa-wind"></i> Wind: {{ weather.current.wind_speed }} m/s</p>
+                                <p><i class="fas fa-tachometer-alt"></i> Pressure: {{ weather.current.pressure }} hPa</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-seedling"></i> Farming Advice</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if weather.current.humidity > 80 %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> High humidity! Monitor crops for fungal diseases.
+                        </div>
+                        {% endif %}
+                        
+                        {% if weather.current.temperature > 35 %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-thermometer-full"></i> Very hot! Ensure adequate irrigation.
+                        </div>
+                        {% endif %}
+                        
+                        <p><i class="fas fa-lightbulb"></i> General advice based on current conditions:</p>
+                        <ul>
+                            <li>Monitor soil moisture levels</li>
+                            <li>Check for pest activity in warm weather</li>
+                            <li>Plan irrigation based on humidity levels</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5-Day Forecast -->
+        {% if weather.forecast %}
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5><i class="fas fa-calendar-alt"></i> 5-Day Forecast</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for day in weather.forecast[:5] %}
+                            <div class="col">
+                                <div class="text-center border rounded p-2">
+                                    <h6>{{ day.dt_txt.split(' ')[0] }}</h6>
+                                    <p class="h5">{{ day.main.temp }}°C</p>
+                                    <p class="small">{{ day.weather[0].description }}</p>
+                                    <p class="small text-muted">💧 {{ day.main.humidity }}%</p>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        {% endif %}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

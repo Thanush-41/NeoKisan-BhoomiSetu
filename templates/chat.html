@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - BhoomiSetu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+            height: 80vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            background: linear-gradient(135deg, #2E8B57 0%, #228B22 100%);
+            color: white;
+            padding: 1rem;
+            border-radius: 10px 10px 0 0;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            background: white;
+            max-height: 500px;
+        }
+        .message {
+            margin-bottom: 1rem;
+            animation: fadeIn 0.3s ease-in;
+        }
+        .user-message {
+            text-align: right;
+        }
+        .user-message .message-bubble {
+            background: #007bff;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 15px 15px 5px 15px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+        }
+        .bot-message .message-bubble {
+            background: #e9ecef;
+            color: #333;
+            padding: 0.5rem 1rem;
+            border-radius: 15px 15px 15px 5px;
+            display: inline-block;
+            max-width: 70%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+        .chat-input {
+            background: white;
+            padding: 1rem;
+            border-radius: 0 0 10px 10px;
+            border-top: 1px solid #dee2e6;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .typing-indicator {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            margin: 1rem 0;
+        }
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        .quick-action-btn {
+            background: #e9ecef;
+            border: 1px solid #ced4da;
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-action-btn:hover {
+            background: #2E8B57;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #2E8B57;">
+        <div class="container">
+            <a class="navbar-brand" href="/"><i class="fas fa-seedling"></i> BhoomiSetu</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/chat">Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/weather/Mumbai">Weather</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/prices">Prices</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/schemes">Schemes</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <!-- Location Detection Alert -->
+        <div class="alert alert-info alert-dismissible fade show" id="locationAlert" style="display: none;">
+            <i class="fas fa-map-marker-alt"></i>
+            <strong>Location Required:</strong> To provide accurate weather and market prices, please allow location access when prompted by your browser.
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        
+        <div class="chat-container">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-robot"></i> BhoomiSetu AI Assistant
+                </h5>
+                <small>Ask me anything about farming in your preferred language!</small>
+                <div class="mt-2">
+                    <button class="btn btn-primary btn-sm" id="getLocationBtn" onclick="getUserLocation()">
+                        <i class="fas fa-map-marker-alt"></i> Detect My Location
+                    </button>
+                    <span id="locationStatus" class="ms-2 small"></span>
+                </div>
+            </div>
+
+            <!-- Chat Messages -->
+            <div class="chat-messages" id="chatMessages">
+                {% if not user_message %}
+                <div class="message bot-message">
+                    <div class="message-bubble">
+                        🌾 Welcome to BhoomiSetu! I'm your AI agricultural advisor.
+
+I can help you with:
+• Irrigation timing and techniques
+• Crop selection and varieties  
+• Weather forecasts for your area
+• Current market prices
+• Government schemes and loans
+• Pest and disease management
+
+You can ask me questions in English, Hindi, Telugu, or other Indian languages.
+
+What would you like to know about farming today?
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if user_message %}
+                <div class="message user-message">
+                    <div class="message-bubble">{{ user_message }}</div>
+                </div>
+                {% endif %}
+
+                {% if bot_response %}
+                <div class="message bot-message">
+                    <div class="message-bubble">{{ bot_response }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions px-3">
+                <div class="quick-action-btn" onclick="sendQuickMessage('What is the weather today?')">
+                    🌤️ Weather
+                </div>
+                <div class="quick-action-btn" onclick="sendQuickMessage('Show me current crop prices')">
+                    💰 Prices
+                </div>
+                <div class="quick-action-btn" onclick="sendQuickMessage('tomato price near me')">
+                    🍅 Tomato Price
+                </div>
+                <div class="quick-action-btn" onclick="sendQuickMessage('When should I irrigate my crops?')">
+                    💧 Irrigation
+                </div>
+                <div class="quick-action-btn" onclick="sendQuickMessage('What government schemes are available?')">
+                    🏛️ Schemes
+                </div>
+                <div class="quick-action-btn" onclick="sendQuickMessage('मुझे खेती की जानकारी चाहिए')">
+                    🌾 हिंदी
+                </div>
+            </div>
+
+            <!-- Chat Input -->
+            <div class="chat-input">
+                <form method="POST" action="/chat" id="chatForm">
+                    <div class="row g-2">
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" name="location" id="locationInput"
+                                   placeholder="Your location (auto-detected)" 
+                                   value="{{ location or '' }}">
+                            <input type="hidden" name="latitude" id="latitudeInput">
+                            <input type="hidden" name="longitude" id="longitudeInput">
+                        </div>
+                        <div class="col-md-7">
+                            <input type="text" class="form-control" name="message" 
+                                   placeholder="Ask me anything about farming..." 
+                                   required id="messageInput">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="submit" class="btn btn-success w-100" id="sendBtn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- API Chat Interface (Alternative) -->
+    <div class="container mt-4" style="display: none;" id="apiChat">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">API Chat Interface</h5>
+            </div>
+            <div class="card-body">
+                <div id="apiChatMessages" style="height: 400px; overflow-y: auto; border: 1px solid #ddd; padding: 1rem; margin-bottom: 1rem;"></div>
+                <div class="row g-2">
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="apiLocation" placeholder="Location">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="text" class="form-control" id="apiCrop" placeholder="Crop type">
+                    </div>
+                    <div class="col-md-4">
+                        <input type="text" class="form-control" id="apiMessage" placeholder="Your question">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-success w-100" onclick="sendApiMessage()">Send</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Location storage
+        let userLocation = {
+            latitude: null,
+            longitude: null,
+            city: null,
+            address: null
+        };
+
+        // Load saved location from localStorage
+        function loadSavedLocation() {
+            const saved = localStorage.getItem('bhoomiSetuLocation');
+            if (saved) {
+                userLocation = JSON.parse(saved);
+                updateLocationStatus();
+            }
+        }
+
+        // Get user's location using browser geolocation
+        function getUserLocation() {
+            const btn = document.getElementById('getLocationBtn');
+            const status = document.getElementById('locationStatus');
+            
+            console.log('getUserLocation called');
+            
+            if (!navigator.geolocation) {
+                console.log('Geolocation not supported');
+                if (status) status.innerHTML = '<span class="text-warning">⚠️ Geolocation not supported by this browser</span>';
+                return;
+            }
+
+            console.log('Geolocation is supported, requesting position...');
+            
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting Location...';
+            }
+            if (status) {
+                status.innerHTML = '<span class="text-info">📍 Requesting location permission...</span>';
+            }
+
+            // Show user what's happening
+            console.log('About to request geolocation...');
+
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+                    console.log('Location permission granted:', position);
+                    userLocation.latitude = position.coords.latitude;
+                    userLocation.longitude = position.coords.longitude;
+                    
+                    status.innerHTML = '<span class="text-info">🌍 Converting coordinates to city...</span>';
+                    
+                    // Reverse geocoding to get city name
+                    try {
+                        const response = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${userLocation.latitude}&lon=${userLocation.longitude}&limit=1&appid=9f842d56fca036534c0a651a6dd6f6fb`);
+                        const data = await response.json();
+                        
+                        if (data && data.length > 0) {
+                            userLocation.city = data[0].name;
+                            userLocation.address = `${data[0].name}, ${data[0].state}, ${data[0].country}`;
+                        }
+                    } catch (error) {
+                        console.error('Reverse geocoding failed:', error);
+                        userLocation.city = 'Unknown';
+                    }
+                    
+                    // Save to localStorage
+                    localStorage.setItem('bhoomiSetuLocation', JSON.stringify(userLocation));
+                    localStorage.setItem('bhoomiSetuLocationPermission', 'granted');
+                    updateLocationStatus();
+                    
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="fas fa-location-arrow"></i> Update Location';
+                    
+                    // Show success message
+                    if (userLocation.city) {
+                        status.innerHTML = `<span class="text-success">✅ Location detected: ${userLocation.city}</span>`;
+                    }
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                    console.log('Error code:', error.code);
+                    console.log('Error message:', error.message);
+                    
+                    if (btn) {
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-location-arrow"></i> Get My Location';
+                    }
+                    
+                    localStorage.setItem('bhoomiSetuLocationPermission', 'denied');
+                    
+                    let errorMessage = '';
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = '❌ Location access denied. Please click the location icon in your browser address bar and allow location access, then refresh the page.';
+                            alert('Location access was denied. To enable:\n1. Click the location icon (🌐) in your browser address bar\n2. Select "Allow"\n3. Refresh the page');
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = '⚠️ Location unavailable. Please check your internet connection and try again.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = '⚠️ Location request timeout. Please try again.';
+                            break;
+                        default:
+                            errorMessage = `❌ Location error (Code: ${error.code}). Please try again.`;
+                            break;
+                    }
+                    
+                    if (status) {
+                        status.innerHTML = `<span class="text-danger">${errorMessage}</span>`;
+                    }
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 15000,
+                    maximumAge: 300000 // 5 minutes
+                }
+            );
+        }
+
+        // Update location status display
+        function updateLocationStatus() {
+            const status = document.getElementById('locationStatus');
+            const locationInput = document.getElementById('locationInput');
+            const latitudeInput = document.getElementById('latitudeInput');
+            const longitudeInput = document.getElementById('longitudeInput');
+            
+            console.log('Updating location status with:', userLocation);
+            
+            if (userLocation.city) {
+                status.innerHTML = `<span class="text-success">📍 ${userLocation.city}</span>`;
+                if (locationInput) {
+                    locationInput.value = userLocation.city;
+                    locationInput.placeholder = userLocation.city;
+                }
+                if (latitudeInput) latitudeInput.value = userLocation.latitude || '';
+                if (longitudeInput) longitudeInput.value = userLocation.longitude || '';
+                
+                console.log('Location status updated successfully');
+            } else {
+                console.log('No city in userLocation');
+            }
+        }
+
+        // Auto-scroll to bottom of chat
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Scroll to bottom on page load
+        window.onload = function() {
+            scrollToBottom();
+            loadSavedLocation();
+            
+            // Automatically request location permission on page load
+            requestLocationPermission();
+        }
+
+        // Automatically request location permission
+        function requestLocationPermission() {
+            console.log('requestLocationPermission called');
+            
+            // Check if we're on HTTPS or localhost (required for geolocation)
+            const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            console.log('Is secure context:', isSecure);
+            console.log('Current protocol:', location.protocol);
+            console.log('Current hostname:', location.hostname);
+            
+            if (!isSecure) {
+                const status = document.getElementById('locationStatus');
+                if (status) {
+                    status.innerHTML = '<span class="text-warning">⚠️ Location requires HTTPS or localhost</span>';
+                }
+                showLocationAlert();
+                return;
+            }
+            
+            const hasLocationPermission = localStorage.getItem('bhoomiSetuLocationPermission');
+            const hasAskedBefore = localStorage.getItem('bhoomiSetuLocationAsked');
+            console.log('Previous location permission:', hasLocationPermission);
+            console.log('Has asked before:', hasAskedBefore);
+            
+            // If we already have permission, get location
+            if (hasLocationPermission === 'granted') {
+                console.log('Permission already granted, getting location...');
+                getUserLocation();
+                return;
+            }
+            
+            // If permission was denied or we haven't asked before
+            if (hasLocationPermission !== 'denied' && hasAskedBefore !== 'true') {
+                // Show alert to inform user
+                showLocationAlert();
+                
+                // Ask user if they want to share location
+                setTimeout(() => {
+                    console.log('Asking user for location permission...');
+                    
+                    const userWantsLocation = confirm('🌾 BhoomiSetu can provide more accurate weather and market prices with your location.\n\n📍 Would you like to share your location?');
+                    
+                    localStorage.setItem('bhoomiSetuLocationAsked', 'true');
+                    
+                    if (userWantsLocation) {
+                        console.log('User agreed to share location');
+                        getUserLocation();
+                    } else {
+                        console.log('User declined to share location');
+                        localStorage.setItem('bhoomiSetuLocationPermission', 'declined');
+                        const status = document.getElementById('locationStatus');
+                        if (status) {
+                            status.innerHTML = '<span class="text-muted">📍 Location sharing declined. You can still detect location manually using the button above.</span>';
+                        }
+                    }
+                }, 1500); // Give user time to see the page
+            } else {
+                // Show location button if previously declined
+                const status = document.getElementById('locationStatus');
+                if (status) {
+                    status.innerHTML = '<span class="text-muted">📍 Click "Detect My Location" to enable location-based features.</span>';
+                }
+                showLocationAlert();
+            }
+        }
+
+        // Show location alert
+        function showLocationAlert() {
+            const alert = document.getElementById('locationAlert');
+            if (alert) {
+                alert.style.display = 'block';
+            }
+        }
+
+        // Handle form submission
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+            
+            console.log('Form submit triggered, message:', messageInput.value);
+            
+            // Validate message is not empty
+            if (!messageInput.value || messageInput.value.trim() === '') {
+                alert('Please enter a message before sending!');
+                messageInput.focus();
+                return false;
+            }
+            
+            // Prevent double submission
+            if (sendBtn.disabled) {
+                console.log('Form submission blocked - already processing');
+                return false;
+            }
+            
+            console.log('Processing form submission...');
+            
+            // Always update location before submission
+            updateFormWithLocation();
+            
+            // Store the message before showing loading state
+            const userMessage = messageInput.value.trim();
+            console.log('User message captured:', userMessage);
+            
+            // Clear the input field immediately
+            messageInput.value = '';
+            
+            // Add user message to chat immediately for better UX
+            addMessage(userMessage, 'user');
+            
+            // Show loading state
+            const originalBtnText = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            sendBtn.disabled = true;
+            
+            // Add typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> BhoomiSetu is thinking...';
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            scrollToBottom();
+            
+            try {
+                // Submit form via AJAX
+                const formData = new FormData(document.getElementById('chatForm'));
+                formData.set('message', userMessage); // Ensure message is set
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const responseText = await response.text();
+                    
+                    // Parse the response to extract the bot response
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(responseText, 'text/html');
+                    
+                    // Look for the bot response in the parsed HTML
+                    const botResponseElement = doc.querySelector('.bot-message .message-bubble');
+                    if (botResponseElement) {
+                        const botResponse = botResponseElement.textContent || botResponseElement.innerText;
+                        
+                        // Remove typing indicator
+                        const indicator = document.getElementById('typing-indicator');
+                        if (indicator) indicator.remove();
+                        
+                        // Add bot response
+                        addMessage(botResponse, 'bot');
+                    } else {
+                        // Fallback: reload the page if we can't parse the response
+                        window.location.reload();
+                    }
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+                
+                // Show error message
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            } finally {
+                // Reset button state
+                sendBtn.innerHTML = originalBtnText;
+                sendBtn.disabled = false;
+            }
+            
+            console.log('Form submission completed');
+        });
+
+        // Function to add messages to chat
+        function addMessage(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = message;
+            
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        // Send quick message
+        function sendQuickMessage(message) {
+            console.log('Quick message triggered:', message);
+            const messageInput = document.getElementById('messageInput');
+            messageInput.value = message;
+            messageInput.focus();
+            updateFormWithLocation();
+            
+            // Trigger form submission
+            document.getElementById('chatForm').dispatchEvent(new Event('submit', {
+                bubbles: true,
+                cancelable: true
+            }));
+        }
+
+        // API Chat functions
+        async function sendApiMessage() {
+            const location = document.getElementById('apiLocation').value || userLocation.city;
+            const crop = document.getElementById('apiCrop').value;
+            const message = document.getElementById('apiMessage').value;
+            
+            if (!message.trim()) return;
+            
+            // Add user message to chat
+            addApiMessage(message, 'user');
+            document.getElementById('apiMessage').value = '';
+            
+            try {
+                const requestBody = {
+                    query: message,
+                    location: location || null,
+                    crop_type: crop || null
+                };
+                
+                // Add coordinates if available
+                if (userLocation.latitude && userLocation.longitude) {
+                    requestBody.coordinates = {
+                        latitude: userLocation.latitude,
+                        longitude: userLocation.longitude
+                    };
+                }
+                
+                const response = await fetch('/api/query', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                const data = await response.json();
+                addApiMessage(data.response, 'bot');
+            } catch (error) {
+                addApiMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            }
+        }
+        
+        // Update form with current location before submission
+        function updateFormWithLocation() {
+            const locationInput = document.getElementById('locationInput');
+            const latitudeInput = document.getElementById('latitudeInput');
+            const longitudeInput = document.getElementById('longitudeInput');
+            
+            console.log('Updating form with location:', userLocation);
+            
+            if (userLocation.city && (!locationInput.value || locationInput.value.trim() === '')) {
+                locationInput.value = userLocation.city;
+                console.log('Set location input to:', userLocation.city);
+            }
+            if (userLocation.latitude) {
+                latitudeInput.value = userLocation.latitude;
+                console.log('Set latitude to:', userLocation.latitude);
+            }
+            if (userLocation.longitude) {
+                longitudeInput.value = userLocation.longitude;
+                console.log('Set longitude to:', userLocation.longitude);
+            }
+        }
+
+        function addApiMessage(message, type) {
+            const messagesDiv = document.getElementById('apiChatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = message;
+            
+            messageDiv.appendChild(bubble);
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Enter key to send message
+        document.getElementById('messageInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                updateFormWithLocation();
+                document.getElementById('chatForm').submit();
+            }
+        });
+
+        // Update form before submission
+        document.getElementById('chatForm').addEventListener('submit', function(e) {
+            updateFormWithLocation();
+        });
+
+        document.getElementById('apiMessage').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendApiMessage();
+            }
+        });
+    </script>
+</body>
+</html>

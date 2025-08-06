@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geolocation Test</title>
+</head>
+<body>
+    <h1>Browser Geolocation Test</h1>
+    <button id="getLocationBtn">Get My Location</button>
+    <button id="autoGetLocationBtn">Auto Get Location (On Load)</button>
+    <div id="result"></div>
+    <div id="debug"></div>
+
+    <script>
+        function addLog(message) {
+            const debug = document.getElementById('debug');
+            debug.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+            console.log(message);
+        }
+
+        function getLocation() {
+            const result = document.getElementById('result');
+            
+            addLog('Checking geolocation support...');
+            
+            if (!navigator.geolocation) {
+                result.innerHTML = "Geolocation is not supported by this browser.";
+                addLog('Geolocation not supported');
+                return;
+            }
+
+            addLog('Geolocation supported, requesting location...');
+            result.innerHTML = "Getting location...";
+
+            // Check if we're on HTTPS or localhost
+            const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            addLog('Is secure context: ' + isSecure);
+            addLog('Protocol: ' + location.protocol);
+            addLog('Hostname: ' + location.hostname);
+
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
+                    const lat = position.coords.latitude;
+                    const lon = position.coords.longitude;
+                    result.innerHTML = `
+                        <h3>Location Found!</h3>
+                        <p>Latitude: ${lat}</p>
+                        <p>Longitude: ${lon}</p>
+                        <p>Accuracy: ${position.coords.accuracy} meters</p>
+                    `;
+                    addLog('Location found: ' + lat + ', ' + lon);
+                },
+                function(error) {
+                    let errorMsg = "Error getting location: ";
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg += "User denied the request for Geolocation.";
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg += "Location information is unavailable.";
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg += "The request to get user location timed out.";
+                            break;
+                        default:
+                            errorMsg += "An unknown error occurred.";
+                            break;
+                    }
+                    result.innerHTML = errorMsg;
+                    addLog('Error: ' + errorMsg);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
+        }
+
+        // Manual button click
+        document.getElementById('getLocationBtn').addEventListener('click', function() {
+            addLog('Manual button clicked');
+            getLocation();
+        });
+
+        // Auto get location on page load
+        document.getElementById('autoGetLocationBtn').addEventListener('click', function() {
+            addLog('Auto location button clicked');
+            getLocation();
+        });
+
+        // Test automatic location on page load
+        window.addEventListener('load', function() {
+            addLog('Page loaded, testing auto location in 2 seconds...');
+            setTimeout(function() {
+                addLog('Attempting automatic location detection...');
+                getLocation();
+            }, 2000);
+        });
+
+        addLog('Script loaded');
+    </script>
+</body>
+</html>

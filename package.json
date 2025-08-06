@@ -1,0 +1,34 @@
+{
+  "name": "bhoomi-setu",
+  "version": "1.0.0",
+  "description": "AI-powered agricultural advisor for Indian farmers",
+  "main": "main.py",
+  "scripts": {
+    "start": "python main.py",
+    "web": "python -m uvicorn src.web.main:app --host 0.0.0.0 --port 8000 --reload",
+    "bot": "python src/telegram/bot.py",
+    "install": "pip install -r requirements.txt",
+    "test": "python -m pytest tests/",
+    "lint": "python -m flake8 src/",
+    "format": "python -m black src/"
+  },
+  "keywords": [
+    "agriculture",
+    "ai",
+    "farming",
+    "telegram-bot",
+    "weather",
+    "crops",
+    "india",
+    "fastapi"
+  ],
+  "author": "BhoomiSetu Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "engines": {
+    "python": ">=3.8"
+  }
+}
