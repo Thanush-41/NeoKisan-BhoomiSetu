@@ -12,6 +12,10 @@ from datetime import datetime
 import requests
 import openai
 import httpx
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
