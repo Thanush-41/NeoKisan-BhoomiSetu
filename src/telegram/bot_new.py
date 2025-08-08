@@ -117,7 +117,10 @@ This helps me give you:
         
         # Get city name from coordinates
         try:
-            api_key = os.getenv('OPENWEATHER_API_KEY', '9f842d56fca036534c0a651a6dd6f6fb')
+            api_key = os.getenv('OPENWEATHER_API_KEY')
+            if not api_key:
+                await update.message.reply_text("Weather service is not configured. Please try again later.")
+                return
             url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={location.latitude}&lon={location.longitude}&limit=1&appid={api_key}"
             
             response = requests.get(url)

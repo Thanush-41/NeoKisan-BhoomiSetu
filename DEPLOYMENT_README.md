@@ -138,10 +138,10 @@ Telugu:
 ```env
 # Required for AI features
 OPENAI_API_KEY=your_openai_api_key_here
+OPENWEATHER_API_KEY=your_openweather_api_key_here
 
 # Pre-configured (working)
 TELEGRAM_BOT_TOKEN=8023646765:AAEdKW_9JnvNg98kuNAm9oyw07MHbL-UgDk
-OPENWEATHER_API_KEY=9f842d56fca036534c0a651a6dd6f6fb
 DATA_GOV_API_KEY=579b464db66ec23bdd00000121ba61b5b04f400760f5e55625b4bb25
 
 # Server settings

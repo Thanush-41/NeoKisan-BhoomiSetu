@@ -599,13 +599,13 @@ I'm your intelligent agricultural advisor, ready to help with:
                     // Save to localStorage
                     localStorage.setItem('bhoomiSetuLocation', JSON.stringify(userLocation));
                     
-                    // Get city name from coordinates
+                    // Get city name from coordinates using server-side geocoding
                     try {
-                        const response = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${userLocation.latitude}&lon=${userLocation.longitude}&limit=1&appid=9f842d56fca036534c0a651a6dd6f6fb`);
+                        const response = await fetch(`/api/geocode?lat=${userLocation.latitude}&lon=${userLocation.longitude}`);
                         const data = await response.json();
-                        if (data && data.length > 0) {
-                            userLocation.city = data[0].name;
-                            userLocation.address = `${data[0].name}, ${data[0].state}, ${data[0].country}`;
+                        if (data && data.city) {
+                            userLocation.city = data.city;
+                            userLocation.address = data.address;
                             localStorage.setItem('bhoomiSetuLocation', JSON.stringify(userLocation));
                         }
                     } catch (error) {

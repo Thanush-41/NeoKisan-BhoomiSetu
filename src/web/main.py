@@ -64,18 +64,23 @@ user_sessions = {}
 async def get_city_from_coordinates(latitude: float, longitude: float) -> str:
     """Get city name from coordinates using reverse geocoding"""
     try:
-        import requests
-        api_key = os.getenv('OPENWEATHER_API_KEY', '9f842d56fca036534c0a651a6dd6f6fb')
-        url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={latitude}&lon={longitude}&limit=1&appid={api_key}"
+        import aiohttp
+        api_key = os.getenv('OPENWEATHER_API_KEY')
+        if not api_key:
+            print("WARNING: OPENWEATHER_API_KEY not found in environment")
+            return "Unknown Location"
+        url = f"https://api.openweathermap.org/geo/1.0/reverse?lat={latitude}&lon={longitude}&limit=1&appid={api_key}"
         
-        response = requests.get(url)
-        data = response.json()
-        
-        if data and len(data) > 0:
-            return data[0].get('name', 'Unknown')
-        return 'Unknown'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                data = await response.json()
+                
+                if data and len(data) > 0:
+                    return data[0].get('name', 'Unknown')
+                return 'Unknown'
     except Exception as e:
         print(f"Reverse geocoding error: {e}")
+        return "Unknown Location"
         return 'Unknown'
 
 @app.get("/", response_class=HTMLResponse)
@@ -390,6 +395,39 @@ async def get_crop_info():
 async def get_financial_schemes():
     """Get information about financial schemes"""
     return JSONResponse(content=agri_agent.financial_schemes)
+
+@app.get("/api/geocode")
+async def geocode_location(lat: float, lon: float):
+    """Secure server-side geocoding endpoint"""
+    try:
+        import aiohttp
+        api_key = os.getenv('OPENWEATHER_API_KEY')
+        if not api_key:
+            raise HTTPException(status_code=500, detail="OpenWeather API key not configured")
+        
+        url = f"https://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
+        
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                data = await response.json()
+                
+                if data and len(data) > 0:
+                    location = data[0]
+                    return JSONResponse(content={
+                        "city": location.get('name', 'Unknown'),
+                        "address": f"{location.get('name', 'Unknown')}, {location.get('state', '')}, {location.get('country', '')}"
+                    })
+                else:
+                    return JSONResponse(content={
+                        "city": "Unknown Location",
+                        "address": "Unknown Location"
+                    })
+    except Exception as e:
+        print(f"Geocoding error: {e}")
+        return JSONResponse(content={
+            "city": "Unknown Location", 
+            "address": "Unknown Location"
+        })
 
 @app.post("/chat")
 async def chat_submit(
