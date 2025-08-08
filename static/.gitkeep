@@ -1,0 +1,2 @@
+# This file ensures the static directory is tracked by git
+# Even when empty, this folder is needed by FastAPI for static file serving
