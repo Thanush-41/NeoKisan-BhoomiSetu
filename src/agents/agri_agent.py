@@ -412,15 +412,20 @@ IMPORTANT: Fix common typos in city names:
 - "guntur" → "guntur"
 - "vizag" → "visakhapatnam"
 
+SPECIAL HANDLING for location words:
+- If query contains "here", "current location", "my location" → set location to null
+- Only extract specific city/place names, not generic location words
+
 Please respond in JSON format with:
 1. "intent": "price" | "weather" | "general"
 2. "commodity": extracted commodity name (standardized)
-3. "location": extracted location (corrected spelling)
+3. "location": extracted location (corrected spelling) OR null if "here"/"current location"
 4. "corrected_query": query with typos fixed
 5. "confidence": 0-1 score
 
 Examples:
 - "weather in banglore" → {{"intent": "weather", "commodity": null, "location": "bangalore", "corrected_query": "weather in bangalore", "confidence": 0.95}}
+- "weather here" → {{"intent": "weather", "commodity": null, "location": null, "corrected_query": "weather here", "confidence": 0.95}}
 - "tomaot price in bangalor" → {{"intent": "price", "commodity": "tomato", "location": "bangalore", "corrected_query": "tomato price in bangalore", "confidence": 0.9}}
 - "weather in deli" → {{"intent": "weather", "commodity": null, "location": "delhi", "corrected_query": "weather in delhi", "confidence": 0.95}}
 
@@ -759,10 +764,20 @@ Response (JSON only):
             context_data = {}
             
             # For weather queries, use the AI-extracted location specifically
-            if query_type == "weather" and ai_location:
-                # Use AI-extracted location for weather
+            if query_type == "weather":
                 weather_location = ai_location
-                print(f"🌤️ DEBUG: Weather query detected with AI location: '{weather_location}'")
+                
+                # Handle "here" or empty location - use user's current location
+                if not weather_location or weather_location.lower() in ["here", "current", "my location", "current location"]:
+                    weather_location = user_context.get("location") if user_context else None
+                    print(f"🌤️ DEBUG: No specific location or 'here' detected, using user location: '{weather_location}'")
+                
+                # If still no location, use a fallback
+                if not weather_location:
+                    weather_location = "Vijayawada"  # Default fallback
+                    print(f"🌤️ DEBUG: No location available, using fallback: '{weather_location}'")
+                
+                print(f"🌤️ DEBUG: Weather query detected with final location: '{weather_location}'")
                 print(f"🌤️ DEBUG: Original query: '{query}' → Using location: '{weather_location}'")
                 weather_data = await self.get_weather_data(weather_location)
                 context_data["weather"] = weather_data

@@ -5,7 +5,7 @@ services:
     pythonVersion: "3.10"
     plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn src.web.main:app --host 0.0.0.0 --port 10000
+    startCommand: uvicorn src.web.main:app --host 0.0.0.0 --port 8000
     envVars:
       - key: OPENWEATHER_API_KEY
         sync: false
@@ -19,7 +19,5 @@ services:
         sync: false
       - key: HOST
         value: "0.0.0.0"
-      - key: PORT
-        value: "10000"
       - key: DEBUG
         value: "False"
