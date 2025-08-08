@@ -280,7 +280,7 @@ This helps me give you:
                         commodity = c
                         break
                 
-                price_data = await agri_agent.get_commodity_prices(commodity)
+                price_data = await agri_agent.get_commodity_prices(commodity, user_location="Vijayawada")
                 if "error" not in price_data:
                     data = price_data.get("data", [])
                     if data:

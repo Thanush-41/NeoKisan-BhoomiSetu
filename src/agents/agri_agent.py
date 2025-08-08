@@ -12,6 +12,7 @@ from datetime import datetime
 import requests
 import openai
 import httpx
+import aiohttp
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -152,17 +153,53 @@ class AgricultureAIAgent:
     async def get_weather_data(self, location: str) -> Dict:
         """Fetch weather data from OpenWeather API"""
         try:
+            print(f"🌤️ DEBUG: Starting weather fetch for location: '{location}'")
+            
             # Current weather
             current_url = f"http://api.openweathermap.org/data/2.5/weather?q={location}&appid={self.weather_api_key}&units=metric"
+            print(f"🌐 DEBUG: Making API request to: {current_url}")
+            
             current_response = requests.get(current_url)
+            print(f"📡 DEBUG: Weather API response status: {current_response.status_code}")
+            
+            if current_response.status_code != 200:
+                current_data = current_response.json()
+                print(f"❌ DEBUG: Weather API error response: {current_data}")
+                error_message = current_data.get("message", "Unknown error")
+                print(f"⚠️ DEBUG: Weather API failed: {error_message}")
+                return {"error": f"Weather API error: {error_message}"}
+            
             current_data = current_response.json()
+            print(f"✅ DEBUG: Successfully fetched current weather data")
+            print(f"📍 DEBUG: Location found: {current_data.get('name', 'Unknown')}, {current_data.get('sys', {}).get('country', 'Unknown')}")
+            print(f"🌡️ DEBUG: Temperature: {current_data['main']['temp']}°C")
+            print(f"🌤️ DEBUG: Conditions: {current_data['weather'][0]['description']}")
             
             # 5-day forecast
             forecast_url = f"http://api.openweathermap.org/data/2.5/forecast?q={location}&appid={self.weather_api_key}&units=metric"
+            print(f"🌐 DEBUG: Fetching forecast from: {forecast_url}")
+            
             forecast_response = requests.get(forecast_url)
-            forecast_data = forecast_response.json()
+            print(f"📡 DEBUG: Forecast API response status: {forecast_response.status_code}")
+            
+            forecast_data = {}
+            if forecast_response.status_code == 200:
+                forecast_data = forecast_response.json()
+                print(f"✅ DEBUG: Successfully fetched forecast data with {len(forecast_data.get('list', []))} entries")
+            else:
+                print(f"⚠️ DEBUG: Forecast API failed with status {forecast_response.status_code}")
+            
+            location_name = current_data.get("name", location)
+            country = current_data.get("sys", {}).get("country", "")
+            full_location = f"{location_name}, {country}" if country else location_name
+            
+            print(f"✅ DEBUG: Weather data compiled for: {full_location}")
             
             return {
+                "location": {
+                    "name": full_location,
+                    "requested": location
+                },
                 "current": {
                     "temperature": current_data["main"]["temp"],
                     "humidity": current_data["main"]["humidity"],
@@ -170,36 +207,508 @@ class AgricultureAIAgent:
                     "wind_speed": current_data["wind"]["speed"],
                     "pressure": current_data["main"]["pressure"]
                 },
-                "forecast": forecast_data["list"][:5]  # Next 5 forecasts
+                "forecast": forecast_data.get("list", [])[:5] if forecast_response.status_code == 200 else []
             }
+        except requests.exceptions.RequestException as e:
+            print(f"🌐 DEBUG: Network error during weather fetch: {e}")
+            logger.error(f"Weather API network error: {e}")
+            return {"error": f"Network error: Unable to reach weather service"}
+        except KeyError as e:
+            print(f"📊 DEBUG: Missing expected data in weather response: {e}")
+            logger.error(f"Weather API data error: {e}")
+            return {"error": "Weather data format error"}
         except Exception as e:
+            print(f"❌ DEBUG: Unexpected error in weather fetch: {e}")
             logger.error(f"Weather API error: {e}")
-            return {"error": "Unable to fetch weather data"}
+            return {"error": f"Weather service error: {str(e)}"}
 
-    async def get_commodity_prices(self, commodity: str = None) -> Dict:
-        """Fetch commodity prices from data.gov.in API"""
+    async def _parse_csv_manually(self, commodity: str = None, user_location: str = None) -> Dict:
+        """Manual CSV parsing fallback when pandas is not available"""
         try:
-            url = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
-            params = {
-                "api-key": self.data_gov_api_key,
-                "format": "json",
-                "limit": 100
-            }
+            import csv
+            import os
             
-            if commodity:
-                params["filters[commodity]"] = commodity
+            # Path to the comprehensive CSV file
+            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                                       "9ef84268-d588-465a-a308-a864a43d0070 (2).csv")
+            
+            print(f"🔍 DEBUG: Manual CSV parsing from: {csv_file_path}")
+            
+            if not os.path.exists(csv_file_path):
+                print(f"⚠️ DEBUG: CSV file not found at {csv_file_path}")
+                return {"error": "Local market data file not found"}
+            
+            all_records = []
+            
+            with open(csv_file_path, 'r', encoding='utf-8') as file:
+                csv_reader = csv.DictReader(file)
                 
-            response = requests.get(url, params=params)
-            data = response.json()
+                # Check column names
+                fieldnames = csv_reader.fieldnames
+                print(f"🔍 DEBUG: CSV columns: {fieldnames}")
+                
+                for row in csv_reader:
+                    # Skip empty rows
+                    if not any(row.values()):
+                        continue
+                    
+                    # Extract data with flexible column naming
+                    state = row.get('State', '').strip()
+                    district = row.get('District', '').strip()
+                    market = row.get('Market', '').strip()
+                    commodity_name = row.get('Commodity', '').strip()
+                    variety = row.get('Variety', '').strip()
+                    grade = row.get('Grade', '').strip()
+                    arrival_date = row.get('Arrival_Date', '').strip()
+                    
+                    # Handle different possible column names for prices
+                    min_price = (row.get('Min_x0020_Price', '') or 
+                               row.get('Min Price', '') or 
+                               row.get('Min_Price', '')).strip()
+                    max_price = (row.get('Max_x0020_Price', '') or 
+                               row.get('Max Price', '') or 
+                               row.get('Max_Price', '')).strip()
+                    modal_price = (row.get('Modal_x0020_Price', '') or 
+                                 row.get('Modal Price', '') or 
+                                 row.get('Modal_Price', '')).strip()
+                    
+                    # Filter by commodity if specified
+                    if commodity:
+                        commodity_variations = {
+                            'tomato': ['Tomato'],
+                            'onion': ['Onion'],
+                            'potato': ['Potato'],
+                            'rice': ['Paddy(Dhan)(Common)', 'Rice'],
+                            'wheat': ['Wheat'],
+                            'cotton': ['Cotton'],
+                            'groundnut': ['Groundnut'],
+                            'maize': ['Maize'],
+                            'chilli': ['Dry Chillies', 'Green Chilli'],
+                            'turmeric': ['Turmeric'],
+                            'banana': ['Banana'],
+                            'mango': ['Mango'],
+                            'coconut': ['Coconut']
+                        }
+                        
+                        search_terms = commodity_variations.get(commodity.lower(), [commodity])
+                        
+                        # Check if commodity matches
+                        matches = False
+                        for term in search_terms:
+                            if term.lower() in commodity_name.lower():
+                                matches = True
+                                break
+                        
+                        if not matches:
+                            continue
+                    
+                    # Create record
+                    record = {
+                        "state": state,
+                        "district": district,
+                        "market": market,
+                        "commodity": commodity_name,
+                        "variety": variety,
+                        "grade": grade,
+                        "arrival_date": arrival_date,
+                        "min_price": min_price,
+                        "max_price": max_price,
+                        "modal_price": modal_price
+                    }
+                    
+                    # Add state priority
+                    priority_states = ["Andhra Pradesh", "Telangana", "Karnataka", "Tamil Nadu", "Kerala"]
+                    if state in priority_states:
+                        record["_state_priority"] = priority_states.index(state)
+                    else:
+                        record["_state_priority"] = 99
+                    
+                    all_records.append(record)
+            
+            print(f"✅ DEBUG: Manual parsing completed, {len(all_records)} records loaded")
+            
+            # Get available states
+            available_states = list(set(record.get("state", "") for record in all_records))
+            print(f"🌍 DEBUG: Available states: {sorted(available_states)}")
+            
+            # Sort by location relevance
+            if user_location and all_records:
+                def location_score(record):
+                    state = record.get("state", "").lower()
+                    market = record.get("market", "").lower()
+                    district = record.get("district", "").lower()
+                    state_priority = record.get("_state_priority", 99)
+                    arrival_date = record.get("arrival_date", "")
+                    
+                    score = 0
+                    
+                    # State priority (lower number = higher priority)
+                    score += (10 - state_priority) * 10000
+                    
+                    # Date freshness bonus
+                    if arrival_date and "05/08/2025" in arrival_date:
+                        score += 5000
+                    
+                    # Location matching for Vijayawada users
+                    if user_location.lower() == "vijayawada":
+                        if "andhra pradesh" in state:
+                            score += 20000
+                        if "krishna" in district.lower():
+                            score += 15000
+                        elif any(nearby in district.lower() for nearby in ["guntur", "west godavari", "east godavari"]):
+                            score += 10000
+                    
+                    # General location matching
+                    if user_location and user_location.lower() in market.lower():
+                        score += 12000
+                    elif user_location and user_location.lower() in district.lower():
+                        score += 8000
+                    
+                    return score
+                
+                all_records.sort(key=location_score, reverse=True)
+                
+                # Debug top results
+                print(f"🔄 DEBUG: Top 3 markets after manual sorting:")
+                for i, record in enumerate(all_records[:3]):
+                    market = record.get("market", "Unknown")
+                    district = record.get("district", "Unknown")
+                    state = record.get("state", "Unknown")
+                    commodity_name = record.get("commodity", "Unknown")
+                    price = record.get("modal_price", "N/A")
+                    print(f"   {i+1}. {market}, {district}, {state} - {commodity_name}: ₹{price}")
             
             return {
                 "status": "success",
-                "data": data.get("records", []),
-                "count": len(data.get("records", []))
+                "data": all_records,
+                "count": len(all_records),
+                "available_states": available_states,
+                "has_local_data": any(record.get("_state_priority", 99) < 5 for record in all_records)
             }
+            
         except Exception as e:
-            logger.error(f"Commodity price API error: {e}")
-            return {"error": "Unable to fetch commodity prices"}
+            print(f"⚠️ DEBUG: Manual CSV parsing error: {e}")
+            return {"error": f"Error parsing CSV file: {e}"}
+
+    async def classify_query_with_groq(self, query: str) -> Dict:
+        """Use Groq AI to intelligently classify queries and extract location/commodity info with typo correction"""
+        try:
+            from groq import Groq
+            
+            client = Groq(api_key=self.groq_api_key)
+            
+            prompt = f"""
+Analyze this agricultural query and extract information with typo correction:
+Query: "{query}"
+
+IMPORTANT: Fix common typos in city names:
+- "banglore" → "bangalore"
+- "deli" → "delhi"  
+- "mumbay" → "mumbai"
+- "chenai" → "chennai"
+- "kolkatta" → "kolkata"
+- "hyderabd" → "hyderabad"
+- "vijayawda" → "vijayawada"
+- "guntur" → "guntur"
+- "vizag" → "visakhapatnam"
+
+Please respond in JSON format with:
+1. "intent": "price" | "weather" | "general"
+2. "commodity": extracted commodity name (standardized)
+3. "location": extracted location (corrected spelling)
+4. "corrected_query": query with typos fixed
+5. "confidence": 0-1 score
+
+Examples:
+- "weather in banglore" → {{"intent": "weather", "commodity": null, "location": "bangalore", "corrected_query": "weather in bangalore", "confidence": 0.95}}
+- "tomaot price in bangalor" → {{"intent": "price", "commodity": "tomato", "location": "bangalore", "corrected_query": "tomato price in bangalore", "confidence": 0.9}}
+- "weather in deli" → {{"intent": "weather", "commodity": null, "location": "delhi", "corrected_query": "weather in delhi", "confidence": 0.95}}
+
+Response (JSON only):
+"""
+            
+            print(f"🤖 DEBUG: Sending query to Groq AI: '{query}'")
+            
+            response = client.chat.completions.create(
+                model="llama-3.1-8b-instant",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.1,
+                max_tokens=200
+            )
+            
+            import json
+            result_text = response.choices[0].message.content.strip()
+            print(f"🤖 DEBUG: Groq raw response: {result_text}")
+            
+            result = json.loads(result_text)
+            print(f"🤖 DEBUG: Groq parsed result: {result}")
+            
+            # Log typo correction
+            original_location = None
+            corrected_location = result.get("location")
+            if "location" in query.lower() or " in " in query.lower():
+                # Extract original location from query
+                query_parts = query.lower().split(" in ")
+                if len(query_parts) > 1:
+                    original_location = query_parts[-1].strip()
+                    if original_location != corrected_location:
+                        print(f"🔧 DEBUG: Typo corrected: '{original_location}' → '{corrected_location}'")
+            
+            return result
+            
+        except Exception as e:
+            print(f"⚠️ DEBUG: Groq classification failed: {e}")
+            # Fallback to simple classification with manual typo correction
+            query_lower = query.lower()
+            
+            # Manual typo corrections
+            location = None
+            if " in " in query_lower:
+                location_part = query_lower.split(" in ")[-1].strip()
+                location_corrections = {
+                    "banglore": "bangalore",
+                    "bangalor": "bangalore", 
+                    "bangaluru": "bangalore",
+                    "deli": "delhi",
+                    "mumbay": "mumbai",
+                    "chenai": "chennai",
+                    "kolkatta": "kolkata",
+                    "hyderabd": "hyderabad",
+                    "vijayawda": "vijayawada",
+                    "vizag": "visakhapatnam"
+                }
+                location = location_corrections.get(location_part, location_part)
+                if location != location_part:
+                    print(f"🔧 DEBUG: Manual typo correction: '{location_part}' → '{location}'")
+            
+            return {
+                "intent": "price" if any(word in query_lower for word in ["price", "rate", "cost", "market"]) else 
+                         "weather" if any(word in query_lower for word in ["weather", "rain", "temperature"]) else "general",
+                "commodity": None,
+                "location": location,
+                "corrected_query": query,
+                "confidence": 0.5
+            }
+
+    async def get_commodity_prices(self, commodity: str = None, user_location: str = None, original_query: str = None) -> Dict:
+        """Intelligent hybrid system: Try API first, fallback to CSV with location awareness and AI classification"""
+        try:
+            print(f"🧠 DEBUG: Starting intelligent price search...")
+            print(f"🧠 DEBUG: Commodity: {commodity}, Location: {user_location}, Query: {original_query}")
+            
+            # Step 1: Use Groq AI to analyze query if provided
+            groq_result = None
+            if original_query:
+                groq_result = await self.classify_query_with_groq(original_query)
+                if groq_result.get("intent") != "price":
+                    print(f"🧠 DEBUG: Query intent is {groq_result.get('intent')}, not price-related")
+                    return {"error": "Query is not price-related", "intent": groq_result.get("intent")}
+                
+                # Extract better commodity and location from AI
+                if not commodity and groq_result.get("commodity"):
+                    commodity = groq_result.get("commodity")
+                    print(f"🧠 DEBUG: AI extracted commodity: {commodity}")
+                
+                if not user_location and groq_result.get("location"):
+                    user_location = groq_result.get("location")
+                    print(f"🧠 DEBUG: AI extracted location: {user_location}")
+            
+            # Step 2: Parse specific location requests (e.g., "tomato price in bangalore")
+            target_state = None
+            target_city = None
+            if user_location:
+                location_mapping = {
+                    "bangalore": {"state": "Karnataka", "city": "Bangalore"},
+                    "bengaluru": {"state": "Karnataka", "city": "Bangalore"},
+                    "delhi": {"state": "Delhi", "city": "Delhi"},
+                    "mumbai": {"state": "Maharashtra", "city": "Mumbai"},
+                    "kolkata": {"state": "West Bengal", "city": "Kolkata"},
+                    "chennai": {"state": "Tamil Nadu", "city": "Chennai"},
+                    "hyderabad": {"state": "Telangana", "city": "Hyderabad"},
+                    "vijayawada": {"state": "Andhra Pradesh", "city": "Vijayawada"},
+                    "visakhapatnam": {"state": "Andhra Pradesh", "city": "Visakhapatnam"},
+                    "guntur": {"state": "Andhra Pradesh", "city": "Guntur"},
+                    "tirupati": {"state": "Andhra Pradesh", "city": "Tirupati"}
+                }
+                
+                location_key = user_location.lower()
+                if location_key in location_mapping:
+                    target_state = location_mapping[location_key]["state"]
+                    target_city = location_mapping[location_key]["city"]
+                    print(f"🧠 DEBUG: Specific location request - State: {target_state}, City: {target_city}")
+            
+            # Step 3: Try API first for states that have data
+            api_states = ["Bihar", "Gujarat", "Haryana", "Jammu and Kashmir", "Kerala", "Uttarakhand"]
+            should_try_api = (not target_state or target_state in api_states or 
+                            (target_state and target_state not in ["Andhra Pradesh", "Telangana"]))
+            
+            api_result = None
+            if should_try_api:
+                print(f"🌐 DEBUG: Trying API first...")
+                try:
+                    url = "https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
+                    params = {
+                        "api-key": "579b464db66ec23bdd000001cdd3946e44ce4aad7209ff7b23ac571b",
+                        "format": "json",
+                        "limit": 1000
+                    }
+                    
+                    if commodity:
+                        params["filters[commodity]"] = commodity.title()
+                    if target_state:
+                        params["filters[state]"] = target_state
+                    
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url, params=params) as response:
+                            if response.status == 200:
+                                api_data = await response.json()
+                                if api_data.get("records"):
+                                    print(f"✅ DEBUG: API returned {len(api_data['records'])} records")
+                                    api_result = {
+                                        "status": "success",
+                                        "data": api_data["records"],
+                                        "count": len(api_data["records"]),
+                                        "source": "api"
+                                    }
+                                else:
+                                    print(f"⚠️ DEBUG: API returned no records")
+                            else:
+                                print(f"⚠️ DEBUG: API request failed with status {response.status}")
+                except Exception as e:
+                    print(f"⚠️ DEBUG: API request failed: {e}")
+            
+            # Step 4: Use CSV data (always as fallback or primary for AP/Telangana)
+            csv_result = None
+            try:
+                import pandas as pd
+                import os
+                
+                # Path to the comprehensive CSV file
+                csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
+                                           "9ef84268-d588-465a-a308-a864a43d0070 (2).csv")
+                
+                print(f"📊 DEBUG: Loading CSV data from: {csv_file_path}")
+                
+                if os.path.exists(csv_file_path):
+                    df = pd.read_csv(csv_file_path)
+                    print(f"✅ DEBUG: Loaded {len(df)} records from CSV")
+                    
+                    # Filter by target state if specified
+                    if target_state:
+                        df = df[df['State'].str.contains(target_state, case=False, na=False)]
+                        print(f"🎯 DEBUG: Filtered to {len(df)} records for state: {target_state}")
+                    
+                    # Filter by commodity if specified
+                    if commodity:
+                        commodity_variations = {
+                            'tomato': ['Tomato'],
+                            'onion': ['Onion'],
+                            'potato': ['Potato'],
+                            'rice': ['Paddy(Dhan)(Common)', 'Rice'],
+                            'wheat': ['Wheat'],
+                            'cotton': ['Cotton'],
+                            'groundnut': ['Groundnut'],
+                            'maize': ['Maize'],
+                            'chilli': ['Dry Chillies', 'Green Chilli'],
+                            'turmeric': ['Turmeric'],
+                            'banana': ['Banana'],
+                            'mango': ['Mango'],
+                            'coconut': ['Coconut']
+                        }
+                        
+                        search_terms = commodity_variations.get(commodity.lower(), [commodity])
+                        commodity_filter = df['Commodity'].str.contains('|'.join(search_terms), case=False, na=False)
+                        df = df[commodity_filter]
+                        print(f"🎯 DEBUG: Filtered to {len(df)} records for commodity: {commodity}")
+                    
+                    if not df.empty:
+                        # Convert to records and sort by relevance
+                        csv_records = []
+                        for _, row in df.iterrows():
+                            record = {
+                                "state": row['State'],
+                                "district": row['District'], 
+                                "market": row['Market'],
+                                "commodity": row['Commodity'],
+                                "variety": row['Variety'],
+                                "grade": row['Grade'],
+                                "arrival_date": row['Arrival_Date'],
+                                "min_price": row['Min_x0020_Price'],
+                                "max_price": row['Max_x0020_Price'],
+                                "modal_price": row['Modal_x0020_Price']
+                            }
+                            csv_records.append(record)
+                        
+                        # Sort by location relevance
+                        if user_location or target_city:
+                            def location_score(record):
+                                score = 0
+                                state = record.get("state", "").lower()
+                                market = record.get("market", "").lower()
+                                district = record.get("district", "").lower()
+                                
+                                # Exact location matches
+                                if target_city and target_city.lower() in market.lower():
+                                    score += 50000
+                                elif target_city and target_city.lower() in district.lower():
+                                    score += 30000
+                                elif user_location and user_location.lower() in market.lower():
+                                    score += 40000
+                                elif user_location and user_location.lower() in district.lower():
+                                    score += 25000
+                                
+                                # State priority for AP/Telangana users
+                                if user_location and user_location.lower() in ["vijayawada", "guntur", "tirupati"]:
+                                    if "andhra pradesh" in state:
+                                        score += 20000
+                                    elif "telangana" in state:
+                                        score += 15000
+                                
+                                return score
+                            
+                            csv_records.sort(key=location_score, reverse=True)
+                        
+                        csv_result = {
+                            "status": "success",
+                            "data": csv_records,
+                            "count": len(csv_records),
+                            "source": "csv"
+                        }
+                        print(f"✅ DEBUG: CSV processed {len(csv_records)} relevant records")
+                    else:
+                        print(f"⚠️ DEBUG: No matching records in CSV")
+                else:
+                    print(f"⚠️ DEBUG: CSV file not found")
+            except Exception as e:
+                print(f"⚠️ DEBUG: CSV processing failed: {e}")
+            
+            # Step 5: Intelligent result selection
+            if target_state and target_state in ["Andhra Pradesh", "Telangana"] and csv_result:
+                # Prioritize CSV for AP/Telangana
+                print(f"🎯 DEBUG: Using CSV data for {target_state}")
+                return csv_result
+            elif api_result and api_result.get("count", 0) > 0:
+                # Use API if available
+                print(f"🌐 DEBUG: Using API data")
+                return api_result
+            elif csv_result and csv_result.get("count", 0) > 0:
+                # Fallback to CSV
+                print(f"📊 DEBUG: Falling back to CSV data")
+                return csv_result
+            else:
+                # No data found
+                return {
+                    "status": "success",
+                    "data": [],
+                    "count": 0,
+                    "source": "none",
+                    "message": f"No price data found for {commodity or 'requested commodity'}" + 
+                              (f" in {target_state or user_location}" if target_state or user_location else "")
+                }
+            
+        except Exception as e:
+            print(f"⚠️ DEBUG: Error in intelligent price search: {e}")
+            return {"error": f"Error in price search: {e}"}
 
     def classify_query(self, query: str) -> str:
         """Classify the type of agricultural query"""
@@ -231,36 +740,73 @@ class AgricultureAIAgent:
             if detected_lang != 'en':
                 english_query = await self.translate_text(query, 'en')
             
-            # Classify query type
-            query_type = self.classify_query(english_query)
-            print(f"🤖 DEBUG: Query type classified as: '{query_type}'")
+            # Classify query type using AI if available
+            print(f"📝 DEBUG: Starting Groq AI classification for query: '{english_query}'")
+            groq_classification = await self.classify_query_with_groq(english_query)
+            query_type = groq_classification.get("intent", "general")
+            ai_commodity = groq_classification.get("commodity")
+            ai_location = groq_classification.get("location")
+            
+            print(f"🤖 DEBUG: AI classified query type: '{query_type}'")
+            print(f"🤖 DEBUG: AI extracted - Commodity: {ai_commodity}, Location: {ai_location}")
+            
+            # Use AI-extracted location if not provided
+            if not location and ai_location:
+                location = ai_location
+                print(f"🤖 DEBUG: Using AI-extracted location: {location}")
             
             # Gather relevant data based on query type
             context_data = {}
             
-            if location:
-                weather_data = await self.get_weather_data(location)
+            # For weather queries, use the AI-extracted location specifically
+            if query_type == "weather" and ai_location:
+                # Use AI-extracted location for weather
+                weather_location = ai_location
+                print(f"🌤️ DEBUG: Weather query detected with AI location: '{weather_location}'")
+                print(f"🌤️ DEBUG: Original query: '{query}' → Using location: '{weather_location}'")
+                weather_data = await self.get_weather_data(weather_location)
                 context_data["weather"] = weather_data
-            
-            if query_type in ["market", "crop_selection"]:
-                commodity_data = await self.get_commodity_prices()
-                context_data["prices"] = commodity_data
-            
-            # Generate response based on query type
-            if query_type == "irrigation":
-                response = await self._handle_irrigation_query(english_query, context_data, user_context)
-            elif query_type == "crop_selection":
-                response = await self._handle_crop_selection_query(english_query, context_data, user_context)
-            elif query_type == "weather":
+                print(f"🌤️ DEBUG: Weather data fetched, proceeding to handler...")
                 response = await self._handle_weather_query(english_query, context_data, user_context)
-            elif query_type == "market":
+            elif query_type == "price":
+                # For price queries, pass AI-extracted data for location-aware processing
+                print(f"💰 DEBUG: Price query detected with AI data:")
+                print(f"💰 DEBUG: - Commodity: {ai_commodity}")
+                print(f"💰 DEBUG: - Location: {ai_location}")
+                print(f"💰 DEBUG: - Original query: '{english_query}'")
+                
+                # Update user context with AI-extracted location if available
+                if ai_location and user_context:
+                    user_context["ai_location"] = ai_location
+                elif ai_location and not user_context:
+                    user_context = {"ai_location": ai_location}
+                
                 response = await self._handle_market_query(english_query, context_data, user_context)
-            elif query_type == "finance":
-                response = await self._handle_finance_query(english_query, context_data, user_context)
-            elif query_type == "pest_disease":
-                response = await self._handle_pest_disease_query(english_query, context_data, user_context)
             else:
-                response = await self._handle_general_query(english_query, context_data, user_context)
+                # For other queries, fetch weather data with regular location
+                if location:
+                    weather_data = await self.get_weather_data(location)
+                    context_data["weather"] = weather_data
+                
+                # Route based on keywords
+                if any(word in english_query.lower() for word in ["price", "rate", "cost", "market", "sell"]):
+                    response = await self._handle_market_query(english_query, context_data, user_context)
+                elif any(word in english_query.lower() for word in ["irrigate", "water", "irrigation", "watering"]):
+                    response = await self._handle_irrigation_query(english_query, context_data, user_context)
+                elif any(word in english_query.lower() for word in ["seed", "variety", "crop", "plant", "sow"]):
+                    response = await self._handle_crop_selection_query(english_query, context_data, user_context)
+                elif any(word in english_query.lower() for word in ["weather", "temperature", "rain", "climate"]):
+                    # For weather queries detected by keywords, also use AI location if available
+                    if ai_location:
+                        weather_data = await self.get_weather_data(ai_location)
+                        context_data["weather"] = weather_data
+                    response = await self._handle_weather_query(english_query, context_data, user_context)
+                elif any(word in english_query.lower() for word in ["loan", "credit", "scheme", "subsidy", "finance", "money"]):
+                    response = await self._handle_finance_query(english_query, context_data, user_context)
+                elif any(word in english_query.lower() for word in ["disease", "pest", "fungus", "insect", "spray"]):
+                    response = await self._handle_pest_disease_query(english_query, context_data, user_context)
+                else:
+                    response = await self._handle_general_query(english_query, context_data, user_context)
             
             # Translate back to original language if needed
             if detected_lang != 'en':
@@ -298,17 +844,30 @@ class AgricultureAIAgent:
             Answer in simple, clear language that a farmer can understand and implement.
             """
             
-            response = self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert agricultural advisor."},
+            # Use Groq API for the response
+            if self.groq_api_key:
+                print("💧 DEBUG: Using Groq for irrigation query")
+                messages = [
+                    {"role": "system", "content": "You are an expert agricultural advisor specializing in irrigation management for Indian farmers."},
                     {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
+                ]
+                return await self._call_groq_api(messages)
+            elif self.openai_client:
+                print("💧 DEBUG: Using OpenAI for irrigation query")
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are an expert agricultural advisor."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content.strip()
+            else:
+                print("⚠️ DEBUG: No AI API available for irrigation")
+                return "I can help with irrigation advice. Please provide your location and crop type for better recommendations."
+                
         except Exception as e:
             logger.error(f"Irrigation query error: {e}")
             return "I can help with irrigation advice. Please provide your location and crop type for better recommendations."
@@ -341,17 +900,30 @@ class AgricultureAIAgent:
             Provide specific variety names when possible and explain your reasoning.
             """
             
-            response = self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert agricultural advisor."},
+            # Use Groq API for the response
+            if self.groq_api_key:
+                print("🌾 DEBUG: Using Groq for crop selection query")
+                messages = [
+                    {"role": "system", "content": "You are an expert agricultural advisor specializing in crop selection for Indian farmers."},
                     {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
+                ]
+                return await self._call_groq_api(messages)
+            elif self.openai_client:
+                print("🌾 DEBUG: Using OpenAI for crop selection query")
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are an expert agricultural advisor."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content.strip()
+            else:
+                print("⚠️ DEBUG: No AI API available for crop selection")
+                return "I can help you choose the right crop varieties. Please provide your location and soil type for better recommendations."
+                
         except Exception as e:
             logger.error(f"Crop selection query error: {e}")
             return "I can help you choose the right crop varieties. Please provide your location and soil type for better recommendations."
@@ -360,61 +932,185 @@ class AgricultureAIAgent:
         """Handle weather-related queries"""
         weather_info = context_data.get("weather", {})
         
+        print(f"🌤️ DEBUG: Weather handler received data: {weather_info.keys() if weather_info else 'No data'}")
+        
         if "error" in weather_info:
-            return "I couldn't fetch current weather data. Please check your location and try again."
+            error_msg = weather_info.get("error", "Unknown error")
+            print(f"❌ DEBUG: Weather error in handler: {error_msg}")
+            
+            # Provide helpful error messages based on error type
+            if "not found" in error_msg.lower() or "404" in error_msg:
+                return f"🌍 I couldn't find weather data for that location. Please check the city name and try again.\n\n💡 Try: 'weather in bangalore' or 'weather in delhi'"
+            elif "network" in error_msg.lower():
+                return "🌐 I'm having trouble connecting to the weather service. Please try again in a moment."
+            else:
+                return f"🌤️ I couldn't fetch current weather data: {error_msg}\n\n💡 Please check your location and try again."
         
         current = weather_info.get("current", {})
         forecast = weather_info.get("forecast", [])
+        location_name = weather_info.get("location", {}).get("name", "Unknown Location")
         
-        response = f"Current Weather:\n"
+        print(f"🌤️ DEBUG: Formatting weather response for: {location_name}")
+        print(f"🌤️ DEBUG: Current temp: {current.get('temperature', 'N/A')}°C")
+        
+        response = f"🌍 **Weather for {location_name}**\n\n"
+        response += f"**Current Conditions:**\n"
         response += f"🌡️ Temperature: {current.get('temperature', 'N/A')}°C\n"
         response += f"💧 Humidity: {current.get('humidity', 'N/A')}%\n"
         response += f"🌤️ Conditions: {current.get('description', 'N/A')}\n"
         response += f"💨 Wind Speed: {current.get('wind_speed', 'N/A')} m/s\n\n"
         
         if forecast:
-            response += "5-Day Forecast:\n"
+            response += "**5-Day Forecast:**\n"
             for i, day in enumerate(forecast[:5]):
                 date = datetime.fromtimestamp(day['dt']).strftime('%Y-%m-%d')
                 temp = day['main']['temp']
                 desc = day['weather'][0]['description']
                 response += f"{date}: {temp}°C, {desc}\n"
         
+        print(f"✅ DEBUG: Weather response formatted successfully")
         return response
 
     async def _handle_market_query(self, query: str, context_data: Dict, user_context: Dict) -> str:
-        """Handle market price queries"""
-        price_info = context_data.get("prices", {})
-        
-        if "error" in price_info:
-            return "I couldn't fetch current market prices. Please try again later."
-        
-        data = price_info.get("data", [])
-        
-        if not data:
-            return "No market price data available at the moment."
-        
-        response = "Current Market Prices:\n\n"
-        
-        # Group by commodity
-        commodities = {}
-        for record in data[:10]:  # Limit to 10 records
-            commodity = record.get("commodity", "Unknown")
-            market = record.get("market", "Unknown")
-            price = record.get("modal_price", "N/A")
+        """Handle market price queries with intelligent hybrid API+CSV system"""
+        try:
+            # Get location - prioritize AI-extracted location for specific location queries
+            ai_location = user_context.get("ai_location") if user_context else None
+            default_location = user_context.get("location") if user_context else None
+            location = ai_location or default_location
             
-            if commodity not in commodities:
-                commodities[commodity] = []
-            commodities[commodity].append(f"{market}: ₹{price}")
-        
-        for commodity, prices in commodities.items():
-            response += f"📈 {commodity}:\n"
-            for price in prices[:3]:  # Limit to 3 markets per commodity
-                response += f"  • {price}\n"
-            response += "\n"
-        
-        return response
-
+            print(f"💰 DEBUG: Market query handler - AI location: {ai_location}, Default: {default_location}, Using: {location}")
+            
+            # Use intelligent commodity prices method with original query for AI analysis
+            price_result = await self.get_commodity_prices(
+                commodity=None,  # Let AI extract commodity
+                user_location=location,
+                original_query=query
+            )
+            
+            print(f"💰 DEBUG: Price result received: {price_result.get('source', 'unknown')} with {price_result.get('count', 0)} records")
+            
+            # Check if query was classified as non-price related
+            if "error" in price_result and "not price-related" in price_result.get("error", ""):
+                intent = price_result.get("intent", "general")
+                if intent == "weather":
+                    return "I see you're asking about weather. Let me help you with weather information instead of prices."
+                elif intent == "general":
+                    return "I see this is a general farming question. I'll help you with agricultural advice."
+                else:
+                    return "I'll help you with that farming question."
+            
+            # Handle other errors
+            if "error" in price_result:
+                return f"I couldn't fetch current market prices: {price_result.get('error', 'Unknown error')}. Please try again later."
+            
+            data = price_result.get("data", [])
+            source = price_result.get("source", "unknown")
+            
+            if not data:
+                message = price_result.get("message", "No market price data available at the moment.")
+                return f"{message}\n\n💡 Try asking for a specific commodity like 'tomato price' or 'rice rate in Guntur'."
+            
+            # Extract commodity and location info for response formatting
+            query_lower = query.lower()
+            
+            # Determine what commodity was found
+            found_commodities = list(set(record.get("commodity", "") for record in data[:10]))
+            primary_commodity = found_commodities[0] if found_commodities else "commodity"
+            
+            # Determine location context
+            location_context = ""
+            if data:
+                first_record = data[0]
+                state = first_record.get("state", "")
+                district = first_record.get("district", "")
+                market = first_record.get("market", "")
+                
+                if market and district:
+                    location_context = f"{market}, {district}"
+                elif district:
+                    location_context = district
+                elif state:
+                    location_context = state
+            
+            # Format response based on data source
+            if source == "api":
+                response = f"🌐 **Live Market Prices** ({primary_commodity.title()})\n"
+                response += f"📡 Source: Government API (Real-time data)\n\n"
+            elif source == "csv":
+                response = f"📊 **Market Prices** ({primary_commodity.title()})\n"
+                response += f"📋 Source: Local Market Database\n"
+                if location_context:
+                    response += f"📍 Area: {location_context}\n"
+                response += "\n"
+            else:
+                response = f"💰 **Market Prices** ({primary_commodity.title()})\n\n"
+            
+            # Show top 5-8 relevant price records
+            count = 0
+            max_display = 8
+            
+            for record in data:
+                if count >= max_display:
+                    break
+                
+                commodity = record.get("commodity", "Unknown")
+                market = record.get("market", "Unknown Market")
+                district = record.get("district", "Unknown District") 
+                state = record.get("state", "Unknown State")
+                
+                # Price information
+                modal_price = record.get("modal_price", "N/A")
+                min_price = record.get("min_price", "N/A")
+                max_price = record.get("max_price", "N/A")
+                arrival_date = record.get("arrival_date", "")
+                
+                # Format location
+                if district != "Unknown District" and state != "Unknown State":
+                    location_str = f"{market}, {district}, {state}"
+                elif state != "Unknown State":
+                    location_str = f"{market}, {state}"
+                else:
+                    location_str = market
+                
+                # Format price
+                if modal_price and modal_price != "N/A":
+                    if min_price != "N/A" and max_price != "N/A" and min_price != max_price:
+                        price_str = f"₹{modal_price} (₹{min_price}-₹{max_price})"
+                    else:
+                        price_str = f"₹{modal_price}"
+                else:
+                    price_str = "Price not available"
+                
+                # Add date if available
+                date_str = f" • {arrival_date}" if arrival_date else ""
+                
+                response += f"📍 **{location_str}**\n"
+                response += f"   💰 {price_str} per quintal{date_str}\n\n"
+                
+                count += 1
+            
+            # Add helpful footer
+            if count < len(data):
+                remaining = len(data) - count
+                response += f"📈 *+{remaining} more markets available*\n\n"
+            
+            # Add data source note
+            if source == "api":
+                response += "✅ Real-time data from Government API\n"
+            elif source == "csv":
+                response += "📋 Data from comprehensive market database\n"
+                response += "💡 For other states, try: 'tomato price in Kerala' or 'rice rate in Gujarat'\n"
+            
+            # Add location-specific tip
+            if location and location.lower() in ["vijayawada", "guntur", "tirupati"]:
+                response += f"🎯 Showing prices relevant to {location.title()}"
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error in market query handling: {e}")
+            return "I encountered an error while fetching market prices. Please try again with a specific commodity like 'tomato price' or 'rice rate'."
     async def _handle_finance_query(self, query: str, context_data: Dict, user_context: Dict) -> str:
         """Handle financial and scheme queries"""
         try:
@@ -441,17 +1137,30 @@ class AgricultureAIAgent:
             Make the information actionable and location-specific.
             """
             
-            response = self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "system", "content": "You are an expert in agricultural finance."},
+            # Use Groq API for the response
+            if self.groq_api_key:
+                print("💰 DEBUG: Using Groq for finance query")
+                messages = [
+                    {"role": "system", "content": "You are an expert in agricultural finance and government schemes for Indian farmers."},
                     {"role": "user", "content": prompt}
-                ],
-                max_tokens=500,
-                temperature=0.7
-            )
-            
-            return response.choices[0].message.content.strip()
+                ]
+                return await self._call_groq_api(messages)
+            elif self.openai_client:
+                print("💰 DEBUG: Using OpenAI for finance query")
+                response = self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are an expert in agricultural finance."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content.strip()
+            else:
+                print("⚠️ DEBUG: No AI API available for finance")
+                return "I can help with information about agricultural loans and government schemes. Please specify your location for more relevant information."
+                
         except Exception as e:
             logger.error(f"Finance query error: {e}")
             return "I can help with information about agricultural loans and government schemes. Please specify your location for more relevant information."

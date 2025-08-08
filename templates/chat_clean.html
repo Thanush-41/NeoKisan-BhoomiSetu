@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - BhoomiSetu AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0f3d2c 0%, #1a5f47 25%, #2d8f5e 50%, #40b574 75%, #52d689 100%);
+            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Particles */
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 225, 140, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(45, 143, 94, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(82, 214, 137, 0.08) 0%, transparent 50%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-20px) rotate(1deg); }
+            66% { transform: translateY(-10px) rotate(-1deg); }
+        }
+
+        /* Glassmorphism Container */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Navigation */
+        .navbar-glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: 700;
+            font-size: 1.5rem;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: #52d689 !important;
+            text-shadow: 0 0 10px rgba(82, 214, 137, 0.5);
+        }
+
+        /* Main Chat Container */
+        .chat-main {
+            height: calc(100vh - 80px);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Chat Header */
+        .chat-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .chat-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #ffffff 0%, #52d689 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 4px 20px rgba(82, 214, 137, 0.3);
+        }
+
+        .chat-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 400;
+        }
+
+        /* Messages Container */
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            margin-bottom: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(82, 214, 137, 0.3) transparent;
+        }
+
+        .messages-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .messages-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb {
+            background: rgba(82, 214, 137, 0.3);
+            border-radius: 10px;
+        }
+
+        .messages-container::-webkit-scrollbar-thumb:hover {
+            background: rgba(82, 214, 137, 0.5);
+        }
+
+        /* Message Bubbles */
+        .message {
+            margin-bottom: 1.5rem;
+            animation: messageSlideIn 0.5s ease-out;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .user-message {
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .bot-message {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .user-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .bot-avatar {
+            background: linear-gradient(135deg, #52d689 0%, #2d8f5e 100%);
+            color: white;
+        }
+
+        .message-bubble {
+            padding: 1rem 1.25rem;
+            border-radius: 18px;
+            max-width: 65%;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            position: relative;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-message .message-bubble {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-bottom-right-radius: 6px;
+        }
+
+        .bot-message .message-bubble {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2c3e50;
+            border-bottom-left-radius: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Input Container */
+        .input-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .input-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(82, 214, 137, 0.5), transparent);
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-end;
+        }
+
+        .message-input {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            color: white;
+            font-size: 1rem;
+            resize: none;
+            max-height: 120px;
+            min-height: 50px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .message-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #52d689;
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 20px rgba(82, 214, 137, 0.3);
+        }
+
+        .send-button {
+            background: linear-gradient(135deg, #52d689 0%, #2d8f5e 100%);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(82, 214, 137, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .send-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(82, 214, 137, 0.4);
+        }
+
+        .send-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .send-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .send-button:hover::before {
+            left: 100%;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-action-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            padding: 0.5rem 1rem;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            font-weight: 500;
+        }
+
+        .quick-action-btn:hover {
+            background: rgba(82, 214, 137, 0.3);
+            border-color: #52d689;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(82, 214, 137, 0.2);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-style: italic;
+            margin: 1rem 0;
+            justify-content: flex-start;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #52d689;
+            animation: typingDots 1.4s infinite ease-in-out;
+        }
+
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typingDots {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .chat-main {
+                padding: 1rem;
+            }
+            
+            .chat-title {
+                font-size: 2rem;
+            }
+            
+            .message-bubble {
+                max-width: 85%;
+            }
+            
+            .chat-form {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+            
+            .send-button {
+                align-self: stretch;
+            }
+        }
+
+        /* Custom Animations */
+        @keyframes liquidFloat {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg); 
+                border-radius: 20px 25px 22px 28px;
+            }
+            33% { 
+                transform: translateY(-10px) rotate(1deg); 
+                border-radius: 25px 20px 28px 22px;
+            }
+            66% { 
+                transform: translateY(-5px) rotate(-1deg); 
+                border-radius: 22px 28px 20px 25px;
+            }
+        }
+
+        .glass-container {
+            animation: liquidFloat 15s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar-glass fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling"></i> BhoomiSetu AI
+            </a>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link active" href="/chat"><i class="fas fa-comments"></i> Chat</a>
+                <a class="nav-link" href="/weather/Mumbai"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Chat Interface -->
+    <div class="chat-main">
+        <div class="chat-container glass-container">
+            <!-- Chat Header -->
+            <div class="chat-header">
+                <h1 class="chat-title">
+                    <i class="fas fa-robot"></i> BhoomiSetu AI
+                </h1>
+                <p class="chat-subtitle">Your intelligent agricultural advisor • Ask anything about farming</p>
+            </div>
+
+            <!-- Location Detection (Hidden initially) -->
+            <div class="alert alert-info" id="locationAlert" style="display: none; background: rgba(52, 152, 219, 0.1); border: 1px solid rgba(52, 152, 219, 0.3); color: white; border-radius: 12px;">
+                <i class="fas fa-map-marker-alt"></i>
+                <strong>Location Access:</strong> Allow location for personalized weather and market data.
+                <button type="button" class="btn-close btn-close-white" onclick="hideLocationAlert()"></button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="sendQuickMessage('Best crops for current season')">
+                    <i class="fas fa-seedling"></i> Seasonal Crops
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Weather forecast and irrigation advice')">
+                    <i class="fas fa-tint"></i> Irrigation Guide
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Current market prices for vegetables')">
+                    <i class="fas fa-chart-line"></i> Market Prices
+                </button>
+                <button class="quick-action-btn" onclick="sendQuickMessage('Government schemes for farmers')">
+                    <i class="fas fa-university"></i> Gov Schemes
+                </button>
+                <button class="quick-action-btn" onclick="getUserLocation()">
+                    <i class="fas fa-location-arrow"></i> Detect Location
+                </button>
+            </div>
+
+            <!-- Messages Container -->
+            <div class="messages-container" id="chatMessages">
+                {% if not user_message %}
+                <div class="message bot-message">
+                    <div class="message-avatar bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-bubble">
+                        🌾 <strong>Welcome to BhoomiSetu AI!</strong>
+
+I'm your intelligent agricultural advisor, ready to help with:
+
+✨ <strong>Crop Management</strong> - Irrigation, fertilization, pest control
+🌱 <strong>Crop Selection</strong> - Best varieties for your region & season  
+🌤️ <strong>Weather Insights</strong> - Forecasts and farming recommendations
+💰 <strong>Market Intelligence</strong> - Current prices and trends
+🏛️ <strong>Government Schemes</strong> - Loans, subsidies, insurance
+🔬 <strong>General Knowledge</strong> - Any topic you're curious about
+
+<em>Ask me anything in Hindi, English, Telugu, or your preferred language!</em>
+
+<strong>Pro tip:</strong> Share your location for personalized advice! 📍
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if user_message %}
+                <div class="message user-message">
+                    <div class="message-bubble">{{ user_message }}</div>
+                    <div class="message-avatar user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                </div>
+                {% endif %}
+                
+                {% if bot_response %}
+                <div class="message bot-message">
+                    <div class="message-avatar bot-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-bubble">{{ bot_response }}</div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Input Container -->
+            <div class="input-container">
+                <form id="chatForm" class="chat-form">
+                    <textarea 
+                        class="message-input" 
+                        id="messageInput" 
+                        name="message" 
+                        placeholder="Ask me about farming, weather, crops, or anything else..." 
+                        rows="1"
+                        required
+                    ></textarea>
+                    <button type="submit" class="send-button" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i> Send
+                    </button>
+                    
+                    <!-- Hidden form fields for location -->
+                    <input type="hidden" id="locationInput" name="location" value="">
+                    <input type="hidden" id="latitudeInput" name="latitude" value="">
+                    <input type="hidden" id="longitudeInput" name="longitude" value="">
+                    <input type="hidden" name="language" value="en">
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap and Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Location storage
+        let userLocation = {
+            latitude: null,
+            longitude: null,
+            city: null,
+            address: null
+        };
+
+        // Load saved location from localStorage
+        function loadSavedLocation() {
+            const saved = localStorage.getItem('bhoomiSetuLocation');
+            if (saved) {
+                userLocation = JSON.parse(saved);
+                updateLocationStatus();
+            }
+        }
+
+        // Get user's location using browser geolocation
+        function getUserLocation() {
+            console.log('getUserLocation called');
+            
+            if (!navigator.geolocation) {
+                console.log('Geolocation not supported');
+                return;
+            }
+
+            console.log('Geolocation is supported, requesting position...');
+            
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+                    console.log('Position obtained:', position);
+                    userLocation.latitude = position.coords.latitude;
+                    userLocation.longitude = position.coords.longitude;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('bhoomiSetuLocation', JSON.stringify(userLocation));
+                    
+                    // Get city name from coordinates
+                    try {
+                        const response = await fetch(`https://api.openweathermap.org/geo/1.0/reverse?lat=${userLocation.latitude}&lon=${userLocation.longitude}&limit=1&appid=9f842d56fca036534c0a651a6dd6f6fb`);
+                        const data = await response.json();
+                        if (data && data.length > 0) {
+                            userLocation.city = data[0].name;
+                            userLocation.address = `${data[0].name}, ${data[0].state}, ${data[0].country}`;
+                            localStorage.setItem('bhoomiSetuLocation', JSON.stringify(userLocation));
+                        }
+                    } catch (error) {
+                        console.error('Reverse geocoding error:', error);
+                    }
+                    
+                    updateLocationStatus();
+                },
+                function(error) {
+                    console.error('Geolocation error:', error);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000
+                }
+            );
+        }
+
+        function updateLocationStatus() {
+            if (userLocation.city) {
+                console.log('Location updated:', userLocation.city);
+            }
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Handle form submission
+        document.getElementById('chatForm').addEventListener('submit', async function(e) {
+            e.preventDefault(); // Prevent default form submission
+            
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+            
+            console.log('Form submit triggered, message:', messageInput.value);
+            
+            // Validate message is not empty
+            if (!messageInput.value || messageInput.value.trim() === '') {
+                alert('Please enter a message before sending!');
+                messageInput.focus();
+                return false;
+            }
+            
+            // Prevent double submission
+            if (sendBtn.disabled) {
+                console.log('Form submission blocked - already processing');
+                return false;
+            }
+            
+            console.log('Processing form submission...');
+            
+            // Always update location before submission
+            updateFormWithLocation();
+            
+            // Store the message before showing loading state
+            const userMessage = messageInput.value.trim();
+            console.log('User message captured:', userMessage);
+            
+            // Clear the input field immediately
+            messageInput.value = '';
+            
+            // Add user message to chat immediately for better UX
+            addMessage(userMessage, 'user');
+            
+            // Show loading state
+            const originalBtnText = sendBtn.innerHTML;
+            sendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            sendBtn.disabled = true;
+            
+            // Add typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.className = 'typing-indicator';
+            typingDiv.id = 'typing-indicator';
+            typingDiv.innerHTML = `
+                <div class="message-avatar bot-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <span style="margin-left: 10px;">BhoomiSetu is thinking...</span>
+            `;
+            document.getElementById('chatMessages').appendChild(typingDiv);
+            scrollToBottom();
+            
+            try {
+                // Submit form via AJAX
+                const formData = new FormData(document.getElementById('chatForm'));
+                formData.set('message', userMessage); // Ensure message is set
+                
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const responseText = await response.text();
+                    
+                    // Parse the response to extract the bot response
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(responseText, 'text/html');
+                    
+                    // Look for the bot response in the parsed HTML
+                    const botResponseElement = doc.querySelector('.bot-message .message-bubble');
+                    if (botResponseElement) {
+                        const botResponse = botResponseElement.textContent || botResponseElement.innerText;
+                        
+                        // Remove typing indicator
+                        const indicator = document.getElementById('typing-indicator');
+                        if (indicator) indicator.remove();
+                        
+                        // Add bot response
+                        addMessage(botResponse, 'bot');
+                    } else {
+                        // Fallback: reload the page if we can't parse the response
+                        window.location.reload();
+                    }
+                } else {
+                    throw new Error('Failed to send message');
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                
+                // Remove typing indicator
+                const indicator = document.getElementById('typing-indicator');
+                if (indicator) indicator.remove();
+                
+                // Show error message
+                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+            } finally {
+                // Reset button state
+                sendBtn.innerHTML = originalBtnText;
+                sendBtn.disabled = false;
+            }
+            
+            console.log('Form submission completed');
+        });
+
+        // Function to add messages to chat
+        function addMessage(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}-message`;
+            
+            // Create avatar
+            const avatar = document.createElement('div');
+            avatar.className = `message-avatar ${sender}-avatar`;
+            const icon = document.createElement('i');
+            icon.className = sender === 'user' ? 'fas fa-user' : 'fas fa-robot';
+            avatar.appendChild(icon);
+            
+            // Create message bubble
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            bubble.textContent = message;
+            
+            // Append elements in correct order
+            if (sender === 'user') {
+                messageDiv.appendChild(bubble);
+                messageDiv.appendChild(avatar);
+            } else {
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(bubble);
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+            
+            // Trigger animation
+            setTimeout(() => {
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0) scale(1)';
+            }, 50);
+        }
+
+        // Update form with current location before submission
+        function updateFormWithLocation() {
+            const locationInput = document.getElementById('locationInput');
+            const latitudeInput = document.getElementById('latitudeInput');
+            const longitudeInput = document.getElementById('longitudeInput');
+            
+            console.log('Updating form with location:', userLocation);
+            
+            if (userLocation.city && (!locationInput.value || locationInput.value.trim() === '')) {
+                locationInput.value = userLocation.city;
+                console.log('Set location input to:', userLocation.city);
+            }
+            if (userLocation.latitude) {
+                latitudeInput.value = userLocation.latitude;
+                console.log('Set latitude to:', userLocation.latitude);
+            }
+            if (userLocation.longitude) {
+                longitudeInput.value = userLocation.longitude;
+                console.log('Set longitude to:', userLocation.longitude);
+            }
+        }
+
+        // Auto-resize textarea
+        document.getElementById('messageInput').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        // Hide location alert
+        function hideLocationAlert() {
+            document.getElementById('locationAlert').style.display = 'none';
+        }
+
+        // Enhanced quick message with typing effect
+        function sendQuickMessage(message) {
+            console.log('Quick message triggered:', message);
+            const messageInput = document.getElementById('messageInput');
+            
+            // Typing effect
+            let i = 0;
+            messageInput.value = '';
+            const typeInterval = setInterval(() => {
+                messageInput.value += message[i];
+                i++;
+                if (i >= message.length) {
+                    clearInterval(typeInterval);
+                    setTimeout(() => {
+                        messageInput.focus();
+                        updateFormWithLocation();
+                        document.getElementById('chatForm').dispatchEvent(new Event('submit', {
+                            bubbles: true,
+                            cancelable: true
+                        }));
+                    }, 500);
+                }
+            }, 50);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadSavedLocation();
+            
+            // Auto-detect location on page load if not already detected
+            if (!userLocation.city) {
+                setTimeout(() => {
+                    getUserLocation();
+                }, 1000);
+            }
+            
+            // Focus on input
+            document.getElementById('messageInput').focus();
+            
+            // Add enter key support for message input
+            document.getElementById('messageInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('chatForm').dispatchEvent(new Event('submit', {
+                        bubbles: true,
+                        cancelable: true
+                    }));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

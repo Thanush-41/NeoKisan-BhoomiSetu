@@ -263,7 +263,7 @@ async def handle_query_without_ai(query: str, location: str, user_context: dict)
             
             print(f"DEBUG: Query location extracted: '{query_location}', Auto-detected: '{location}', Final: '{final_location}'")
             
-            price_data = await agri_agent.get_commodity_prices(commodity)
+            price_data = await agri_agent.get_commodity_prices(commodity, final_location)
             if "error" not in price_data:
                 data = price_data.get("data", [])
                 if data:
@@ -376,7 +376,7 @@ async def get_weather(request: WeatherRequest):
 async def get_prices(request: PriceRequest):
     """Get commodity prices"""
     try:
-        price_data = await agri_agent.get_commodity_prices(request.commodity)
+        price_data = await agri_agent.get_commodity_prices(request.commodity, request.location if hasattr(request, 'location') else None)
         return JSONResponse(content=price_data)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -391,7 +391,7 @@ async def get_financial_schemes():
     """Get information about financial schemes"""
     return JSONResponse(content=agri_agent.financial_schemes)
 
-@app.post("/chat", response_class=HTMLResponse)
+@app.post("/chat")
 async def chat_submit(
     request: Request, 
     message: str = Form("", description="User message"), 
@@ -399,7 +399,7 @@ async def chat_submit(
     latitude: str = Form("", description="Latitude coordinate"),
     longitude: str = Form("", description="Longitude coordinate")
 ):
-    """Handle chat form submission"""
+    """Handle chat form submission - returns JSON for AJAX requests"""
     try:
         # Debug logging
         print(f"DEBUG: Chat form submission - message: '{message}', location: '{location}', latitude: '{latitude}', longitude: '{longitude}'")
@@ -407,12 +407,7 @@ async def chat_submit(
         # Validate that message is not empty
         if not message or message.strip() == "":
             print("DEBUG: Empty message received")
-            return templates.TemplateResponse("chat.html", {
-                "request": request,
-                "user_message": "",
-                "bot_response": "Please enter a message to get started!",
-                "location": location
-            })
+            return {"response": "Please enter a message to get started!"}
         
         # Determine location from coordinates if not provided
         if not location and latitude and longitude:
@@ -445,23 +440,13 @@ async def chat_submit(
         print(f"DEBUG: {response}")
         print(f"DEBUG: Response length: {len(response)} characters")
         
-        # Return chat interface with response
-        return templates.TemplateResponse("chat.html", {
-            "request": request,
-            "user_message": message,
-            "bot_response": response,
-            "location": location
-        })
+        # Return JSON response for AJAX requests
+        return {"response": response}
     
     except Exception as e:
         print(f"DEBUG: Chat error: {e}")
         print(f"DEBUG: Chat error type: {type(e)}")
-        return templates.TemplateResponse("chat.html", {
-            "request": request,
-            "user_message": message if 'message' in locals() else "",
-            "bot_response": f"Sorry, I encountered an error: {str(e)}",
-            "location": location if 'location' in locals() else ""
-        })
+        return {"response": f"Sorry, I encountered an error: {str(e)}"}
 
 @app.get("/weather/{location}")
 async def weather_page(request: Request, location: str):
@@ -483,7 +468,7 @@ async def weather_page(request: Request, location: str):
 async def prices_page(request: Request):
     """Market prices page"""
     try:
-        price_data = await agri_agent.get_commodity_prices()
+        price_data = await agri_agent.get_commodity_prices(user_location="Vijayawada")
         return templates.TemplateResponse("prices.html", {
             "request": request,
             "prices": price_data
