@@ -12,6 +12,24 @@ BhoomiSetu is an AI-powered agricultural advisor designed specifically for India
 ✅ **APIs**: Weather and commodity data configured  
 ⚠️ **OpenAI Integration**: Requires API key for full AI features
 
+## 🌐 **RENDER DEPLOYMENT** (Production Ready)
+
+### **Files Created for Render:**
+- ✅ `render.yaml` - Deployment configuration with Python 3.10
+- ✅ `runtime.txt` - Python version specification
+- ✅ `requirements.txt` - All dependencies listed
+
+### **Deploy to Render:**
+1. **Push to GitHub** (make sure render.yaml is included)
+2. **Connect Render to your repo**
+3. **Set Environment Variables** in Render dashboard:
+   - `OPENWEATHER_API_KEY` = your_weather_api_key
+   - `OPENAI_API_KEY` = your_openai_api_key  
+   - `GROQ_API_KEY` = your_groq_api_key
+4. **Deploy** - Render will automatically use render.yaml config
+
+**Note:** render.yaml forces Python 3.10 to avoid pandas compatibility issues with Python 3.13.
+
 ## 🔧 **Quick Start**
 
 ### 1. **View Web Interface**
