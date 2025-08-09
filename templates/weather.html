@@ -6,46 +6,237 @@
     <title>Weather - BhoomiSetu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
     <style>
-        .navbar-custom {
-            background: linear-gradient(135deg, #2E8B57, #20B2AA, #4682B4, #8A2BE2);
+        :root {
+            --primary-green: #2E7D32;
+            --accent-yellow: #fefcf5;
+            --light-bg: #fefcf5;
+            --dark-text: #212121;
+            --muted-text: #555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            margin-top: 60px;
+        }
+
+        /* Navbar Glass Style */
+        .navbar-glass {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Container inside navbar */
+        .navbar-glass .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Brand styling */
+        .navbar-glass .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #2a7a1f;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Brand icon color */
+        .navbar-glass .navbar-brand i.fas.fa-seedling {
+            color: #4caf50;
+        }
+
+        /* Navigation links container */
+        .navbar-glass .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        /* Individual nav links */
+        .navbar-glass .nav-link {
+            color: #2a7a1f;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Active nav link style */
+        .navbar-glass .nav-link.active,
+        .navbar-glass .nav-link:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        /* Nav icons color */
+        .navbar-glass .nav-link i.fas {
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        /* Auth buttons styling */
+        .navbar-glass .btn-outline-light {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            background: transparent;
+        }
+
+        .navbar-glass .btn-outline-light:hover {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light:hover {
+            background-color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            color: white !important;
+        }
+
+        /* User menu styling */
+        #userMenu .btn {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+        }
+
+        #userMenu .btn:hover {
+            background-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        #userMenu .dropdown-menu {
+            background: white;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #userMenu .dropdown-item {
+            color: var(--dark-text) !important;
+        }
+
+        #userMenu .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: #4caf50 !important;
+        }
+
+        #userName {
+            color: #2a7a1f !important;
+        }
+
+        #userEmail {
+            color: var(--muted-text) !important;
+        }
+
+        /* Weather Cards */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: var(--primary-green) !important;
+            color: white !important;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .btn-primary:hover {
+            background-color: #1a5d1f;
+            border-color: #1a5d1f;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            background: var(--light-bg);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Weather header */
+        .weather-header h1 {
+            color: var(--dark-text);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .weather-header .lead {
+            color: var(--muted-text);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        /* Forecast cards */
+        .forecast-card {
+            background: white;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .forecast-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Weather details styling */
+        .weather-details p {
+            font-size: 0.9rem;
+            color: var(--dark-text);
         }
     </style>
 </head>
 <body>
     <!-- Enhanced Navigation with Authentication -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <nav class="navbar-glass fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-seedling me-2"></i>BhoomiSetu
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling"></i> BhoomiSetu AI
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> AI Chat</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/weather"><i class="fas fa-cloud-sun"></i> Weather</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/schemes"><i class="fas fa-hand-holding-heart"></i> Schemes</a>
-                    </li>
-                </ul>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
+                <a class="nav-link active" href="/weather/Mumbai"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
                 
-                <!-- Authentication Buttons (visible when logged out) -->
+                <!-- Authentication Buttons -->
                 <div id="authButtons" class="d-flex gap-2">
                     <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
                         <i class="fas fa-sign-in-alt"></i> Login
@@ -63,8 +254,8 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/chat"><i class="fas fa-comments"></i> AI Chat</a></li>
-                        <li><a class="dropdown-item" href="/"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
+                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                     </ul>
@@ -73,96 +264,111 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <h2><i class="fas fa-cloud-sun"></i> Weather Information for {{ location }}</h2>
-        
-        {% if weather.error %}
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i> {{ weather.error }}
-        </div>
-        {% else %}
-        
-        <!-- Current Weather -->
-        <div class="row mt-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5><i class="fas fa-thermometer-half"></i> Current Weather</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-6">
-                                <h3>{{ weather.current.temperature }}°C</h3>
-                                <p class="text-muted">{{ weather.current.description }}</p>
-                            </div>
-                            <div class="col-6">
-                                <p><i class="fas fa-eye"></i> Humidity: {{ weather.current.humidity }}%</p>
-                                <p><i class="fas fa-wind"></i> Wind: {{ weather.current.wind_speed }} m/s</p>
-                                <p><i class="fas fa-tachometer-alt"></i> Pressure: {{ weather.current.pressure }} hPa</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <!-- Main Content -->
+    <main class="content-wrapper">
+        <div class="container py-4">
+            <!-- Location Header -->
+            <div class="weather-header mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-map-marker-alt me-2" style="color: var(--primary-green);"></i>
+                    Weather Information for {{ location }}
+                </h1>
+                <p class="lead mb-4">Real-time weather data for better farming decisions</p>
             </div>
-            
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h5><i class="fas fa-seedling"></i> Farming Advice</h5>
-                    </div>
-                    <div class="card-body">
-                        {% if weather.current.humidity > 80 %}
-                        <div class="alert alert-warning">
-                            <i class="fas fa-exclamation-triangle"></i> High humidity! Monitor crops for fungal diseases.
-                        </div>
-                        {% endif %}
-                        
-                        {% if weather.current.temperature > 35 %}
-                        <div class="alert alert-danger">
-                            <i class="fas fa-thermometer-full"></i> Very hot! Ensure adequate irrigation.
-                        </div>
-                        {% endif %}
-                        
-                        <p><i class="fas fa-lightbulb"></i> General advice based on current conditions:</p>
-                        <ul>
-                            <li>Monitor soil moisture levels</li>
-                            <li>Check for pest activity in warm weather</li>
-                            <li>Plan irrigation based on humidity levels</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- 5-Day Forecast -->
-        {% if weather.forecast %}
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5><i class="fas fa-calendar-alt"></i> 5-Day Forecast</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row">
-                            {% for day in weather.forecast[:5] %}
-                            <div class="col">
-                                <div class="text-center border rounded p-2">
-                                    <h6>{{ day.dt_txt.split(' ')[0] }}</h6>
-                                    <p class="h5">{{ day.main.temp }}°C</p>
-                                    <p class="small">{{ day.weather[0].description }}</p>
-                                    <p class="small text-muted">💧 {{ day.main.humidity }}%</p>
+            {% if weather.error %}
+            <div class="alert alert-danger border-0 shadow-sm">
+                <i class="fas fa-exclamation-triangle me-2"></i> {{ weather.error }}
+            </div>
+            {% else %}
+            
+            <div class="row g-4">
+                <!-- Current Weather Card -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="fas fa-thermometer-half me-2"></i> Current Weather</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-6">
+                                    <h3 class="text-primary mb-1">{{ weather.current.temperature }}°C</h3>
+                                    <p class="text-muted mb-0">{{ weather.current.description }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <div class="weather-details">
+                                        <p class="mb-2"><i class="fas fa-eye text-info me-2"></i> Humidity: {{ weather.current.humidity }}%</p>
+                                        <p class="mb-2"><i class="fas fa-wind text-success me-2"></i> Wind: {{ weather.current.wind_speed }} m/s</p>
+                                        <p class="mb-0"><i class="fas fa-tachometer-alt text-warning me-2"></i> Pressure: {{ weather.current.pressure }} hPa</p>
+                                    </div>
                                 </div>
                             </div>
-                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Farming Advice Card -->
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm h-100">
+                        <div class="card-header" style="background-color: var(--primary-green); color: white;">
+                            <h5 class="mb-0"><i class="fas fa-seedling me-2"></i> Farming Advice</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if weather.current.humidity > 80 %}
+                            <div class="alert alert-warning border-0 shadow-sm">
+                                <i class="fas fa-exclamation-triangle me-2"></i> High humidity! Monitor crops for fungal diseases.
+                            </div>
+                            {% endif %}
+                            
+                            {% if weather.current.temperature > 35 %}
+                            <div class="alert alert-danger border-0 shadow-sm">
+                                <i class="fas fa-thermometer-full me-2"></i> Very hot! Ensure adequate irrigation.
+                            </div>
+                            {% endif %}
+                            
+                            <p class="mb-3"><i class="fas fa-lightbulb me-2" style="color: var(--accent-orange);"></i> General advice based on current conditions:</p>
+                            <ul class="list-unstyled">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Monitor soil moisture levels</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i> Check for pest activity in warm weather</li>
+                                <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i> Plan irrigation based on humidity levels</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
+
+            <!-- 5-Day Forecast -->
+            {% if weather.forecast %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header" style="background-color: #17a2b8; color: white;">
+                            <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i> 5-Day Forecast</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                {% for day in weather.forecast[:5] %}
+                                <div class="col">
+                                    <div class="forecast-card text-center border rounded p-3 h-100">
+                                        <h6 class="mb-2 fw-bold">{{ day.dt_txt.split(' ')[0] }}</h6>
+                                        <p class="h5 mb-2" style="color: var(--primary-green);">{{ day.main.temp }}°C</p>
+                                        <p class="small mb-2">{{ day.weather[0].description }}</p>
+                                        <p class="small text-muted mb-0">
+                                            <i class="fas fa-tint text-primary me-1"></i> {{ day.main.humidity }}%
+                                        </p>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% endif %}
         </div>
-        {% endif %}
-        
-        {% endif %}
-    </div>
+    </main>
 
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1">

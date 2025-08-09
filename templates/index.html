@@ -6,8 +6,17 @@
     <title>BhoomiSetu - AI Agricultural Advisor</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary-green: #2E7D32;
+            --accent-yellow: #fefcf5;
+            --light-bg: #fefcf5;
+            --dark-text: #212121;
+            --muted-text: #555;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,216 +24,386 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #0f3d2c 0%, #1a5f47 25%, #2d8f5e 50%, #40b574 75%, #52d689 100%);
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            margin-top: 60px;
         }
 
-        /* Animated Background Particles */
-        body::before {
-            content: '';
-            position: absolute;
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 5%;
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-image: 
-                radial-gradient(circle at 20% 80%, rgba(120, 225, 140, 0.1) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(45, 143, 94, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 40% 40%, rgba(82, 214, 137, 0.08) 0%, transparent 50%);
-            animation: float 20s ease-in-out infinite;
-            z-index: -1;
+            z-index: 1000;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            33% { transform: translateY(-20px) rotate(1deg); }
-            66% { transform: translateY(-10px) rotate(-1deg); }
-        }
-
-        /* Glassmorphism Components */
-        .glass-container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            border-radius: 24px;
-            box-shadow: 
-                0 8px 32px rgba(0, 0, 0, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
-
-        /* Navigation */
-        .navbar-glass {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem 0;
-        }
-
-        .navbar-brand {
-            color: white !important;
+        nav .logo {
+            font-family: 'Poppins', sans-serif;
             font-weight: 700;
             font-size: 1.5rem;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-        }
-
-        .nav-link {
-            color: rgba(255, 255, 255, 0.9) !important;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #52d689 !important;
-            text-shadow: 0 0 10px rgba(82, 214, 137, 0.5);
-        }
-
-        /* Hero Section */
-        .hero-section {
-            padding: 120px 0 80px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-title {
-            font-size: 3.5rem;
-            font-weight: 700;
-            background: linear-gradient(135deg, #ffffff 0%, #52d689 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 1.5rem;
-            text-shadow: 0 4px 20px rgba(82, 214, 137, 0.3);
-        }
-
-        .hero-subtitle {
-            font-size: 1.3rem;
-            color: rgba(255, 255, 255, 0.9);
-            margin-bottom: 2rem;
-            font-weight: 400;
-        }
-
-        .hero-stats {
+            color: var(--primary-green);
             display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--dark-text);
+            font-weight: 500;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-green);
+        }
+
+        /* Hero */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 3rem 5%;
             gap: 2rem;
-            justify-content: center;
-            margin-top: 3rem;
         }
 
-        .stat-item {
-            text-align: center;
-            color: white;
+        .hero-text {
+            flex: 1;
+            min-width: 300px;
         }
 
-        .stat-number {
+        .hero-text h1 {
+            font-family: 'Poppins', sans-serif;
             font-size: 2.5rem;
-            font-weight: 700;
-            color: #52d689;
-            display: block;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
         }
 
-        .stat-label {
+        .hero-text p {
+            margin-bottom: 2rem;
+            color: var(--muted-text);
+            font-size: 1.1rem;
+        }
+
+        .hero-text .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-right: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-green);
+            color: #fff;
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary-green);
+            color: var(--primary-green);
+        }
+
+        .hero-image {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+
+        .hero-image img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Stats */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            padding: 2rem 5%;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: #fff;
+            padding: 1.5rem 2rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            min-width: 140px;
+        }
+
+        .stat h3 {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat p {
             font-size: 0.9rem;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            color: var(--muted-text);
         }
 
-        /* Feature Cards */
-        .features-section {
-            padding: 80px 0;
-            position: relative;
-            z-index: 1;
+        /* Features */
+        .features {
+            padding: 3rem 5%;
+            background: #fff;
+        }
+
+        .features h2 {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 2rem;
+            color: var(--dark-text);
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
         }
 
         .feature-card {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            padding: 2rem;
+            background: var(--light-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
             text-align: center;
-            transition: all 0.3s ease;
-            height: 100%;
-            color: white;
-            position: relative;
-            overflow: hidden;
+            border: 1px solid #eee;
         }
 
-        .feature-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(82, 214, 137, 0.5), transparent);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-10px);
-            background: rgba(255, 255, 255, 0.15);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        .feature-icon {
-            font-size: 3rem;
-            color: #52d689;
-            margin-bottom: 1.5rem;
-            display: block;
-        }
-
-        .feature-title {
-            font-size: 1.4rem;
-            font-weight: 600;
+        .feature-card i {
+            font-size: 2rem;
+            color: var(--primary-green);
             margin-bottom: 1rem;
-            color: white;
         }
 
-        .feature-desc {
-            color: rgba(255, 255, 255, 0.8);
-            line-height: 1.6;
-        }
-
-        /* Buttons */
-        .btn-glass {
-            background: linear-gradient(135deg, #52d689 0%, #2d8f5e 100%);
-            border: none;
-            border-radius: 15px;
-            padding: 1rem 2rem;
-            color: white;
+        .feature-card h4 {
+            margin-bottom: 0.5rem;
             font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(82, 214, 137, 0.3);
-            position: relative;
-            overflow: hidden;
         }
 
-        .btn-glass:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(82, 214, 137, 0.4);
+        .feature-card p {
+            font-size: 0.9rem;
+            color: var(--muted-text);
+        }
+
+        /* Help Section */
+        .help {
+            padding: 3rem 5%;
+        }
+
+        .help h2 {
+            text-align: center;
+            margin-bottom: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .help p {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--muted-text);
+        }
+
+        .help-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .help-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .help-card i {
+            font-size: 1.5rem;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-green);
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        /* Navbar Glass Style */
+        .navbar-glass {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Container inside navbar */
+        .navbar-glass .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Brand styling */
+        .navbar-glass .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #2a7a1f;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Brand icon color */
+        .navbar-glass .navbar-brand i.fas.fa-seedling {
+            color: #4caf50;
+        }
+
+        /* Navigation links container */
+        .navbar-glass .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        /* Individual nav links */
+        .navbar-glass .nav-link {
+            color: #2a7a1f;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Active nav link style */
+        .navbar-glass .nav-link.active,
+        .navbar-glass .nav-link:hover {
+            background-color: #4caf50;
             color: white;
         }
 
-        .btn-glass::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transition: left 0.5s;
+        /* Nav icons color */
+        .navbar-glass .nav-link i.fas {
+            color: inherit;
+            font-size: 1rem;
         }
 
-        .btn-glass:hover::before {
-            left: 100%;
+        /* Auth buttons styling */
+        .navbar-glass .btn-outline-light {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            background: transparent;
+        }
+
+        .navbar-glass .btn-outline-light:hover {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light:hover {
+            background-color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            color: white !important;
+        }
+
+        /* User menu styling */
+        #userMenu .btn {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+        }
+
+        #userMenu .btn:hover {
+            background-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        #userMenu .dropdown-menu {
+            background: white;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #userMenu .dropdown-item {
+            color: var(--dark-text) !important;
+        }
+
+        #userMenu .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: #4caf50 !important;
+        }
+
+        #userName {
+            color: #2a7a1f !important;
+        }
+
+        #userEmail {
+            color: var(--muted-text) !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-glass .container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .navbar-glass .navbar-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.7rem;
+                margin-left: auto;
+            }
+        }
+
+        .quick-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 250px;
+        }
+
+        /* On small screens stack vertically */
+        @media (max-width: 768px) {
+            .quick-card {
+                min-height: auto;
+            }
         }
 
         /* Chat Button */
@@ -236,49 +415,36 @@
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #52d689 0%, #2d8f5e 100%);
+            background: linear-gradient(135deg, var(--primary-green) 0%, #1a5d1f 100%);
             color: white;
             border: none;
             font-size: 1.5rem;
-            box-shadow: 0 8px 25px rgba(82, 214, 137, 0.4);
+            box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4);
             transition: all 0.3s ease;
             animation: pulse 2s infinite;
         }
 
         .chat-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 12px 35px rgba(82, 214, 137, 0.6);
+            box-shadow: 0 12px 35px rgba(46, 125, 50, 0.6);
         }
 
         @keyframes pulse {
-            0% { box-shadow: 0 8px 25px rgba(82, 214, 137, 0.4); }
-            50% { box-shadow: 0 8px 25px rgba(82, 214, 137, 0.6), 0 0 0 10px rgba(82, 214, 137, 0.1); }
-            100% { box-shadow: 0 8px 25px rgba(82, 214, 137, 0.4); }
+            0% { box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4); }
+            50% { box-shadow: 0 8px 25px rgba(46, 125, 50, 0.6), 0 0 0 10px rgba(46, 125, 50, 0.1); }
+            100% { box-shadow: 0 8px 25px rgba(46, 125, 50, 0.4); }
         }
 
-        /* Section Titles */
-        .section-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            text-align: center;
-            color: white;
-            margin-bottom: 3rem;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            
-            .hero-stats {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            .section-title {
-                font-size: 2rem;
-            }
+        /* Legacy glass container for compatibility */
+        .glass-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 24px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
     </style>
 </head>
@@ -326,119 +492,89 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section">
-        <div class="container">
-            <div class="row justify-content-center text-center">
-                <div class="col-lg-10">
-                    <h1 class="hero-title">
-                        <i class="fas fa-seedling"></i> BhoomiSetu AI
-                    </h1>
-                    <p class="hero-subtitle">
-                        🌾 India's Most Advanced Agricultural AI Advisor<br>
-                        Empowering farmers with intelligent insights, real-time data, and expert guidance
-                    </p>
-                    <div class="d-flex gap-3 justify-content-center flex-wrap">
-                        <a href="/chat" class="btn btn-glass">
-                            <i class="fas fa-comments"></i> Start Chatting
-                        </a>
-                        <a href="#features" class="btn btn-glass" style="background: rgba(255,255,255,0.1);">
-                            <i class="fas fa-info-circle"></i> Learn More
-                        </a>
-                    </div>
-                    
-                    <div class="hero-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">10K+</span>
-                            <span class="stat-label">Happy Farmers</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">50+</span>
-                            <span class="stat-label">Crops Supported</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">24/7</span>
-                            <span class="stat-label">AI Support</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">15+</span>
-                            <span class="stat-label">Languages</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <section class="hero">
+        <div class="hero-text">
+            <h1>India's Most Advanced Agricultural AI Advisor</h1>
+            <p>Empowering farmers with intelligent insights, real-time data, and expert guidance.</p>
+            <a href="/chat" class="btn btn-primary">Start Chatting</a>
+            <a href="#features" class="btn btn-outline">Learn More</a>
+        </div>
+        <div class="hero-image">
+            <img src="/static/agrieco.png" alt="Farmer Illustration">
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features-section" id="features">
-        <div class="container">
-            <h2 class="section-title">🚀 AI-Powered Features</h2>
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card glass-container">
-                        <i class="fas fa-robot feature-icon"></i>
-                        <h4 class="feature-title">Smart AI Assistant</h4>
-                        <p class="feature-desc">
-                            Chat with our advanced AI that understands farming queries in multiple Indian languages. 
-                            Get instant answers on crops, weather, and farming techniques.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card glass-container">
-                        <i class="fas fa-seedling feature-icon"></i>
-                        <h4 class="feature-title">Crop Intelligence</h4>
-                        <p class="feature-desc">
-                            Receive personalized crop recommendations based on your location, soil type, and seasonal conditions. 
-                            Optimize your harvest with data-driven insights.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card glass-container">
-                        <i class="fas fa-cloud-rain feature-icon"></i>
-                        <h4 class="feature-title">Weather Insights</h4>
-                        <p class="feature-desc">
-                            Real-time weather forecasts and agricultural advisories. Plan your farming activities 
-                            with accurate weather predictions and irrigation guidance.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card glass-container">
-                        <i class="fas fa-chart-line feature-icon"></i>
-                        <h4 class="feature-title">Market Prices</h4>
-                        <p class="feature-desc">
-                            Live commodity prices from mandis across India. Make informed decisions about 
-                            when and where to sell your produce for maximum profit.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card glass-container">
-                        <i class="fas fa-university feature-icon"></i>
-                        <h4 class="feature-title">Government Schemes</h4>
-                        <p class="feature-desc">
-                            Complete information about PM-KISAN, crop insurance, loans, and subsidies. 
-                            Get guidance on applications and eligibility criteria.
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-lg-4 col-md-6">
-                    <div class="feature-card glass-container">
-                        <i class="fas fa-globe feature-icon"></i>
-                        <h4 class="feature-title">Multilingual Support</h4>
-                        <p class="feature-desc">
-                            Communicate in Hindi, Telugu, English, and other Indian languages. 
-                            Get agricultural advice in your preferred language for better understanding.
-                        </p>
-                    </div>
-                </div>
+    <!-- Stats -->
+    <section class="stats">
+        <div class="stat">
+            <h3>10K+</h3>
+            <p>Happy Farmers</p>
+        </div>
+        <div class="stat">
+            <h3>50+</h3>
+            <p>Crops Supported</p>
+        </div>
+        <div class="stat">
+            <h3>24/7</h3>
+            <p>AI Support</p>
+        </div>
+        <div class="stat">
+            <h3>15+</h3>
+            <p>Languages</p>
+        </div>
+    </section>
+    <!-- Features -->
+    <section class="features" id="features">
+        <h2>AI-Powered Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <i class="fas fa-robot"></i>
+                <h4>Smart AI Assistant</h4>
+                <p class="feature-desc">
+                    Chat with our advanced AI that understands farming queries in multiple Indian languages. 
+                    Get instant answers on crops, weather, and farming techniques.
+                </p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-seedling"></i>
+                <h4>Crop Intelligence</h4>
+                <p class="feature-desc">
+                    Receive personalized crop recommendations based on your location, soil type, and seasonal
+                    conditions.
+                    Optimize your harvest with data-driven insights.
+                </p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-cloud-sun"></i>
+                <h4>Weather Insights</h4>
+                <p class="feature-desc">
+                    Real-time weather forecasts and agricultural advisories. Plan your farming activities
+                    with accurate weather predictions and irrigation guidance.
+                </p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>Market Prices</h4>
+                <p class="feature-desc">
+                    Live commodity prices from mandis across India. Make informed decisions about
+                    when and where to sell your produce for maximum profit.
+                </p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-university"></i>
+                <h4>Government Schemes</h4>
+                <p class="feature-desc">
+                    Complete information about PM-KISAN, crop insurance, loans, and subsidies.
+                    Get guidance on applications and eligibility criteria.
+                </p>
+            </div>
+            <div class="feature-card">
+                <i class="fas fa-language"></i>
+                <h4>Multilingual Support</h4>
+                <p class="feature-desc">
+                    Communicate in Hindi, Telugu, English, and other Indian languages.
+                    Get agricultural advice in your preferred language for better understanding.
+                </p>
             </div>
         </div>
     </section>
@@ -469,76 +605,44 @@
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="py-5">
-        <div class="container">
-            <div class="row text-center mb-5">
-                <div class="col">
-                    <h2 class="fw-bold">How Can I Help You?</h2>
-                    <p class="text-muted">Ask me anything about farming - I understand multiple Indian languages!</p>
-                </div>
+    <!-- Help -->
+    <section class="help">
+        <h2>How Can I Help You?</h2>
+        <p>Ask me anything about farming - I understand multiple Indian languages!</p>
+        <div class="help-grid">
+            <div class="help-card">
+                <i class="fas fa-tint"></i>
+                <h4>Irrigation Guidance</h4>
+                <p class="text-muted">Get personalized advice on when and how to irrigate your crops based on weather
+                    and soil conditions.</p>
             </div>
-            
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <div class="card feature-card text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-tint"></i>
-                        </div>
-                        <h5 class="fw-bold">Irrigation Guidance</h5>
-                        <p class="text-muted">Get personalized advice on when and how to irrigate your crops based on weather and soil conditions.</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card feature-card text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-leaf"></i>
-                        </div>
-                        <h5 class="fw-bold">Crop Selection</h5>
-                        <p class="text-muted">Choose the right seed varieties for your climate, soil type, and market conditions.</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card feature-card text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-cloud-sun"></i>
-                        </div>
-                        <h5 class="fw-bold">Weather Forecasts</h5>
-                        <p class="text-muted">Real-time weather data and forecasts to help you plan your farming activities.</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card feature-card text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <h5 class="fw-bold">Market Prices</h5>
-                        <p class="text-muted">Current commodity prices from various mandis to help you make selling decisions.</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card feature-card text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-money-bill-wave"></i>
-                        </div>
-                        <h5 class="fw-bold">Financial Schemes</h5>
-                        <p class="text-muted">Information about government schemes, loans, and subsidies available for farmers.</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-4">
-                    <div class="card feature-card text-center p-4">
-                        <div class="feature-icon">
-                            <i class="fas fa-bug"></i>
-                        </div>
-                        <h5 class="fw-bold">Pest Management</h5>
-                        <p class="text-muted">Expert advice on identifying and managing crop diseases and pest infestations.</p>
-                    </div>
-                </div>
+            <div class="help-card">
+                <i class="fas fa-leaf"></i>
+                <h4>Crop Selection</h4>
+                <p class="text-muted">Choose the right seed varieties for your climate, soil type, and market
+                    conditions.</p>
+            </div>
+            <div class="help-card">
+                <i class="fas fa-cloud-sun"></i>
+                <h4>Weather Forecasts</h4>
+                <p class="text-muted">Real-time weather data and forecasts to help you plan your farming activities.</p>
+            </div>
+            <div class="help-card">
+                <i class="fas fa-chart-line"></i>
+                <h4>Market Prices</h4>
+                <p class="text-muted">Current commodity prices from various mandis to help you make selling decisions.
+                </p>
+            </div>
+            <div class="help-card">
+                <i class="fas fa-money-bill-wave"></i>
+                <h4>Financial Schemes</h4>
+                <p class="text-muted">Information about government schemes, loans, and subsidies available for farmers.
+                </p>
+            </div>
+            <div class="help-card">
+                <i class="fas fa-bug"></i>
+                <h4>Pest Management</h4>
+                <p class="text-muted">Expert advice on identifying and managing crop diseases and pest infestations.</p>
             </div>
         </div>
     </section>
@@ -581,16 +685,8 @@
     </section>
 
     <!-- Footer -->
-    <footer class="bg-dark text-light py-4">
-        <div class="container text-center">
-            <div class="row">
-                <div class="col">
-                    <h5><i class="fas fa-seedling"></i> BhoomiSetu</h5>
-                    <p class="mb-0">AI-powered agricultural advisor for Indian farmers</p>
-                    <p class="small text-muted">Empowering farmers with technology and knowledge</p>
-                </div>
-            </div>
-        </div>
+    <footer>
+        <p>&copy; 2025 BhoomiSetu AI | Empowering Farmers with Technology</p>
     </footer>
 
     <!-- Floating Chat Button -->

@@ -6,46 +6,226 @@
     <title>Government Schemes - BhoomiSetu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
     <style>
-        .navbar-custom {
-            background: linear-gradient(135deg, #2E8B57, #20B2AA, #4682B4, #8A2BE2);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        :root {
+            --primary-green: #2E7D32;
+            --light-bg: #fefcf5;
+            --dark-text: #212121;
+            --muted-text: #666;
+            --accent-orange: #FF8C00;
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+
+        body {
+            background: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Clean Glass Navbar */
+        .navbar-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(46, 125, 50, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Brand styling */
+        .navbar-glass .navbar-brand {
+            color: #2a7a1f;
+            font-weight: 700;
+            font-size: 1.4rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-glass .navbar-brand:hover {
+            color: #4caf50;
+        }
+
+        .navbar-glass .navbar-brand i {
+            color: #4caf50;
+            font-size: 1.2rem;
+        }
+
+        /* Navigation links */
+        .navbar-glass .navbar-nav {
+            align-items: center;
+        }
+
+        .navbar-glass .nav-link {
+            color: #2a7a1f;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Active nav link style */
+        .navbar-glass .nav-link.active,
+        .navbar-glass .nav-link:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        /* Nav icons color */
+        .navbar-glass .nav-link i.fas {
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        /* Auth buttons styling */
+        .navbar-glass .btn-outline-light {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            background: transparent;
+        }
+
+        .navbar-glass .btn-outline-light:hover {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light:hover {
+            background-color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            color: white !important;
+        }
+
+        /* User menu styling */
+        #userMenu .btn {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+        }
+
+        #userMenu .btn:hover {
+            background-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        #userMenu .dropdown-menu {
+            background: white;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #userMenu .dropdown-item {
+            color: var(--dark-text) !important;
+        }
+
+        #userMenu .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: #4caf50 !important;
+        }
+
+        #userName {
+            color: #2a7a1f !important;
+        }
+
+        #userEmail {
+            color: var(--muted-text) !important;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            background: var(--primary-green) !important;
+            color: white !important;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .btn-primary:hover {
+            background-color: #1a5d1f;
+            border-color: #1a5d1f;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            background: var(--light-bg);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Scheme card styling */
+        .scheme-card {
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .scheme-tag {
+            background-color: rgba(46, 125, 50, 0.1);
+            color: var(--primary-green);
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .scheme-benefit {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        /* Page header */
+        .page-header h1 {
+            color: var(--dark-text);
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .page-header .lead {
+            color: var(--muted-text);
+            font-family: 'Open Sans', sans-serif;
         }
     </style>
 </head>
 <body>
     <!-- Enhanced Navigation with Authentication -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <nav class="navbar-glass fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-seedling me-2"></i>BhoomiSetu
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling"></i> BhoomiSetu AI
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> AI Chat</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/weather"><i class="fas fa-cloud-sun"></i> Weather</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/schemes"><i class="fas fa-hand-holding-heart"></i> Schemes</a>
-                    </li>
-                </ul>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
+                <a class="nav-link" href="/weather/Mumbai"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link active" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
                 
-                <!-- Authentication Buttons (visible when logged out) -->
+                <!-- Authentication Buttons -->
                 <div id="authButtons" class="d-flex gap-2">
                     <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
                         <i class="fas fa-sign-in-alt"></i> Login
@@ -63,8 +243,8 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/chat"><i class="fas fa-comments"></i> AI Chat</a></li>
-                        <li><a class="dropdown-item" href="/"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
+                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                     </ul>
@@ -73,55 +253,86 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <h2><i class="fas fa-university"></i> Government Schemes for Farmers</h2>
-        <p class="text-muted">Information about central and state government schemes, loans, and subsidies</p>
+    <!-- Main Content -->
+    <main class="content-wrapper">
+        <div class="container py-4">
+            <div class="page-header mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-university me-2" style="color: var(--primary-green);"></i>
+                    Government Schemes for Farmers
+                </h1>
+                <p class="lead">Information about central and state government schemes, loans, and subsidies</p>
+            </div>
         
-        <!-- Central Schemes -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <h3 class="text-success"><i class="fas fa-flag-usa"></i> Central Government Schemes</h3>
-                <div class="row">
-                    {% for scheme_id, scheme in schemes.central_schemes.items() %}
-                    <div class="col-md-6 mb-3">
-                        <div class="card h-100">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">{{ scheme_id.replace('_', ' ').title() }}</h5>
-                            </div>
-                            <div class="card-body">
-                                <p><strong>Description:</strong> {{ scheme.description }}</p>
-                                
-                                {% if scheme.amount %}
-                                <p><strong><i class="fas fa-rupee-sign"></i> Amount:</strong> {{ scheme.amount }}</p>
-                                {% endif %}
-                                
-                                {% if scheme.interest_rate %}
-                                <p><strong><i class="fas fa-percentage"></i> Interest Rate:</strong> {{ scheme.interest_rate }}</p>
-                                {% endif %}
-                                
-                                {% if scheme.premium %}
-                                <p><strong><i class="fas fa-shield-alt"></i> Premium:</strong> {{ scheme.premium }}</p>
-                                {% endif %}
-                                
-                                {% if scheme.coverage %}
-                                <p><strong><i class="fas fa-umbrella"></i> Coverage:</strong> {{ scheme.coverage }}</p>
-                                {% endif %}
-                                
-                                <p><strong><i class="fas fa-users"></i> Eligibility:</strong> {{ scheme.eligibility }}</p>
-                                <p><strong><i class="fas fa-file-alt"></i> Application:</strong> {{ scheme.application }}</p>
+            <!-- Central Schemes -->
+            <div class="row">
+                <div class="col-12">
+                    <h3 class="mb-4" style="color: var(--primary-green);">
+                        <i class="fas fa-flag me-2"></i> Central Government Schemes
+                    </h3>
+                    <div class="row g-4">
+                        {% for scheme_id, scheme in schemes.central_schemes.items() %}
+                        <div class="col-md-6">
+                            <div class="card scheme-card h-100">
+                                <div class="card-header">
+                                    <h5 class="mb-0">{{ scheme_id.replace('_', ' ').title() }}</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Description:</strong> {{ scheme.description }}</p>
+                                    
+                                    {% if scheme.amount %}
+                                    <p class="scheme-benefit">
+                                        <i class="fas fa-rupee-sign me-1"></i> 
+                                        <strong>Amount:</strong> {{ scheme.amount }}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    {% if scheme.interest_rate %}
+                                    <p class="scheme-benefit">
+                                        <i class="fas fa-percentage me-1"></i> 
+                                        <strong>Interest Rate:</strong> {{ scheme.interest_rate }}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    {% if scheme.premium %}
+                                    <p>
+                                        <i class="fas fa-shield-alt me-1 text-info"></i>
+                                        <strong>Premium:</strong> {{ scheme.premium }}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    {% if scheme.coverage %}
+                                    <p>
+                                        <i class="fas fa-umbrella me-1 text-warning"></i>
+                                        <strong>Coverage:</strong> {{ scheme.coverage }}
+                                    </p>
+                                    {% endif %}
+                                    
+                                    <div class="border-top pt-3 mt-3">
+                                        <p>
+                                            <i class="fas fa-users me-1 text-secondary"></i>
+                                            <strong>Eligibility:</strong> {{ scheme.eligibility }}
+                                        </p>
+                                        <p class="mb-0">
+                                            <i class="fas fa-file-alt me-1 text-secondary"></i>
+                                            <strong>Application:</strong> {{ scheme.application }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
             </div>
-        </div>
 
-        <!-- State Schemes -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <h3 class="text-success"><i class="fas fa-map-marked-alt"></i> State Government Schemes</h3>
-                <div class="row">
+            <!-- State Schemes -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <h3 class="mb-4" style="color: var(--primary-green);">
+                        <i class="fas fa-map-marked-alt me-2"></i> State Government Schemes
+                    </h3>
+                    <div class="row g-4">
                     {% for state, state_schemes in schemes.state_schemes.items() %}
                     <div class="col-md-6 mb-3">
                         <div class="card h-100">
@@ -166,59 +377,64 @@
                             <div class="col-md-6">
                                 <h6><i class="fas fa-map-marker-alt"></i> Where to Apply</h6>
                                 <ul>
-                                    <li>Common Service Centers (CSC)</li>
-                                    <li>Bank Branches</li>
-                                    <li>Agricultural Offices</li>
-                                    <li>Online Portals</li>
-                                    <li>Village Revenue Office</li>
-                                    <li>Tehsildar Office</li>
-                                </ul>
+                                        <li class="mb-2"><i class="fas fa-university text-primary me-2"></i> Bank Branches</li>
+                                        <li class="mb-2"><i class="fas fa-tractor text-success me-2"></i> Agricultural Offices</li>
+                                        <li class="mb-2"><i class="fas fa-globe text-warning me-2"></i> Online Portals</li>
+                                        <li class="mb-2"><i class="fas fa-building text-secondary me-2"></i> Village Revenue Office</li>
+                                        <li class="mb-0"><i class="fas fa-landmark text-dark me-2"></i> Tehsildar Office</li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Important Links -->
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-link"></i> Important Links</h5>
+            <!-- Important Links -->
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header" style="background-color: #17a2b8; color: white;">
+                            <h5 class="mb-0">
+                                <i class="fas fa-link me-2"></i> Important Links
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <h6 style="color: var(--primary-green);">PM-KISAN</h6>
+                                    <a href="https://pmkisan.gov.in" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        pmkisan.gov.in <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 style="color: var(--primary-green);">Crop Insurance</h6>
+                                    <a href="https://pmfby.gov.in" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        pmfby.gov.in <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 style="color: var(--primary-green);">Agricultural Portal</h6>
+                                    <a href="https://agricoop.gov.in" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        agricoop.gov.in <i class="fas fa-external-link-alt ms-1"></i>
+                                    </a>
+                                </div>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <h6>PM-KISAN</h6>
-                                <a href="https://pmkisan.gov.in" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    pmkisan.gov.in <i class="fas fa-external-link-alt"></i>
-                                </a>
+                </div>
                             </div>
-                            <div class="col-md-4">
-                                <h6>Crop Insurance</h6>
-                                <a href="https://pmfby.gov.in" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    pmfby.gov.in <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            </div>
-                            <div class="col-md-4">
-                                <h6>Agricultural Portal</h6>
-                                <a href="https://agricoop.gov.in" target="_blank" class="btn btn-sm btn-outline-primary">
-                                    agricoop.gov.in <i class="fas fa-external-link-alt"></i>
-                                </a>
-                            </div>
+                        </div>
+                        
+                        <div class="alert alert-info border-0 shadow-sm mt-4">
+                            <i class="fas fa-lightbulb me-2"></i> 
+                            <strong>Tip:</strong> For personalized scheme recommendations based on your location and farming details, 
+                            chat with our AI assistant or ask specific questions about schemes available in your area.
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="alert alert-success mt-4">
-            <i class="fas fa-lightbulb"></i> 
-            <strong>Tip:</strong> For personalized scheme recommendations based on your location and farming details, 
-            chat with our AI assistant or ask specific questions about schemes available in your area.
-        </div>
-    </div>
+    </main>
 
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1">
