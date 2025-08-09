@@ -532,6 +532,24 @@ async def chat_submit(
         print(f"DEBUG: Chat error type: {type(e)}")
         return {"response": f"Sorry, I encountered an error: {str(e)}"}
 
+@app.get("/weather")
+async def weather_default_page(request: Request):
+    """Weather information page with default location"""
+    try:
+        # Default to Mumbai if no location specified
+        default_location = "Mumbai"
+        weather_data = await agri_agent.get_weather_data(default_location)
+        return templates.TemplateResponse("weather.html", {
+            "request": request,
+            "location": default_location,
+            "weather": weather_data
+        })
+    except Exception as e:
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "error": str(e)
+        })
+
 @app.get("/weather/{location}")
 async def weather_page(request: Request, location: str):
     """Weather information page"""
