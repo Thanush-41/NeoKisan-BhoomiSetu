@@ -543,16 +543,26 @@
         .welcome-message {
             text-align: center;
             padding: 2rem;
-            color: rgba(255, 255, 255, 0.8);
+            color: var(--dark-text);
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            margin: 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
 
         .welcome-message h3 {
-            background: linear-gradient(135deg, #ffffff, #e5e5e5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            color: var(--primary-green);
             margin-bottom: 1rem;
             font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .welcome-message p {
+            color: var(--muted-text);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
         }
 
         .quick-suggestions {
@@ -564,23 +574,30 @@
         }
 
         .suggestion-chip {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(46, 125, 50, 0.1);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(46, 125, 50, 0.3);
             border-radius: 25px;
             padding: 0.5rem 1rem;
-            color: rgba(255, 255, 255, 0.9);
+            color: var(--primary-green);
             font-size: 0.875rem;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
+            font-weight: 500;
         }
 
         .suggestion-chip:hover {
-            background: rgba(82, 214, 137, 0.2);
-            border-color: rgba(82, 214, 137, 0.4);
+            background: var(--primary-green);
+            border-color: var(--primary-green);
             color: white;
             transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+
+        .suggestion-chip i {
+            color: inherit;
+            margin-right: 0.5rem;
         }
 
         @media (max-width: 768px) {
