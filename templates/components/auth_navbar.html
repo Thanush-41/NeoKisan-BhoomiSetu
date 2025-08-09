@@ -1,0 +1,519 @@
+<!-- Authentication Navbar Component -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark bg-opacity-90 position-fixed w-100" style="top: 0; z-index: 1050; backdrop-filter: blur(10px);">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="fas fa-seedling text-success"></i>
+            BhoomiSetu
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/chat">
+                        <i class="fas fa-comments"></i> Chat
+                    </a>
+                </li>
+            </ul>
+            
+            <!-- Authentication Buttons (shown when not logged in) -->
+            <div class="d-flex gap-2" id="authButtons">
+                <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+                <button class="btn btn-success btn-sm" onclick="showRegisterModal()">
+                    <i class="fas fa-user-plus"></i> Register
+                </button>
+            </div>
+            
+            <!-- User Menu (shown when logged in) -->
+            <div class="dropdown" id="userMenu" style="display: none;">
+                <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName">User</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" href="#" onclick="showThreadsModal()">
+                        <i class="fas fa-comments"></i> My Chats
+                    </a></li>
+                    <li><a class="dropdown-item" href="/chat" onclick="createNewThread()">
+                        <i class="fas fa-plus"></i> New Chat
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item" href="#" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- Authentication Modals -->
+
+<!-- Login Modal -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-container">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white"><i class="fas fa-sign-in-alt"></i> Login to BhoomiSetu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label text-white">Email</label>
+                        <input type="email" class="form-control" id="loginEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white">Password</label>
+                        <input type="password" class="form-control" id="loginPassword" required>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </button>
+                        <button type="button" class="btn btn-outline-light" onclick="googleLogin()">
+                            <i class="fab fa-google"></i> Login with Google
+                        </button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-light">
+                            Don't have an account? 
+                            <a href="#" class="text-warning" onclick="showRegisterModal()">Register here</a>
+                        </small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Register Modal -->
+<div class="modal fade" id="registerModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content glass-container">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white"><i class="fas fa-user-plus"></i> Register for BhoomiSetu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <div class="mb-3">
+                        <label class="form-label text-white">Display Name</label>
+                        <input type="text" class="form-control" id="registerName" placeholder="Your Name">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white">Email</label>
+                        <input type="email" class="form-control" id="registerEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white">Password</label>
+                        <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white">Confirm Password</label>
+                        <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Create Account
+                        </button>
+                        <button type="button" class="btn btn-outline-light" onclick="googleLogin()">
+                            <i class="fab fa-google"></i> Sign up with Google
+                        </button>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-light">
+                            Already have an account? 
+                            <a href="#" class="text-warning" onclick="showLoginModal()">Login here</a>
+                        </small>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Threads Modal -->
+<div class="modal fade" id="threadsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content glass-container">
+            <div class="modal-header border-0">
+                <h5 class="modal-title text-white"><i class="fas fa-comments"></i> My Chat History</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-success btn-sm" onclick="createNewThread()">
+                        <i class="fas fa-plus"></i> New Chat
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="loadUserThreads()">
+                        <i class="fas fa-refresh"></i> Refresh
+                    </button>
+                </div>
+                <div id="threadsList">
+                    <div class="text-center text-light">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading your chats...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+    // Import Firebase modules
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+    import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+    import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
+    import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js';
+    
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyBjgLBZmRqfBwuWhR02hlKJfWCeUUqvJ1I",
+        authDomain: "neokisan-bhoomisetu.firebaseapp.com",
+        projectId: "neokisan-bhoomisetu",
+        storageBucket: "neokisan-bhoomisetu.firebasestorage.app",
+        messagingSenderId: "67973217236",
+        appId: "1:67973217236:web:43b055fc330412aea13441",
+        measurementId: "G-004N5VKTWZ"
+    };
+    
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const analytics = getAnalytics(app);
+    const provider = new GoogleAuthProvider();
+    
+    // Make Firebase available globally
+    window.firebaseAuth = auth;
+    window.firebaseDb = db;
+    window.googleProvider = provider;
+    window.signInWithPopup = signInWithPopup;
+    window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+    window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+    window.signOut = signOut;
+    window.collection = collection;
+    window.addDoc = addDoc;
+    window.getDocs = getDocs;
+    window.doc = doc;
+    window.deleteDoc = deleteDoc;
+    window.updateDoc = updateDoc;
+    window.query = query;
+    window.orderBy = orderBy;
+    window.where = where;
+    
+    console.log('Firebase initialized successfully!');
+</script>
+
+<!-- Authentication JavaScript -->
+<script>
+    // Global variables for authentication
+    let currentUser = null;
+    let authToken = null;
+
+    // Check for existing auth token on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        authToken = localStorage.getItem('authToken');
+        if (authToken) {
+            verifyToken(authToken);
+        }
+    });
+
+    // Authentication Functions
+    function showLoginModal() {
+        const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+        if (registerModal) registerModal.hide();
+        
+        const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+        modal.show();
+    }
+
+    function showRegisterModal() {
+        const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+        if (loginModal) loginModal.hide();
+        
+        const modal = new bootstrap.Modal(document.getElementById('registerModal'));
+        modal.show();
+    }
+
+    function showThreadsModal() {
+        const modal = new bootstrap.Modal(document.getElementById('threadsModal'));
+        modal.show();
+        loadUserThreads();
+    }
+
+    // Login form submission
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        
+        try {
+            const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+            const user = userCredential.user;
+            const token = await user.getIdToken();
+            
+            handleLoginSuccess({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || user.email.split('@')[0],
+                token: token
+            });
+        } catch (error) {
+            showAlert('Login failed: ' + error.message, 'danger');
+        }
+    });
+
+    // Register form submission
+    document.getElementById('registerForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        
+        if (password !== confirmPassword) {
+            showAlert('Passwords do not match', 'danger');
+            return;
+        }
+        
+        try {
+            const userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+            const user = userCredential.user;
+            
+            if (name && user.updateProfile) {
+                await user.updateProfile({ displayName: name });
+            }
+            
+            const token = await user.getIdToken();
+            
+            handleLoginSuccess({
+                uid: user.uid,
+                email: user.email,
+                displayName: name || user.email.split('@')[0],
+                token: token
+            });
+        } catch (error) {
+            showAlert('Registration error: ' + error.message, 'danger');
+        }
+    });
+
+    // Google Login
+    async function googleLogin() {
+        try {
+            const result = await window.signInWithPopup(window.firebaseAuth, window.googleProvider);
+            const token = await result.user.getIdToken();
+            
+            handleLoginSuccess({
+                uid: result.user.uid,
+                email: result.user.email,
+                displayName: result.user.displayName,
+                token: token
+            });
+        } catch (error) {
+            showAlert('Google login failed: ' + error.message, 'danger');
+        }
+    }
+
+    // Handle successful login
+    function handleLoginSuccess(user) {
+        currentUser = user;
+        authToken = user.token;
+        localStorage.setItem('authToken', authToken);
+        
+        updateUIForLoggedInUser(user);
+        hideAuthModals();
+        showAlert('Login successful! Welcome ' + (user.displayName || user.email), 'success');
+    }
+
+    // Update UI for logged-in user
+    function updateUIForLoggedInUser(user) {
+        document.getElementById('authButtons').style.display = 'none';
+        document.getElementById('userMenu').style.display = 'block';
+        document.getElementById('userName').textContent = user.displayName || user.email.split('@')[0];
+    }
+
+    // Update UI for logged-out user
+    function updateUIForLoggedOutUser() {
+        document.getElementById('authButtons').style.display = 'flex';
+        document.getElementById('userMenu').style.display = 'none';
+    }
+
+    // Verify existing token
+    async function verifyToken(token) {
+        try {
+            // For development, we'll accept any token and create a mock user
+            currentUser = {
+                uid: 'mock_user',
+                email: 'user@example.com',
+                displayName: 'Test User'
+            };
+            updateUIForLoggedInUser(currentUser);
+        } catch (error) {
+            logout();
+        }
+    }
+
+    // Logout
+    function logout() {
+        currentUser = null;
+        authToken = null;
+        localStorage.removeItem('authToken');
+        updateUIForLoggedOutUser();
+        showAlert('Logged out successfully', 'info');
+    }
+
+    // Hide authentication modals
+    function hideAuthModals() {
+        const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+        const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+        
+        if (loginModal) loginModal.hide();
+        if (registerModal) registerModal.hide();
+    }
+
+    // Load user chat threads
+    async function loadUserThreads() {
+        if (!authToken || !currentUser) return;
+        
+        try {
+            const threadsCollection = window.collection(window.firebaseDb, 'chatThreads');
+            const q = window.query(
+                threadsCollection,
+                window.where('userId', '==', currentUser.uid),
+                window.orderBy('updatedAt', 'desc')
+            );
+            
+            const querySnapshot = await window.getDocs(q);
+            const threads = [];
+            
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                threads.push({
+                    id: doc.id,
+                    title: data.title,
+                    last_message: data.lastMessage || 'No messages yet',
+                    updated_at: data.updatedAt?.toDate() || new Date(),
+                    message_count: data.messageCount || 0
+                });
+            });
+            
+            displayThreads(threads);
+        } catch (error) {
+            console.error('Error loading threads:', error);
+            document.getElementById('threadsList').innerHTML = 
+                '<div class="text-center text-light"><p>Failed to load chat history</p></div>';
+        }
+    }
+
+    // Display chat threads
+    function displayThreads(threads) {
+        const container = document.getElementById('threadsList');
+        
+        if (threads.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-light">
+                    <p><i class="fas fa-comments fa-3x mb-3"></i></p>
+                    <p>No chat history yet. Start your first conversation!</p>
+                    <a href="/chat" class="btn btn-success">
+                        <i class="fas fa-plus"></i> Start Chatting
+                    </a>
+                </div>
+            `;
+            return;
+        }
+        
+        const threadsHTML = threads.map(thread => `
+            <div class="card bg-dark bg-opacity-50 mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="text-light">
+                            <h6 class="card-title">${thread.title}</h6>
+                            <p class="card-text small text-muted">
+                                ${thread.last_message}
+                            </p>
+                            <small class="text-muted">
+                                ${thread.updated_at.toLocaleDateString()}
+                                · ${thread.message_count} messages
+                            </small>
+                        </div>
+                        <div class="btn-group">
+                            <a href="/chat?thread=${thread.id}" class="btn btn-sm btn-outline-light">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteThread('${thread.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        container.innerHTML = threadsHTML;
+    }
+
+    // Create new thread
+    function createNewThread() {
+        window.location.href = '/chat';
+    }
+
+    // Delete thread
+    async function deleteThread(threadId) {
+        if (!confirm('Are you sure you want to delete this chat thread?')) return;
+        
+        try {
+            const messagesCollection = window.collection(window.firebaseDb, 'chatThreads', threadId, 'messages');
+            const messagesSnapshot = await window.getDocs(messagesCollection);
+            
+            const deletePromises = messagesSnapshot.docs.map(messageDoc => 
+                window.deleteDoc(window.doc(window.firebaseDb, 'chatThreads', threadId, 'messages', messageDoc.id))
+            );
+            await Promise.all(deletePromises);
+            
+            await window.deleteDoc(window.doc(window.firebaseDb, 'chatThreads', threadId));
+            
+            showAlert('Chat thread deleted', 'success');
+            loadUserThreads();
+        } catch (error) {
+            console.error('Error deleting thread:', error);
+            showAlert('Failed to delete chat thread: ' + error.message, 'danger');
+        }
+    }
+
+    // Show alert messages
+    function showAlert(message, type = 'info') {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+        alertDiv.style.cssText = 'top: 100px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.parentNode.removeChild(alertDiv);
+            }
+        }, 5000);
+    }
+</script>

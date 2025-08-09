@@ -8,16 +8,23 @@ import json
 import asyncio
 from typing import Dict, Optional, List
 from datetime import datetime
-from fastapi import FastAPI, Request, Form, HTTPException
+from fastapi import FastAPI, Request, Form, HTTPException, Depends, Header
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, ValidationError
 import uvicorn
 from dotenv import load_dotenv
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from agents.agri_agent import agri_agent
+from services.firebase_service import firebase_service
+from services.mongodb_service import mongodb_service, startup_mongodb, shutdown_mongodb
+from models.auth_models import (
+    UserRegistration, UserLogin, TokenVerification, UserResponse,
+    ChatThreadCreate, ChatMessage, ChatThreadResponse, ChatMessageResponse
+)
 
 # Load environment variables
 load_dotenv()
@@ -28,6 +35,9 @@ app = FastAPI(
     description="AI-powered agricultural advisor for Indian farmers",
     version="1.0.0"
 )
+
+# Security
+security = HTTPBearer(auto_error=False)
 
 # Mount static files and templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -61,6 +71,24 @@ class PriceRequest(BaseModel):
 # In-memory session storage (in production, use Redis or database)
 user_sessions = {}
 
+# Authentication Helper Functions
+async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
+    """Get current authenticated user from token"""
+    if not credentials:
+        return None
+    
+    token_verification = await firebase_service.verify_token(credentials.credentials)
+    if token_verification.get("error"):
+        raise HTTPException(status_code=401, detail="Invalid token")
+    
+    return token_verification
+
+async def require_auth(current_user: dict = Depends(get_current_user)):
+    """Require authentication for protected routes"""
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Authentication required")
+    return current_user
+
 async def get_city_from_coordinates(latitude: float, longitude: float) -> str:
     """Get city name from coordinates using reverse geocoding"""
     try:
@@ -92,6 +120,11 @@ async def home(request: Request):
 async def chat_interface(request: Request):
     """Serve the chat interface"""
     return templates.TemplateResponse("chat.html", {"request": request})
+
+@app.get("/test", response_class=HTMLResponse)
+async def test_auth(request: Request):
+    """Serve the authentication test page"""
+    return templates.TemplateResponse("test_auth.html", {"request": request})
 
 @app.post("/api/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
@@ -525,10 +558,234 @@ async def schemes_page(request: Request):
         "schemes": agri_agent.financial_schemes
     })
 
+# ========================================
+# AUTHENTICATION ROUTES
+# ========================================
+
+@app.post("/api/auth/register", response_model=UserResponse)
+async def register_user(user_data: UserRegistration):
+    """Register a new user"""
+    result = await firebase_service.create_user(
+        email=user_data.email,
+        password=user_data.password,
+        display_name=user_data.display_name
+    )
+    
+    if result.get("error"):
+        raise HTTPException(status_code=400, detail=result["error"])
+    
+    return result["user"]
+
+@app.post("/api/auth/login", response_model=UserResponse)
+async def login_user(user_data: UserLogin):
+    """Login user with email and password"""
+    result = await firebase_service.sign_in_user(
+        email=user_data.email,
+        password=user_data.password
+    )
+    
+    if result.get("error"):
+        raise HTTPException(status_code=401, detail=result["error"])
+    
+    return result["user"]
+
+@app.post("/api/auth/verify")
+async def verify_token(token_data: TokenVerification):
+    """Verify authentication token"""
+    result = await firebase_service.verify_token(token_data.token)
+    
+    if result.get("error"):
+        raise HTTPException(status_code=401, detail=result["error"])
+    
+    return {"valid": True, "user": result}
+
+# MongoDB Chat Endpoints
+@app.post("/api/chat/threads")
+async def create_chat_thread(
+    title: str = Form(...),
+    current_user: dict = Depends(require_auth)
+):
+    """Create a new chat thread"""
+    try:
+        thread_id = await mongodb_service.create_chat_thread(
+            user_id=current_user['uid'],
+            title=title
+        )
+        return {"success": True, "thread_id": thread_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create thread: {str(e)}")
+
+@app.get("/api/chat/threads")
+async def get_user_threads(current_user: dict = Depends(require_auth)):
+    """Get user's chat threads"""
+    try:
+        threads = await mongodb_service.get_user_threads(current_user['uid'])
+        return {"threads": threads}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get threads: {str(e)}")
+
+@app.post("/api/chat/threads/{thread_id}/messages")
+async def save_message_to_thread(
+    thread_id: str,
+    content: str = Form(...),
+    is_user: bool = Form(...),
+    current_user: dict = Depends(require_auth)
+):
+    """Save a message to a chat thread"""
+    try:
+        message_id = await mongodb_service.save_message(
+            thread_id=thread_id,
+            content=content,
+            is_user=is_user
+        )
+        return {"success": True, "message_id": message_id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save message: {str(e)}")
+
+@app.get("/api/chat/threads/{thread_id}/messages")
+async def get_thread_messages(
+    thread_id: str,
+    current_user: dict = Depends(require_auth)
+):
+    """Get messages from a chat thread"""
+    try:
+        messages = await mongodb_service.get_thread_messages(thread_id)
+        return {"messages": messages}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get messages: {str(e)}")
+
+@app.delete("/api/chat/threads/{thread_id}")
+async def delete_thread(
+    thread_id: str,
+    current_user: dict = Depends(require_auth)
+):
+    """Delete a chat thread"""
+    try:
+        success = await mongodb_service.delete_thread(thread_id, current_user['uid'])
+        if success:
+            return {"success": True}
+        else:
+            raise HTTPException(status_code=404, detail="Thread not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete thread: {str(e)}")
+
+@app.put("/api/chat/threads/{thread_id}")
+async def update_thread_title(
+    thread_id: str,
+    title: str = Form(...),
+    current_user: dict = Depends(require_auth)
+):
+    """Update chat thread title"""
+    try:
+        success = await mongodb_service.update_thread_title(thread_id, current_user['uid'], title)
+        if success:
+            return {"success": True}
+        else:
+            raise HTTPException(status_code=404, detail="Thread not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update thread: {str(e)}")
+
+@app.get("/api/chat/stats")
+async def get_chat_stats(current_user: dict = Depends(require_auth)):
+    """Get chat statistics"""
+    try:
+        stats = await mongodb_service.get_stats()
+        return stats
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get stats: {str(e)}")
+
+@app.get("/api/auth/me")
+async def get_current_user_info(current_user: dict = Depends(require_auth)):
+    """Get current user information"""
+    user_doc = await firebase_service.get_user_document(current_user["uid"])
+    return {
+        "uid": current_user["uid"],
+        "email": current_user["email"],
+        "profile": user_doc
+    }
+
+# ========================================
+# CHAT THREAD MANAGEMENT ROUTES
+# ========================================
+
+@app.post("/api/threads/create")
+async def create_thread(
+    thread_data: ChatThreadCreate,
+    current_user: dict = Depends(require_auth)
+):
+    """Create a new chat thread"""
+    thread_id = await firebase_service.create_chat_thread(
+        uid=current_user["uid"],
+        title=thread_data.title
+    )
+    
+    if not thread_id:
+        raise HTTPException(status_code=500, detail="Failed to create thread")
+    
+    return {"thread_id": thread_id, "message": "Thread created successfully"}
+
+@app.get("/api/threads")
+async def get_user_threads(current_user: dict = Depends(require_auth)):
+    """Get all chat threads for the current user"""
+    threads = await firebase_service.get_user_threads(current_user["uid"])
+    return {"threads": threads}
+
+@app.get("/api/threads/{thread_id}/messages")
+async def get_thread_messages(
+    thread_id: str,
+    current_user: dict = Depends(require_auth)
+):
+    """Get all messages in a specific thread"""
+    messages = await firebase_service.get_thread_messages(thread_id)
+    return {"messages": messages}
+
+@app.delete("/api/threads/{thread_id}")
+async def delete_thread(
+    thread_id: str,
+    current_user: dict = Depends(require_auth)
+):
+    """Delete a chat thread"""
+    success = await firebase_service.delete_thread(thread_id, current_user["uid"])
+    
+    if not success:
+        raise HTTPException(status_code=404, detail="Thread not found or access denied")
+    
+    return {"message": "Thread deleted successfully"}
+
+@app.post("/api/threads/{thread_id}/messages")
+async def save_message_to_thread(
+    thread_id: str,
+    message_data: ChatMessage,
+    current_user: dict = Depends(require_auth)
+):
+    """Save a chat message to a thread"""
+    success = await firebase_service.save_chat_message(
+        thread_id=thread_id,
+        user_message=message_data.message,
+        ai_response="",  # Will be updated after AI response
+        location=message_data.location
+    )
+    
+    if not success:
+        raise HTTPException(status_code=500, detail="Failed to save message")
+    
+    return {"message": "Message saved successfully"}
+
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "timestamp": datetime.now()}
+
+# Event handlers
+@app.on_event("startup")
+async def startup_event():
+    """Initialize services on startup"""
+    await startup_mongodb()
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Clean up services on shutdown"""
+    await shutdown_mongodb()
 
 if __name__ == "__main__":
     uvicorn.run(

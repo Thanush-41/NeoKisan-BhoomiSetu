@@ -28,7 +28,6 @@ class AgricultureAIAgent:
         
         # Initialize OpenAI client (if available)
         openai_key = os.getenv('OPENAI_API_KEY')
-        print(f"🔑 DEBUG: OpenAI key found: {bool(openai_key and openai_key != 'your_openai_api_key_here')}")
         if openai_key and openai_key != 'your_openai_api_key_here':
             self.openai_client = openai.OpenAI(api_key=openai_key)
         else:
@@ -36,7 +35,6 @@ class AgricultureAIAgent:
             
         # Initialize Groq API settings
         self.groq_api_key = os.getenv('GROQ_API_KEY')
-        print(f"🔑 DEBUG: Groq key found: {bool(self.groq_api_key)}")
         if self.groq_api_key:
             print(f"🔑 DEBUG: Groq key starts with: {self.groq_api_key[:10]}...")
         self.groq_base_url = "https://api.groq.com/openai/v1"
@@ -585,7 +583,14 @@ Response (JSON only):
             # Step 4: Use CSV data (always as fallback or primary for AP/Telangana)
             csv_result = None
             try:
-                import pandas as pd
+                try:
+                    import pandas as pd
+                    use_pandas = True
+                except ImportError:
+                    print("⚠️ DEBUG: Pandas not available, using built-in CSV reader")
+                    import csv
+                    use_pandas = False
+                
                 import os
                 
                 # Path to the comprehensive CSV file
@@ -595,13 +600,25 @@ Response (JSON only):
                 print(f"📊 DEBUG: Loading CSV data from: {csv_file_path}")
                 
                 if os.path.exists(csv_file_path):
-                    df = pd.read_csv(csv_file_path)
-                    print(f"✅ DEBUG: Loaded {len(df)} records from CSV")
-                    
-                    # Filter by target state if specified
-                    if target_state:
-                        df = df[df['State'].str.contains(target_state, case=False, na=False)]
-                        print(f"🎯 DEBUG: Filtered to {len(df)} records for state: {target_state}")
+                    if use_pandas:
+                        df = pd.read_csv(csv_file_path)
+                        print(f"✅ DEBUG: Loaded {len(df)} records from CSV using pandas")
+                        
+                        # Filter by target state if specified
+                        if target_state:
+                            df = df[df['State'].str.contains(target_state, case=False, na=False)]
+                            print(f"🎯 DEBUG: Filtered to {len(df)} records for state: {target_state}")
+                    else:
+                        # Fallback to built-in csv module
+                        with open(csv_file_path, 'r', encoding='utf-8') as file:
+                            csv_reader = csv.DictReader(file)
+                            df_data = list(csv_reader)
+                        print(f"✅ DEBUG: Loaded {len(df_data)} records from CSV using built-in csv")
+                        
+                        # Filter by target state if specified
+                        if target_state:
+                            df_data = [row for row in df_data if target_state.lower() in row.get('State', '').lower()]
+                            print(f"🎯 DEBUG: Filtered to {len(df_data)} records for state: {target_state}")
                     
                     # Filter by commodity if specified
                     if commodity:
@@ -622,11 +639,23 @@ Response (JSON only):
                         }
                         
                         search_terms = commodity_variations.get(commodity.lower(), [commodity])
-                        commodity_filter = df['Commodity'].str.contains('|'.join(search_terms), case=False, na=False)
-                        df = df[commodity_filter]
-                        print(f"🎯 DEBUG: Filtered to {len(df)} records for commodity: {commodity}")
+                        
+                        if use_pandas:
+                            commodity_filter = df['Commodity'].str.contains('|'.join(search_terms), case=False, na=False)
+                            df = df[commodity_filter]
+                            print(f"🎯 DEBUG: Filtered to {len(df)} records for commodity: {commodity}")
+                        else:
+                            # Filter using built-in csv data
+                            filtered_data = []
+                            for row in df_data:
+                                commodity_val = row.get('Commodity', '')
+                                if any(term.lower() in commodity_val.lower() for term in search_terms):
+                                    filtered_data.append(row)
+                            df_data = filtered_data
+                            print(f"🎯 DEBUG: Filtered to {len(df_data)} records for commodity: {commodity}")
                     
-                    if not df.empty:
+                    # Process results
+                    if use_pandas and not df.empty:
                         # Convert to records and sort by relevance
                         csv_records = []
                         for _, row in df.iterrows():
@@ -643,7 +672,25 @@ Response (JSON only):
                                 "modal_price": row['Modal_x0020_Price']
                             }
                             csv_records.append(record)
-                        
+                    elif not use_pandas and df_data:
+                        # Process using built-in csv data
+                        csv_records = []
+                        for row in df_data:
+                            record = {
+                                "state": row.get('State', ''),
+                                "district": row.get('District', ''), 
+                                "market": row.get('Market', ''),
+                                "commodity": row.get('Commodity', ''),
+                                "variety": row.get('Variety', ''),
+                                "grade": row.get('Grade', ''),
+                                "arrival_date": row.get('Arrival_Date', ''),
+                                "min_price": row.get('Min_x0020_Price', ''),
+                                "max_price": row.get('Max_x0020_Price', ''),
+                                "modal_price": row.get('Modal_x0020_Price', '')
+                            }
+                            csv_records.append(record)
+                    
+                    if csv_records:
                         # Sort by location relevance
                         if user_location or target_city:
                             def location_score(record):
