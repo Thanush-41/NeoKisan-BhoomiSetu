@@ -220,6 +220,75 @@
             font-size: 0.9rem;
             color: var(--dark-text);
         }
+
+        /* Location Selector Styles */
+        .location-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .location-chip {
+            background: rgba(46, 125, 50, 0.1);
+            border: 1px solid rgba(46, 125, 50, 0.3);
+            border-radius: 20px;
+            padding: 0.4rem 0.8rem;
+            color: var(--primary-green);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: 500;
+            outline: none;
+        }
+
+        .location-chip:hover {
+            background: var(--primary-green);
+            border-color: var(--primary-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 125, 50, 0.3);
+        }
+
+        .location-chip.active {
+            background: var(--primary-green);
+            border-color: var(--primary-green);
+            color: white;
+        }
+
+        .location-chip i {
+            color: inherit;
+        }
+
+        /* Input styling */
+        #locationInput {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 0.75rem;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        #locationInput:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 0.2rem rgba(46, 125, 50, 0.25);
+        }
+
+        .input-group-text {
+            background-color: var(--primary-green);
+            color: white;
+            border: none;
+        }
+
+        /* Loading state */
+        .weather-loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .weather-loading .spinner-border {
+            color: var(--primary-green);
+        }
     </style>
 </head>
 <body>
@@ -232,7 +301,7 @@
             <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
                 <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
                 <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
-                <a class="nav-link active" href="/weather/Mumbai"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link active" href="/weather"><i class="fas fa-cloud"></i> Weather</a>
                 <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
                 <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
                 
@@ -271,9 +340,87 @@
             <div class="weather-header mb-4">
                 <h1 class="display-5 fw-bold">
                     <i class="fas fa-map-marker-alt me-2" style="color: var(--primary-green);"></i>
-                    Weather Information for {{ location }}
+                    Weather Information for <span id="currentLocation">{{ location }}</span>
                 </h1>
                 <p class="lead mb-4">Real-time weather data for better farming decisions</p>
+            </div>
+
+            <!-- Location Selector -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body p-4">
+                            <h5 class="card-title mb-3">
+                                <i class="fas fa-search me-2" style="color: var(--primary-green);"></i>
+                                Choose Location
+                            </h5>
+                            
+                            <!-- Custom Location Input -->
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-8">
+                                    <div class="input-group">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-map-marker-alt"></i>
+                                        </span>
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="locationInput" 
+                                               placeholder="Enter city name (e.g., Delhi, Pune, Hyderabad)" 
+                                               value="{{ location }}">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-primary w-100" onclick="searchWeather()">
+                                        <i class="fas fa-search me-2"></i>Get Weather
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Recommended Cities -->
+                            <div class="mb-2">
+                                <small class="text-muted fw-semibold">Quick Select Popular Cities:</small>
+                            </div>
+                            <div class="location-chips">
+                                <button class="location-chip" onclick="selectLocation('Mumbai')">
+                                    <i class="fas fa-city me-1"></i>Mumbai
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Delhi')">
+                                    <i class="fas fa-landmark me-1"></i>Delhi
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Bangalore')">
+                                    <i class="fas fa-building me-1"></i>Bangalore
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Chennai')">
+                                    <i class="fas fa-ship me-1"></i>Chennai
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Hyderabad')">
+                                    <i class="fas fa-mosque me-1"></i>Hyderabad
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Kolkata')">
+                                    <i class="fas fa-university me-1"></i>Kolkata
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Pune')">
+                                    <i class="fas fa-industry me-1"></i>Pune
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Ahmedabad')">
+                                    <i class="fas fa-mosque me-1"></i>Ahmedabad
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Jaipur')">
+                                    <i class="fas fa-crown me-1"></i>Jaipur
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Lucknow')">
+                                    <i class="fas fa-star-and-crescent me-1"></i>Lucknow
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Nagpur')">
+                                    <i class="fas fa-tree me-1"></i>Nagpur
+                                </button>
+                                <button class="location-chip" onclick="selectLocation('Indore')">
+                                    <i class="fas fa-mountain me-1"></i>Indore
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {% if weather.error %}
@@ -518,6 +665,91 @@
             event.preventDefault();
             alert('Email registration not implemented yet. Please use Google registration.');
         }
+        
+        // Weather Location Functions
+        let isLoading = false;
+
+        function selectLocation(city) {
+            // Update the input field
+            document.getElementById('locationInput').value = city;
+            
+            // Update active state for chips
+            document.querySelectorAll('.location-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Fetch weather for the selected city
+            searchWeather();
+        }
+
+        function searchWeather() {
+            const location = document.getElementById('locationInput').value.trim();
+            
+            if (!location) {
+                alert('Please enter a location');
+                return;
+            }
+            
+            if (isLoading) {
+                return; // Prevent multiple requests
+            }
+            
+            isLoading = true;
+            showLoadingState();
+            
+            // Update URL and reload page with new location
+            window.location.href = `/weather/${encodeURIComponent(location)}`;
+        }
+
+        function showLoadingState() {
+            const weatherContent = document.querySelector('.content-wrapper');
+            const loadingHtml = `
+                <div class="weather-loading">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3">Getting weather data for ${document.getElementById('locationInput').value}...</p>
+                </div>
+            `;
+            
+            // Add loading indicator (optional for better UX)
+            const existingContent = weatherContent.innerHTML;
+            weatherContent.innerHTML = loadingHtml + existingContent;
+        }
+
+        // Handle Enter key in location input
+        document.getElementById('locationInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                searchWeather();
+            }
+        });
+
+        // Set active state for current location chip on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentLocation = '{{ location }}';
+            const chips = document.querySelectorAll('.location-chip');
+            
+            chips.forEach(chip => {
+                if (chip.textContent.trim().toLowerCase().includes(currentLocation.toLowerCase())) {
+                    chip.classList.add('active');
+                }
+            });
+        });
+
+        // Auto-complete functionality (optional enhancement)
+        let searchTimeout;
+        document.getElementById('locationInput').addEventListener('input', function(event) {
+            clearTimeout(searchTimeout);
+            const query = event.target.value.trim();
+            
+            if (query.length > 2) {
+                searchTimeout = setTimeout(() => {
+                    // Could implement autocomplete suggestions here
+                    console.log('Search suggestions for:', query);
+                }, 500);
+            }
+        });
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
