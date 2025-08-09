@@ -264,45 +264,48 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
         import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
         
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjgLBZmRqfBwuWhR02hlKJfWCeUUqvJ1I",
-            authDomain: "neokisan-bhoomisetu.firebaseapp.com",
-            projectId: "neokisan-bhoomisetu",
-            storageBucket: "neokisan-bhoomisetu.firebasestorage.app",
-            messagingSenderId: "67973217236",
-            appId: "1:67973217236:web:43b055fc330412aea13441",
-            measurementId: "G-004N5VKTWZ"
-        };
+        // Dynamic Firebase initialization
+        async function initializeFirebase() {
+            try {
+                const response = await fetch('/api/firebase-config');
+                const firebaseConfig = await response.json();
+                
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const db = getFirestore(app);
+                const provider = new GoogleAuthProvider();
+                
+                // Make Firebase available globally
+                window.firebaseAuth = auth;
+                window.firebaseDb = db;
+                window.googleProvider = provider;
+                window.signInWithPopup = signInWithPopup;
+                window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+                window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+                window.signOut = signOut;
+                window.collection = collection;
+                window.addDoc = addDoc;
+                window.getDocs = getDocs;
+                window.doc = doc;
+                window.deleteDoc = deleteDoc;
+                window.updateDoc = updateDoc;
+                window.query = query;
+                window.orderBy = orderBy;
+                window.where = where;
+                window.onAuthStateChanged = onAuthStateChanged;
+                
+                console.log('Firebase initialized successfully!');
+                return { auth, db, provider };
+            } catch (error) {
+                console.error('Failed to initialize Firebase:', error);
+                throw error;
+            }
+        }
         
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
-        
-        // Make Firebase available globally
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.googleProvider = provider;
-        window.signInWithPopup = signInWithPopup;
-        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.signOut = signOut;
-        window.collection = collection;
-        window.addDoc = addDoc;
-        window.getDocs = getDocs;
-        window.doc = doc;
-        window.deleteDoc = deleteDoc;
-        window.updateDoc = updateDoc;
-        window.query = query;
-        window.orderBy = orderBy;
-        window.where = where;
-        window.onAuthStateChanged = onAuthStateChanged;
-        
-        console.log('Firebase initialized successfully!');
-
-        // Monitor auth state changes
+        // Initialize Firebase and setup auth monitoring
+        initializeFirebase().then(({ auth }) => {
+            // Monitor auth state changes
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 console.log('User signed in:', user);

@@ -313,6 +313,8 @@
                         <i class="fas fa-user"></i> <span id="userName">User</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
                         <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
                         <li><hr class="dropdown-divider"></li>
@@ -709,6 +711,9 @@
         </div>
     </div>
 
+    <!-- Shared Authentication State Manager -->
+    <script src="/static/js/auth-state-manager.js"></script>
+
     <!-- Firebase SDK -->
     <script type="module">
         // Import Firebase modules (only for authentication)
@@ -716,91 +721,54 @@
         import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
         import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js';
         
-        // Firebase configuration (only for auth)
-        const firebaseConfig = {
-            apiKey: "AIzaSyBjgLBZmRqfBwuWhR02hlKJfWCeUUqvJ1I",
-            authDomain: "neokisan-bhoomisetu.firebaseapp.com",
-            projectId: "neokisan-bhoomisetu",
-            storageBucket: "neokisan-bhoomisetu.firebasestorage.app",
-            messagingSenderId: "67973217236",
-            appId: "1:67973217236:web:43b055fc330412aea13441",
-            measurementId: "G-004N5VKTWZ"
-        };
-        
-        // Initialize Firebase (only for auth)
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const analytics = getAnalytics(app);
-        const provider = new GoogleAuthProvider();
-        
-        // Make Firebase available globally
-        window.firebaseAuth = auth;
-        window.googleProvider = provider;
-        window.signInWithPopup = signInWithPopup;
-        window.signInWithEmailAndPassword = signInWithEmailAndPassword;
-        window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
-        window.signOut = signOut;
-        window.onAuthStateChanged = onAuthStateChanged;
-        
-        console.log('Firebase authentication initialized successfully!');
-        
-        // Set up auth state listener
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                console.log('User signed in:', user);
-                // Handle login success
-                window.currentUser = {
-                    uid: user.uid,
-                    email: user.email,
-                    displayName: user.displayName || user.email.split('@')[0]
-                };
-                
-                // Update UI for logged in user immediately
-                console.log('Updating UI for logged in user');
-                try {
-                    const authButtonsEl = document.getElementById('authButtons');
-                    const userMenuEl = document.getElementById('userMenu');
-                    const userNameEl = document.getElementById('userName');
-                    
-                    if (authButtonsEl) {
-                        authButtonsEl.style.setProperty('display', 'none', 'important');
-                        console.log('✅ Hidden auth buttons with !important');
-                    }
-                    if (userMenuEl) {
-                        userMenuEl.style.setProperty('display', 'block', 'important');
-                        console.log('✅ Showed user menu with !important');
-                    }
-                    if (userNameEl) {
-                        userNameEl.textContent = window.currentUser.displayName || window.currentUser.email.split('@')[0];
-                        console.log('✅ Updated user name');
-                    }
-                    console.log('UI updated successfully for logged in user');
-                } catch (error) {
-                    console.error('Error updating UI for logged in user:', error);
+        // Initialize Firebase dynamically with config from server
+        async function initializeFirebase() {
+            try {
+                const response = await fetch('/api/firebase-config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Firebase config');
                 }
-            } else {
-                console.log('User signed out');
-                window.currentUser = null;
+                const firebaseConfig = await response.json();
                 
-                // Update UI for logged out user immediately
-                console.log('Updating UI for logged out user');
-                try {
-                    const authButtonsEl = document.getElementById('authButtons');
-                    const userMenuEl = document.getElementById('userMenu');
-                    
-                    if (authButtonsEl) {
-                        authButtonsEl.style.setProperty('display', 'flex', 'important');
-                        console.log('✅ Showed auth buttons with !important');
-                    }
-                    if (userMenuEl) {
-                        userMenuEl.style.setProperty('display', 'none', 'important');
-                        console.log('✅ Hidden user menu with !important');
-                    }
-                    console.log('UI updated successfully for logged out user');
-                } catch (error) {
-                    console.error('Error updating UI for logged out user:', error);
-                }
+                // Initialize Firebase (only for auth)
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const analytics = getAnalytics(app);
+                const provider = new GoogleAuthProvider();
+                
+                return { app, auth, analytics, provider };
+            } catch (error) {
+                console.error('Failed to initialize Firebase:', error);
+                throw error;
             }
+        }
+        
+        // Initialize Firebase and set up authentication
+        let app, auth, analytics, provider;
+        
+        initializeFirebase().then(({ app: firebaseApp, auth: firebaseAuth, analytics: firebaseAnalytics, provider: googleProvider }) => {
+            app = firebaseApp;
+            auth = firebaseAuth;
+            analytics = firebaseAnalytics;
+            provider = googleProvider;
+            
+            // Set up global Firebase references
+            window.firebaseAuth = auth;
+            window.googleProvider = provider;
+            window.signInWithPopup = signInWithPopup;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+            window.onAuthStateChanged = onAuthStateChanged;
+            
+            console.log('Firebase authentication initialized successfully!');
+            
+            // Let AuthStateManager handle auth state
+            if (window.authStateManager) {
+                window.authStateManager.initializeAuth();
+            }
+        }).catch(error => {
+            console.error('Failed to initialize Firebase:', error);
         });
     </script>
 
@@ -1008,34 +976,9 @@
 
         // Handle successful login
         function handleLoginSuccess(user) {
-            // Firebase auth state change will handle UI updates
+            // Firebase auth state change will handle UI updates through AuthStateManager
             hideAuthModals();
             showAlert('Login successful! Welcome ' + (user.displayName || user.email), 'success');
-        }
-
-        // Update UI for logged-in user
-        function updateUIForLoggedInUser(user) {
-            console.log('updateUIForLoggedInUser called with:', user);
-            try {
-                document.getElementById('authButtons').style.display = 'none';
-                document.getElementById('userMenu').style.display = 'block';
-                document.getElementById('userName').textContent = user.displayName || user.email.split('@')[0];
-                console.log('UI successfully updated for logged in user');
-            } catch (error) {
-                console.error('Error in updateUIForLoggedInUser:', error);
-            }
-        }
-
-        // Update UI for logged-out user
-        function updateUIForLoggedOutUser() {
-            console.log('updateUIForLoggedOutUser called');
-            try {
-                document.getElementById('authButtons').style.display = 'flex';
-                document.getElementById('userMenu').style.display = 'none';
-                console.log('UI successfully updated for logged out user');
-            } catch (error) {
-                console.error('Error in updateUIForLoggedOutUser:', error);
-            }
         }
 
         // Make functions globally available

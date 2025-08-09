@@ -181,23 +181,43 @@
     import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js';
     import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js';
     
-    // Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyBjgLBZmRqfBwuWhR02hlKJfWCeUUqvJ1I",
-        authDomain: "neokisan-bhoomisetu.firebaseapp.com",
-        projectId: "neokisan-bhoomisetu",
-        storageBucket: "neokisan-bhoomisetu.firebasestorage.app",
-        messagingSenderId: "67973217236",
-        appId: "1:67973217236:web:43b055fc330412aea13441",
-        measurementId: "G-004N5VKTWZ"
-    };
+    // Dynamic Firebase initialization
+    async function initializeFirebase() {
+        try {
+            const response = await fetch('/api/firebase-config');
+            const firebaseConfig = await response.json();
+            
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const auth = getAuth(app);
+            const db = getFirestore(app);
+            const analytics = getAnalytics(app);
+            const provider = new GoogleAuthProvider();
+            
+            // Make Firebase available globally
+            window.firebaseAuth = auth;
+            window.firebaseDb = db;
+            window.googleProvider = provider;
+            window.signInWithPopup = signInWithPopup;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+            
+            console.log('Firebase initialized successfully in auth navbar!');
+            return { auth, db, provider };
+        } catch (error) {
+            console.error('Failed to initialize Firebase:', error);
+            throw error;
+        }
+    }
     
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const analytics = getAnalytics(app);
-    const provider = new GoogleAuthProvider();
+    // Initialize Firebase when component loads
+    initializeFirebase().then(() => {
+        // Firebase is ready
+        console.log('Auth navbar Firebase ready');
+    }).catch(error => {
+        console.error('Auth navbar Firebase initialization failed:', error);
+    });
     
     // Make Firebase available globally
     window.firebaseAuth = auth;

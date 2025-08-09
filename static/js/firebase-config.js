@@ -5,47 +5,57 @@ import { getAnalytics } from "firebase/analytics";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc, query, orderBy, where } from "firebase/firestore";
 
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyBjgLBZmRqfBwuWhR02hlKJfWCeUUqvJ1I",
-  authDomain: "neokisan-bhoomisetu.firebaseapp.com",
-  projectId: "neokisan-bhoomisetu",
-  storageBucket: "neokisan-bhoomisetu.firebasestorage.app",
-  messagingSenderId: "67973217236",
-  appId: "1:67973217236:web:43b055fc330412aea13441",
-  measurementId: "G-004N5VKTWZ"
-};
+// Dynamic Firebase configuration - fetch from server API for security
+async function getFirebaseConfig() {
+  try {
+    const response = await fetch('/api/firebase-config');
+    const firebaseConfig = await response.json();
+    return firebaseConfig;
+  } catch (error) {
+    console.error('Failed to fetch Firebase config:', error);
+    throw error;
+  }
+}
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const googleProvider = new GoogleAuthProvider();
+// Initialize Firebase with dynamic configuration
+async function initializeFirebaseServices() {
+  try {
+    const firebaseConfig = await getFirebaseConfig();
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const googleProvider = new GoogleAuthProvider();
+    
+    return {
+      app,
+      analytics,
+      auth,
+      db,
+      googleProvider,
+      signInWithPopup,
+      signInWithEmailAndPassword,
+      createUserWithEmailAndPassword,
+      signOut,
+      onAuthStateChanged,
+      collection,
+      addDoc,
+      getDocs,
+      doc,
+      deleteDoc,
+      updateDoc,
+      query,
+      orderBy,
+      where
+    };
+  } catch (error) {
+    console.error('Failed to initialize Firebase services:', error);
+    throw error;
+  }
+}
 
-// Export Firebase services for use in other modules
-export {
-  app,
-  analytics,
-  auth,
-  db,
-  googleProvider,
-  signInWithPopup,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged,
-  collection,
-  addDoc,
-  getDocs,
-  doc,
-  deleteDoc,
-  updateDoc,
-  query,
-  orderBy,
-  where
-};
+// Export the initialization function
+export { initializeFirebaseServices };
 
 // Firebase Authentication Helper Functions
 export class FirebaseAuth {

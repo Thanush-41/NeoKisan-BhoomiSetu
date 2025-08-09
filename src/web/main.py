@@ -126,6 +126,19 @@ async def test_auth(request: Request):
     """Serve the authentication test page"""
     return templates.TemplateResponse("test_auth.html", {"request": request})
 
+@app.get("/api/firebase-config")
+async def get_firebase_config():
+    """Get Firebase configuration for client-side initialization"""
+    return {
+        "apiKey": os.getenv("FIREBASE_API_KEY"),
+        "authDomain": os.getenv("FIREBASE_AUTH_DOMAIN"),
+        "projectId": os.getenv("FIREBASE_PROJECT_ID"),
+        "storageBucket": os.getenv("FIREBASE_STORAGE_BUCKET"),
+        "messagingSenderId": os.getenv("FIREBASE_MESSAGING_SENDER_ID"),
+        "appId": os.getenv("FIREBASE_APP_ID"),
+        "measurementId": os.getenv("FIREBASE_MEASUREMENT_ID")
+    }
+
 @app.post("/api/query", response_model=QueryResponse)
 async def process_query(request: QueryRequest):
     """Process agricultural query via API"""
