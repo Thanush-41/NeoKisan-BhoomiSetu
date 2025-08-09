@@ -6,46 +6,241 @@
     <title>Market Prices - BhoomiSetu</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    
     <style>
-        .navbar-custom {
-            background: linear-gradient(135deg, #2E8B57, #20B2AA, #4682B4, #8A2BE2);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        :root {
+            --primary-green: #2E7D32;
+            --light-bg: #fefcf5;
+            --dark-text: #212121;
+            --muted-text: #666;
+            --accent-orange: #FF8C00;
+            --card-bg: rgba(255, 255, 255, 0.9);
         }
+
+        body {
+            background: var(--light-bg);
+            color: var(--dark-text);
+            font-family: 'Open Sans', sans-serif;
+            line-height: 1.6;
+        }
+
+        /* Clean Glass Navbar */
+        .navbar-glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(46, 125, 50, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 0.8rem 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        /* Brand styling */
+        .navbar-glass .navbar-brand {
+            color: #2a7a1f;
+            font-weight: 700;
+            font-size: 1.4rem;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-glass .navbar-brand:hover {
+            color: #4caf50;
+        }
+
+        .navbar-glass .navbar-brand i {
+            color: #4caf50;
+            font-size: 1.2rem;
+        }
+
+        /* Navigation links */
+        .navbar-glass .navbar-nav {
+            align-items: center;
+        }
+
+        .navbar-glass .nav-link {
+            color: #2a7a1f;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Active nav link style */
+        .navbar-glass .nav-link.active,
+        .navbar-glass .nav-link:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        /* Nav icons color */
+        .navbar-glass .nav-link i.fas {
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        /* Auth buttons styling */
+        .navbar-glass .btn-outline-light {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            background: transparent;
+        }
+
+        .navbar-glass .btn-outline-light:hover {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light:hover {
+            background-color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            color: white !important;
+        }
+
+        /* User menu styling */
+        #userMenu .btn {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+        }
+
+        #userMenu .btn:hover {
+            background-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        #userMenu .dropdown-menu {
+            background: white;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #userMenu .dropdown-item {
+            color: var(--dark-text) !important;
+        }
+
+        #userMenu .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: #4caf50 !important;
+        }
+
+        #userName {
+            color: #2a7a1f !important;
+        }
+
+        #userEmail {
+            color: var(--muted-text) !important;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background: var(--primary-green) !important;
+            color: white !important;
+            border-radius: 15px 15px 0 0 !important;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-green);
+            border-color: var(--primary-green);
+        }
+
+        .btn-primary:hover {
+            background-color: #1a5d1f;
+            border-color: #1a5d1f;
+        }
+
+        /* Content wrapper */
+        .content-wrapper {
+            background: var(--light-bg);
+            min-height: 100vh;
+            padding-top: 80px;
+        }
+
+        /* Price table styling */
+        .table {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .table th {
+            background-color: var(--primary-green);
+            color: white;
+            font-weight: 600;
+            border: none;
+        }
+
+        .table td {
+            color: var(--dark-text);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Price indicators */
+        .price-up {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .price-down {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .price-stable {
+            color: var(--muted-text);
+            font-weight: 500;
+        }
+
+        /* Price badge styling */
+        .price-badge {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Card hover effect */
+        .card:hover {
+            transform: translateY(-2px);
+            transition: transform 0.3s ease;
+        }
+    </style>
     </style>
 </head>
 <body>
     <!-- Enhanced Navigation with Authentication -->
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
+    <nav class="navbar-glass fixed-top">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-seedling me-2"></i>BhoomiSetu
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling"></i> BhoomiSetu AI
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> AI Chat</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/weather/Mumbai"><i class="fas fa-cloud-sun"></i> Weather</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/schemes"><i class="fas fa-hand-holding-heart"></i> Schemes</a>
-                    </li>
-                </ul>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
+                <a class="nav-link" href="/weather/Mumbai"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link active" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
                 
-                <!-- Authentication Buttons (visible when logged out) -->
+                <!-- Authentication Buttons -->
                 <div id="authButtons" class="d-flex gap-2">
                     <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
                         <i class="fas fa-sign-in-alt"></i> Login
@@ -63,8 +258,8 @@
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/chat"><i class="fas fa-comments"></i> AI Chat</a></li>
-                        <li><a class="dropdown-item" href="/"><i class="fas fa-home"></i> Home</a></li>
+                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
+                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                     </ul>
@@ -73,63 +268,80 @@
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <h2><i class="fas fa-chart-line"></i> Current Market Prices</h2>
-        <p class="text-muted">Latest commodity prices from various mandis across India</p>
-        
-        {% if prices.error %}
-        <div class="alert alert-danger">
-            <i class="fas fa-exclamation-triangle"></i> {{ prices.error }}
-        </div>
-        {% else %}
-        
-        <div class="row mt-4">
-            <div class="col-12">
-                {% if prices.data %}
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-success">
-                            <tr>
-                                <th><i class="fas fa-seedling"></i> Commodity</th>
-                                <th><i class="fas fa-map-marker-alt"></i> Market</th>
-                                <th><i class="fas fa-rupee-sign"></i> Price (per Quintal)</th>
-                                <th><i class="fas fa-calendar"></i> Date</th>
-                                <th><i class="fas fa-info-circle"></i> Grade</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for record in prices.data[:20] %}
-                            <tr>
-                                <td><strong>{{ record.commodity or 'N/A' }}</strong></td>
-                                <td>{{ record.market or 'N/A' }}</td>
-                                <td>
-                                    <span class="badge bg-success fs-6">
-                                        ₹{{ record.modal_price or 'N/A' }}
-                                    </span>
-                                </td>
-                                <td>{{ record.arrival_date or 'N/A' }}</td>
-                                <td>{{ record.grade or 'N/A' }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="alert alert-info mt-3">
-                    <i class="fas fa-info-circle"></i> 
-                    <strong>Note:</strong> Prices are updated regularly from government data sources. 
-                    Please verify with local markets before making transactions.
-                </div>
-                {% else %}
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i> No price data available at the moment.
-                </div>
-                {% endif %}
+    <!-- Main Content -->
+    <main class="content-wrapper">
+        <div class="container py-4">
+            <div class="mb-4">
+                <h1 class="display-5 fw-bold">
+                    <i class="fas fa-chart-line me-2" style="color: var(--primary-green);"></i>
+                    Current Market Prices
+                </h1>
+                <p class="lead text-muted">Latest commodity prices from various mandis across India</p>
             </div>
-        </div>
         
-        {% endif %}
-    </div>
+            {% if prices.error %}
+            <div class="alert alert-danger border-0 shadow-sm">
+                <i class="fas fa-exclamation-triangle me-2"></i> {{ prices.error }}
+            </div>
+            {% else %}
+            
+            <div class="row g-4">
+                <div class="col-12">
+                    {% if prices.data %}
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-database me-2"></i> Latest Price Data
+                            </h5>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th><i class="fas fa-seedling me-1"></i> Commodity</th>
+                                            <th><i class="fas fa-map-marker-alt me-1"></i> Market</th>
+                                            <th><i class="fas fa-rupee-sign me-1"></i> Price (per Quintal)</th>
+                                            <th><i class="fas fa-calendar me-1"></i> Date</th>
+                                            <th><i class="fas fa-info-circle me-1"></i> Grade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for record in prices.data[:20] %}
+                                        <tr>
+                                            <td><strong>{{ record.commodity or 'N/A' }}</strong></td>
+                                            <td>{{ record.market or 'N/A' }}</td>
+                                            <td>
+                                                <span class="price-badge bg-success text-white px-2 py-1 rounded">
+                                                    ₹{{ record.modal_price or 'N/A' }}
+                                                </span>
+                                            </td>
+                                            <td>{{ record.arrival_date or 'N/A' }}</td>
+                                            <td>{{ record.grade or 'N/A' }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="alert alert-info border-0 shadow-sm mt-4">
+                        <i class="fas fa-info-circle me-2"></i> 
+                        <strong>Note:</strong> Prices are updated regularly from government data sources. 
+                        Please verify with local markets before making transactions.
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning border-0 shadow-sm">
+                        <i class="fas fa-exclamation-triangle me-2"></i> No price data available at the moment.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            {% endif %}
+        </div>
+    </main>
 
     <!-- Login Modal -->
     <div class="modal fade" id="loginModal" tabindex="-1">
