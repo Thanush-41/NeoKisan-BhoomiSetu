@@ -283,18 +283,44 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
+    <!-- Navigation Component -->
+    <!-- Include shared authentication navbar -->
     <nav class="navbar-glass fixed-top">
         <div class="container">
             <a class="navbar-brand" href="/">
                 <i class="fas fa-seedling"></i> BhoomiSetu AI
             </a>
-            <div class="navbar-nav ms-auto d-flex flex-row gap-3">
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
                 <a class="nav-link active" href="/"><i class="fas fa-home"></i> Home</a>
                 <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
                 <a class="nav-link" href="/weather/Mumbai"><i class="fas fa-cloud"></i> Weather</a>
                 <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
                 <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
+                
+                <!-- Authentication Buttons -->
+                <div id="authButtons" class="d-flex gap-2">
+                    <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="showRegisterModal()">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </div>
+                
+                <!-- User Menu (hidden by default) -->
+                <div id="userMenu" class="dropdown" style="display: none;">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> <span id="userName">User</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
+                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -571,6 +597,561 @@
     <a href="/chat" class="chat-btn">
         <i class="fas fa-comments"></i>
     </a>
+
+    <!-- Authentication Modals -->
+    
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content glass-container">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white"><i class="fas fa-sign-in-alt"></i> Login to BhoomiSetu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                            <button type="button" class="btn btn-outline-light" onclick="googleLogin()">
+                                <i class="fab fa-google"></i> Login with Google
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-light">
+                                Don't have an account? 
+                                <a href="#" class="text-warning" onclick="showRegisterModal()">Register here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content glass-container">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white"><i class="fas fa-user-plus"></i> Register for BhoomiSetu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">Display Name</label>
+                            <input type="text" class="form-control" id="registerName" placeholder="Your Name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                            <button type="button" class="btn btn-outline-light" onclick="googleLogin()">
+                                <i class="fab fa-google"></i> Sign up with Google
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-light">
+                                Already have an account? 
+                                <a href="#" class="text-warning" onclick="showLoginModal()">Login here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Threads Modal -->
+    <div class="modal fade" id="threadsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content glass-container">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white"><i class="fas fa-comments"></i> My Chat History</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-success btn-sm" onclick="createNewThread()">
+                            <i class="fas fa-plus"></i> New Chat
+                        </button>
+                    </div>
+                    <div id="threadsList">
+                        <div class="text-center text-light">
+                            <div class="spinner-border" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-2">Loading your chats...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shared Authentication State Manager -->
+    <script src="/static/js/auth-state-manager.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules (only for authentication)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js';
+        
+        // Initialize Firebase dynamically with config from server
+        async function initializeFirebase() {
+            try {
+                const response = await fetch('/api/firebase-config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Firebase config');
+                }
+                const firebaseConfig = await response.json();
+                
+                // Initialize Firebase (only for auth)
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const analytics = getAnalytics(app);
+                const provider = new GoogleAuthProvider();
+                
+                return { app, auth, analytics, provider };
+            } catch (error) {
+                console.error('Failed to initialize Firebase:', error);
+                throw error;
+            }
+        }
+        
+        // Initialize Firebase and set up authentication
+        let app, auth, analytics, provider;
+        
+        initializeFirebase().then(({ app: firebaseApp, auth: firebaseAuth, analytics: firebaseAnalytics, provider: googleProvider }) => {
+            app = firebaseApp;
+            auth = firebaseAuth;
+            analytics = firebaseAnalytics;
+            provider = googleProvider;
+            
+            // Set up global Firebase references
+            window.firebaseAuth = auth;
+            window.googleProvider = provider;
+            window.signInWithPopup = signInWithPopup;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+            window.onAuthStateChanged = onAuthStateChanged;
+            
+            console.log('Firebase authentication initialized successfully!');
+            
+            // Let AuthStateManager handle auth state
+            if (window.authStateManager) {
+                window.authStateManager.initializeAuth();
+            }
+        }).catch(error => {
+            console.error('Failed to initialize Firebase:', error);
+        });
+    </script>
+
+    <!-- Authentication JavaScript -->
+    <script>
+        // Current user state
+        let currentUser = null;
+        let authToken = null;
+
+        // Check for existing auth token on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Firebase auth state will be handled by onAuthStateChanged
+            console.log('Page loaded, waiting for auth state...');
+        });
+
+        // Authentication Functions
+        function showLoginModal() {
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            if (registerModal) registerModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+            modal.show();
+        }
+
+        function showRegisterModal() {
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            if (loginModal) loginModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('registerModal'));
+            modal.show();
+        }
+
+        function showThreadsModal() {
+            const modal = new bootstrap.Modal(document.getElementById('threadsModal'));
+            modal.show();
+            loadUserThreads();
+        }
+
+        // Manual UI update function for debugging
+        function forceUpdateAuthUI() {
+            console.log('🔧 Forcing auth UI update on home page...');
+            console.log('Current user:', window.currentUser);
+            
+            const authButtonsEl = document.getElementById('authButtons');
+            const userMenuEl = document.getElementById('userMenu');
+            const userNameEl = document.getElementById('userName');
+            
+            console.log('Elements found:', {
+                authButtons: !!authButtonsEl,
+                userMenu: !!userMenuEl,
+                userName: !!userNameEl
+            });
+            
+            if (window.currentUser) {
+                // User is logged in
+                if (authButtonsEl) {
+                    authButtonsEl.style.setProperty('display', 'none', 'important');
+                    console.log('✅ Hidden auth buttons with !important');
+                }
+                if (userMenuEl) {
+                    userMenuEl.style.setProperty('display', 'block', 'important');
+                    console.log('✅ Showed user menu with !important');
+                }
+                if (userNameEl) {
+                    userNameEl.textContent = window.currentUser.displayName || window.currentUser.email.split('@')[0];
+                    console.log('✅ Updated user name');
+                }
+            } else {
+                // User is logged out
+                if (authButtonsEl) {
+                    authButtonsEl.style.setProperty('display', 'flex', 'important');
+                    console.log('✅ Showed auth buttons with !important');
+                }
+                if (userMenuEl) {
+                    userMenuEl.style.setProperty('display', 'none', 'important');
+                    console.log('✅ Hidden user menu with !important');
+                }
+            }
+        }
+
+        // Make function available globally for console debugging
+        window.forceUpdateAuthUI = forceUpdateAuthUI;
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                // Use Firebase Auth directly for login
+                const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                const user = userCredential.user;
+                const token = await user.getIdToken();
+                
+                // Verify with backend
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                if (response.ok) {
+                    handleLoginSuccess({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || user.email.split('@')[0],
+                        token: token
+                    });
+                } else {
+                    showAlert('Login verification failed', 'danger');
+                }
+            } catch (error) {
+                showAlert('Login failed: ' + error.message, 'danger');
+            }
+        });
+
+        // Register form submission
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('Passwords do not match', 'danger');
+                return;
+            }
+            
+            try {
+                // Use Firebase Auth directly for registration
+                const userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                const user = userCredential.user;
+                
+                // Update display name if provided
+                if (name && user.updateProfile) {
+                    await user.updateProfile({ displayName: name });
+                }
+                
+                // Get ID token for backend verification
+                const token = await user.getIdToken();
+                
+                // Verify with backend
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                if (response.ok) {
+                    handleLoginSuccess({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: name || user.email.split('@')[0],
+                        token: token
+                    });
+                } else {
+                    showAlert('Account created but verification failed', 'warning');
+                }
+            } catch (error) {
+                showAlert('Registration error: ' + error.message, 'danger');
+            }
+        });
+
+        // Google Login
+        async function googleLogin() {
+            try {
+                if (typeof window.signInWithPopup === 'undefined') {
+                    showAlert('Google login not available', 'warning');
+                    return;
+                }
+                
+                const result = await window.signInWithPopup(window.firebaseAuth, window.googleProvider);
+                const token = await result.user.getIdToken();
+                
+                // Verify token with our backend
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                if (response.ok) {
+                    const userData = await response.json();
+                    handleLoginSuccess({
+                        uid: userData.user.uid,
+                        email: userData.user.email,
+                        displayName: result.user.displayName,
+                        token: token
+                    });
+                }
+            } catch (error) {
+                showAlert('Google login failed: ' + error.message, 'danger');
+            }
+        }
+
+        // Handle successful login
+        function handleLoginSuccess(user) {
+            // Firebase auth state change will handle UI updates through AuthStateManager
+            hideAuthModals();
+            showAlert('Login successful! Welcome ' + (user.displayName || user.email), 'success');
+        }
+
+        // Make functions globally available
+        window.updateUIForLoggedInUser = updateUIForLoggedInUser;
+        window.updateUIForLoggedOutUser = updateUIForLoggedOutUser;
+
+        // Verify existing token (deprecated - using Firebase auth state instead)
+        async function verifyToken(token) {
+            // This function is no longer used - Firebase onAuthStateChanged handles auth state
+            console.log('verifyToken called but using Firebase auth state instead');
+        }
+
+        // Logout
+        async function logout() {
+            try {
+                await window.signOut(window.firebaseAuth);
+                // Firebase auth state change will handle UI updates
+                showAlert('Logged out successfully', 'info');
+            } catch (error) {
+                console.error('Logout error:', error);
+                showAlert('Logout failed: ' + error.message, 'danger');
+            }
+        }
+
+        // Hide authentication modals
+        function hideAuthModals() {
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            
+            if (loginModal) loginModal.hide();
+            if (registerModal) registerModal.hide();
+        }
+
+        // Load user chat threads - redirect to chat page
+        async function loadUserThreads() {
+            if (!authToken || !currentUser) {
+                console.log('User not authenticated, cannot load threads');
+                return;
+            }
+            
+            // Simply redirect to chat page where threads will be loaded
+            console.log('Redirecting to chat page to load threads');
+            window.location.href = '/chat';
+        }
+
+        // Display chat threads
+        function displayThreads(threads) {
+            const container = document.getElementById('threadsList');
+            
+            if (threads.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center text-light">
+                        <p><i class="fas fa-comments fa-3x mb-3"></i></p>
+                        <p>No chat history yet. Start your first conversation!</p>
+                        <button class="btn btn-success" onclick="createNewThread()">
+                            <i class="fas fa-plus"></i> Start Chatting
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            const threadsHTML = threads.map(thread => `
+                <div class="card bg-dark bg-opacity-50 mb-2">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="text-light">
+                                <h6 class="card-title">${thread.title}</h6>
+                                <p class="card-text small text-muted">
+                                    ${thread.last_message || 'No messages yet'}
+                                </p>
+                                <small class="text-muted">
+                                    ${new Date(thread.updated_at).toLocaleDateString()}
+                                    · ${thread.message_count} messages
+                                </small>
+                            </div>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-light" onclick="openThread('${thread.id}')">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="deleteThread('${thread.id}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.innerHTML = threadsHTML;
+        }
+
+        // Create new thread using MongoDB API
+        async function createNewThread() {
+            if (!authToken || !currentUser) {
+                showAlert('Please login to create a chat thread', 'warning');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/chat/threads', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        title: `Chat ${new Date().toLocaleDateString()}`
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const thread = await response.json();
+                
+                // Redirect to chat with thread ID
+                window.location.href = `/chat?thread=${thread.id}`;
+            } catch (error) {
+                console.error('Error creating thread:', error);
+                showAlert('Failed to create new chat: ' + error.message, 'danger');
+            }
+        }
+
+        // Open thread
+        function openThread(threadId) {
+            window.location.href = `/chat?thread=${threadId}`;
+        }
+
+        // Delete thread using MongoDB API
+        async function deleteThread(threadId) {
+            if (!confirm('Are you sure you want to delete this chat thread?')) return;
+            
+            try {
+                const response = await fetch(`/api/chat/threads/${threadId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                showAlert('Chat thread deleted', 'success');
+                loadUserThreads(); // Refresh the list
+            } catch (error) {
+                console.error('Error deleting thread:', error);
+                showAlert('Failed to delete chat thread: ' + error.message, 'danger');
+            }
+        }
+
+        // Show alert messages
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 100px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
