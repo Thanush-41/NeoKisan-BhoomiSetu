@@ -673,6 +673,7 @@
                 <a class="nav-link active" href="/chat"><i class="fas fa-comments"></i> Chat</a>
                 <a class="nav-link" href="/weather"><i class="fas fa-cloud"></i> Weather</a>
                 <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link" href="/disease-detection"><i class="fas fa-microscope"></i> Disease Detection</a>
                 <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
                 
                 <!-- Chat-specific navigation extras -->
@@ -1054,6 +1055,7 @@
                 formData.append('location', userLocation.city || '');
                 formData.append('latitude', userLocation.latitude || '');
                 formData.append('longitude', userLocation.longitude || '');
+                formData.append('conversation_history', JSON.stringify(chatHistory));
 
                 const response = await fetch('/chat', {
                     method: 'POST',

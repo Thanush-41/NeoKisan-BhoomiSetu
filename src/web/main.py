@@ -22,6 +22,7 @@ from agents.agri_agent import agri_agent
 from services.firebase_service import firebase_service
 from services.mongodb_service import mongodb_service, startup_mongodb, shutdown_mongodb
 from services.crop_disease_service import crop_disease_service
+from services.plant_disease_service import plant_disease_service
 from models.auth_models import (
     UserRegistration, UserLogin, TokenVerification, UserResponse,
     ChatThreadCreate, ChatMessage, ChatThreadResponse, ChatMessageResponse
@@ -56,6 +57,7 @@ class QueryRequest(BaseModel):
     soil_type: Optional[str] = None
     language: Optional[str] = "en"
     coordinates: Optional[Coordinates] = None
+    conversation_history: Optional[List[Dict]] = None
 
 class QueryResponse(BaseModel):
     response: str
@@ -164,11 +166,12 @@ async def process_query(request: QueryRequest):
         
         print(f"DEBUG: User context: {user_context}")
         
-        # Always try to use AI agent (now supports Grok as fallback)
+        # Always try to use AI agent with conversation history (if provided)
         response = await agri_agent.process_query(
             query=request.query,
             location=location,
-            user_context=user_context
+            user_context=user_context,
+            conversation_history=getattr(request, 'conversation_history', None)
         )
         
         # Classify query type
@@ -476,10 +479,10 @@ async def geocode_location(lat: float, lon: float):
             "address": "Unknown Location"
         })
 
-# Crop Disease Detection Endpoints
-@app.post("/api/crop-disease/predict")
-async def predict_crop_disease(file: UploadFile = File(...)):
-    """Predict plant disease from uploaded image"""
+# Plant Disease Detection Endpoints
+@app.post("/api/plant-disease/predict")
+async def predict_plant_disease(file: UploadFile = File(...)):
+    """Predict plant disease from uploaded image using AI model"""
     try:
         # Validate file type
         if not file.content_type.startswith('image/'):
@@ -489,39 +492,69 @@ async def predict_crop_disease(file: UploadFile = File(...)):
         contents = await file.read()
         
         # Get prediction from service
-        result = crop_disease_service.predict_disease(contents)
+        result = plant_disease_service.predict_disease(contents)
         
-        if result.get("status") == "error":
-            raise HTTPException(status_code=500, detail=result.get("error"))
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Prediction failed"))
         
         return JSONResponse(content={
+            "success": True,
             "filename": file.filename,
-            "predicted_class": result["predicted_class"],
+            "plant_type": result["plant_type"],
             "disease_name": result["disease_name"],
+            "full_prediction": result["full_prediction"],
             "confidence": result["confidence"],
-            "explanation": result["explanation"],
-            "all_predictions": result["all_predictions"]
+            "confidence_percentage": result["confidence_percentage"],
+            "class_probabilities": result["class_probabilities"],
+            "timestamp": result.get("timestamp")
         })
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
-@app.get("/api/crop-disease/classes")
-async def get_disease_classes():
-    """Get all available plant disease classes"""
-    if crop_disease_service.class_indices is None:
-        raise HTTPException(status_code=500, detail="Disease classes not loaded")
-    
-    return JSONResponse(content={
-        "classes": list(crop_disease_service.class_indices.keys()),
-        "total_classes": len(crop_disease_service.class_indices)
-    })
+@app.post("/api/plant-disease/description")
+async def get_plant_disease_description(
+    disease_name: str = Form(...),
+    language: str = Form(default="English")
+):
+    """Get AI-generated disease description in specified language"""
+    try:
+        description = await plant_disease_service.get_disease_description(disease_name, language)
+        return JSONResponse(content={
+            "success": True,
+            "disease_name": disease_name,
+            "language": language,
+            "description": description
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get description: {str(e)}")
 
-@app.get("/api/crop-disease/info/{disease_name}")
-async def get_disease_info(disease_name: str):
-    """Get detailed information about a specific disease"""
-    info = crop_disease_service.get_disease_info(disease_name)
-    return JSONResponse(content=info)
+@app.get("/api/plant-disease/treatment/{disease_name}")
+async def get_treatment_recommendations(disease_name: str):
+    """Get treatment recommendations for detected disease"""
+    try:
+        treatments = plant_disease_service.get_treatment_recommendations(disease_name)
+        return JSONResponse(content={
+            "success": True,
+            "disease_name": disease_name,
+            "treatments": treatments
+        })
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get treatments: {str(e)}")
+
+@app.get("/api/plant-disease/classes")
+async def get_plant_disease_classes():
+    """Get all available plant disease classes"""
+    return JSONResponse(content={
+        "success": True,
+        "classes": plant_disease_service.class_names,
+        "total_classes": len(plant_disease_service.class_names),
+        "model_info": {
+            "input_size": "256x256",
+            "color_channels": 3,
+            "model_type": "CNN"
+        }
+    })
 
 @app.post("/chat")
 async def chat_submit(
@@ -529,7 +562,8 @@ async def chat_submit(
     message: str = Form("", description="User message"), 
     location: str = Form("", description="User location"),
     latitude: str = Form("", description="Latitude coordinate"),
-    longitude: str = Form("", description="Longitude coordinate")
+    longitude: str = Form("", description="Longitude coordinate"),
+    conversation_history: str = Form("[]", description="JSON string of conversation history")
 ):
     """Handle chat form submission - returns JSON for AJAX requests"""
     try:
@@ -540,6 +574,15 @@ async def chat_submit(
         if not message or message.strip() == "":
             print("DEBUG: Empty message received")
             return {"response": "Please enter a message to get started!"}
+        
+        # Parse conversation history
+        history = []
+        try:
+            history = json.loads(conversation_history) if conversation_history != "[]" else []
+            print(f"DEBUG: Conversation history loaded: {len(history)} messages")
+        except json.JSONDecodeError:
+            print("DEBUG: Invalid conversation history JSON, using empty history")
+            history = []
         
         # Determine location from coordinates if not provided
         if not location and latitude and longitude:
@@ -561,11 +604,12 @@ async def chat_submit(
         
         print(f"DEBUG: User context: {user_context}")
         
-        # Always try to use AI agent (now supports Grok as fallback)
+        # Always try to use AI agent with conversation history
         response = await agri_agent.process_query(
             query=message,
             location=location,
-            user_context=user_context
+            user_context=user_context,
+            conversation_history=history
         )
         
         print(f"DEBUG: Full response generated:")
@@ -641,6 +685,13 @@ async def schemes_page(request: Request):
 async def crop_disease_page(request: Request):
     """Crop disease detection page"""
     return templates.TemplateResponse("crop_disease.html", {
+        "request": request
+    })
+
+@app.get("/disease-detection")
+async def disease_detection_page(request: Request):
+    """Plant disease detection page using AI model"""
+    return templates.TemplateResponse("disease_detection.html", {
         "request": request
     })
 

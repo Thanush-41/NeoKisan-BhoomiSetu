@@ -51,6 +51,10 @@ class AgricultureAIAgent:
         self.soil_data = self._load_soil_data()
         self.location_soil_mapping = self._get_location_soil_mapping()
         
+        # Initialize fertilizer prediction data
+        self.fertilizer_data = self._load_fertilizer_data()
+        print(f"🌿 DEBUG: Loaded fertilizer dataset with {len(self.fertilizer_data)} records")
+        
         print("✅ DEBUG: AgricultureAIAgent initialization complete")
 
     def _load_crop_knowledge(self) -> Dict:
@@ -189,6 +193,55 @@ class AgricultureAIAgent:
             print(f"❌ DEBUG: Error loading soil data: {e}")
             return {}
 
+    def _load_fertilizer_data(self) -> Dict:
+        """Load fertilizer prediction dataset from CSV file"""
+        try:
+            import pandas as pd
+            import os
+            
+            # Path to the fertilizer dataset
+            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "Fertilizer Prediction.csv")
+            
+            if not os.path.exists(csv_file_path):
+                print(f"⚠️ DEBUG: Fertilizer dataset not found at {csv_file_path}")
+                return {}
+            
+            # Load the dataset
+            fertilizer_df = pd.read_csv(csv_file_path)
+            print(f"🌿 DEBUG: Loaded fertilizer dataset with {len(fertilizer_df)} records")
+            print(f"🌿 DEBUG: Column names: {list(fertilizer_df.columns)}")
+            
+            # Process data for efficient lookup
+            fertilizer_data = {}
+            
+            # Group by soil type and crop type for recommendations
+            for _, row in fertilizer_df.iterrows():
+                soil_type = str(row['Soil Type']).lower().strip()
+                crop_type = str(row['Crop Type']).lower().strip()
+                
+                if soil_type not in fertilizer_data:
+                    fertilizer_data[soil_type] = {}
+                
+                if crop_type not in fertilizer_data[soil_type]:
+                    fertilizer_data[soil_type][crop_type] = []
+                
+                fertilizer_data[soil_type][crop_type].append({
+                    'temperature': float(row['Temparature']),
+                    'humidity': float(row['Humidity ']),  # Note the space after Humidity
+                    'moisture': float(row['Moisture']),
+                    'nitrogen': float(row['Nitrogen']),
+                    'phosphorus': float(row['Phosphorous']),
+                    'potassium': float(row['Potassium']),
+                    'fertilizer': str(row['Fertilizer Name']).strip()
+                })
+            
+            print(f"✅ DEBUG: Processed fertilizer data for {len(fertilizer_data)} soil types")
+            return fertilizer_data
+            
+        except Exception as e:
+            print(f"❌ DEBUG: Error loading fertilizer data: {e}")
+            return {}
+
     def _get_location_soil_mapping(self) -> Dict:
         """Map Indian locations to predominant soil types"""
         return {
@@ -307,6 +360,120 @@ class AgricultureAIAgent:
             "imphal": "red",
             "agartala": "clayey"
         }
+
+    def get_fertilizer_recommendations(self, soil_type: str = None, crop_type: str = None, 
+                                     temperature: float = None, humidity: float = None, 
+                                     moisture: float = None) -> Dict:
+        """Get fertilizer recommendations based on soil type, crop type, and environmental conditions"""
+        try:
+            if not hasattr(self, 'fertilizer_data') or not self.fertilizer_data:
+                return {"error": "Fertilizer data not available"}
+            
+            recommendations = []
+            
+            # If soil type and crop type are provided, get specific recommendations
+            if soil_type and crop_type:
+                soil_key = soil_type.lower().strip()
+                crop_key = crop_type.lower().strip()
+                
+                if soil_key in self.fertilizer_data and crop_key in self.fertilizer_data[soil_key]:
+                    crop_fertilizers = self.fertilizer_data[soil_key][crop_key]
+                    
+                    # If environmental conditions are provided, find best match
+                    if temperature is not None and humidity is not None and moisture is not None:
+                        best_match = None
+                        min_diff = float('inf')
+                        
+                        for fertilizer_data in crop_fertilizers:
+                            # Calculate environmental condition similarity
+                            temp_diff = abs(fertilizer_data['temperature'] - temperature)
+                            humidity_diff = abs(fertilizer_data['humidity'] - humidity)
+                            moisture_diff = abs(fertilizer_data['moisture'] - moisture)
+                            
+                            total_diff = temp_diff + humidity_diff + moisture_diff
+                            
+                            if total_diff < min_diff:
+                                min_diff = total_diff
+                                best_match = fertilizer_data
+                        
+                        if best_match:
+                            recommendations.append({
+                                'fertilizer': best_match['fertilizer'],
+                                'npk': {
+                                    'nitrogen': best_match['nitrogen'],
+                                    'phosphorus': best_match['phosphorus'],
+                                    'potassium': best_match['potassium']
+                                },
+                                'ideal_conditions': {
+                                    'temperature': best_match['temperature'],
+                                    'humidity': best_match['humidity'],
+                                    'moisture': best_match['moisture']
+                                },
+                                'match_score': round(100 - (min_diff / 3), 2)
+                            })
+                    else:
+                        # Return all fertilizers for this soil-crop combination
+                        for fertilizer_data in crop_fertilizers:
+                            recommendations.append({
+                                'fertilizer': fertilizer_data['fertilizer'],
+                                'npk': {
+                                    'nitrogen': fertilizer_data['nitrogen'],
+                                    'phosphorus': fertilizer_data['phosphorus'],
+                                    'potassium': fertilizer_data['potassium']
+                                },
+                                'ideal_conditions': {
+                                    'temperature': fertilizer_data['temperature'],
+                                    'humidity': fertilizer_data['humidity'],
+                                    'moisture': fertilizer_data['moisture']
+                                }
+                            })
+            
+            # If only environmental conditions are provided, find general recommendations
+            elif temperature is not None and humidity is not None and moisture is not None:
+                all_matches = []
+                
+                for soil in self.fertilizer_data:
+                    for crop in self.fertilizer_data[soil]:
+                        for fertilizer_data in self.fertilizer_data[soil][crop]:
+                            temp_diff = abs(fertilizer_data['temperature'] - temperature)
+                            humidity_diff = abs(fertilizer_data['humidity'] - humidity)
+                            moisture_diff = abs(fertilizer_data['moisture'] - moisture)
+                            
+                            total_diff = temp_diff + humidity_diff + moisture_diff
+                            match_score = round(100 - (total_diff / 3), 2)
+                            
+                            if match_score > 70:  # Only include good matches
+                                all_matches.append({
+                                    'fertilizer': fertilizer_data['fertilizer'],
+                                    'soil_type': soil,
+                                    'crop_type': crop,
+                                    'npk': {
+                                        'nitrogen': fertilizer_data['nitrogen'],
+                                        'phosphorus': fertilizer_data['phosphorus'],
+                                        'potassium': fertilizer_data['potassium']
+                                    },
+                                    'match_score': match_score
+                                })
+                
+                # Sort by match score and take top 5
+                all_matches.sort(key=lambda x: x['match_score'], reverse=True)
+                recommendations = all_matches[:5]
+            
+            return {
+                'recommendations': recommendations,
+                'total_found': len(recommendations),
+                'search_criteria': {
+                    'soil_type': soil_type,
+                    'crop_type': crop_type,
+                    'temperature': temperature,
+                    'humidity': humidity,
+                    'moisture': moisture
+                }
+            }
+            
+        except Exception as e:
+            print(f"❌ DEBUG: Error getting fertilizer recommendations: {e}")
+            return {"error": f"Failed to get fertilizer recommendations: {str(e)}"}
 
     def _format_response_for_chat(self, response: str) -> str:
         """Format response with HTML for proper rendering in web chat interface"""
@@ -1184,10 +1351,16 @@ Response (JSON only):
         else:
             return "general"
 
-    async def process_query(self, query: str, location: str = None, user_context: Dict = None) -> str:
-        """Main method to process agricultural queries with enhanced AI understanding"""
+    async def process_query(self, query: str, location: str = None, user_context: Dict = None, conversation_history: List[Dict] = None) -> str:
+        """Main method to process agricultural queries with enhanced AI understanding and conversation context"""
         try:
             print(f"🤖 DEBUG: Processing query: '{query}' | Location: '{location}'")
+            
+            # Check for context-dependent queries that reference previous conversation
+            if conversation_history:
+                context_dependent_query = await self._handle_context_dependent_query(query, conversation_history, location, user_context)
+                if context_dependent_query:
+                    return context_dependent_query
             
             # Detect and translate if needed
             detected_lang = await self.detect_language(query)
@@ -1283,6 +1456,139 @@ Response (JSON only):
         except Exception as e:
             logger.error(f"Query processing error: {e}")
             return "I'm sorry, I encountered an error while processing your query. Please try again."
+
+    async def _handle_context_dependent_query(self, query: str, conversation_history: List[Dict], location: str = None, user_context: Dict = None) -> str:
+        """Handle queries that reference previous conversation context"""
+        try:
+            # Check if query contains context-dependent phrases
+            context_phrases = [
+                "you suggested", "you recommended", "mentioned earlier", "from earlier", 
+                "previous recommendation", "that crop", "the crop", "fertilizer schedule",
+                "based on what you said", "as per your advice", "following your suggestion",
+                "the variety you mentioned", "that solution", "from before"
+            ]
+            
+            query_lower = query.lower()
+            is_context_dependent = any(phrase in query_lower for phrase in context_phrases)
+            
+            if not is_context_dependent:
+                return None
+                
+            print(f"🔄 DEBUG: Context-dependent query detected: '{query}'")
+            
+            # Build conversation context for AI
+            conversation_context = self._build_conversation_context(conversation_history)
+            
+            if not conversation_context:
+                return None
+                
+            print(f"💭 DEBUG: Using conversation history with {len(conversation_history)} messages")
+            
+            # Use OpenAI to understand the context and provide response
+            if self.openai_client:
+                try:
+                    messages = [
+                        {
+                            "role": "system",
+                            "content": f"""You are BhoomiSetu, an expert agricultural advisor. You have access to the previous conversation history.
+
+CURRENT LOCATION: {location or 'Not specified'}
+CURRENT DATE: {datetime.now().strftime('%B %d, %Y')}
+
+CONVERSATION HISTORY:
+{conversation_context}
+
+The user is asking a follow-up question that references something from the previous conversation. 
+Analyze the history to understand what they're referring to and provide a relevant response.
+
+IMPORTANT: Format your response with this structure:
+
+## 🎯 DIRECT ANSWER
+[Provide immediate, specific answer based on the conversation context]
+
+## 📋 DETAILED RECOMMENDATIONS
+[Provide comprehensive guidance related to their follow-up question]
+
+Be specific and reference what you mentioned earlier in the conversation."""
+                        },
+                        {
+                            "role": "user", 
+                            "content": query
+                        }
+                    ]
+                    
+                    response = await self.openai_client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=messages,
+                        temperature=0.3,
+                        max_tokens=800
+                    )
+                    
+                    return self._format_response_for_chat(response.choices[0].message.content.strip())
+                    
+                except Exception as e:
+                    print(f"❌ DEBUG: Context handling with OpenAI failed: {e}")
+                    
+            # Fallback to Groq if OpenAI fails
+            if self.groq_client:
+                try:
+                    context_prompt = f"""Previous conversation:
+{conversation_context}
+
+Current question: {query}
+
+Based on the conversation history above, provide a helpful response to the user's follow-up question. Reference what was discussed earlier."""
+
+                    response = await self.groq_client.chat.completions.create(
+                        model="llama3-8b-8192",
+                        messages=[{"role": "user", "content": context_prompt}],
+                        temperature=0.3,
+                        max_tokens=600
+                    )
+                    
+                    return self._format_response_for_chat(response.choices[0].message.content.strip())
+                    
+                except Exception as e:
+                    print(f"❌ DEBUG: Context handling with Groq failed: {e}")
+            
+            return None
+            
+        except Exception as e:
+            print(f"❌ DEBUG: Context-dependent query handling error: {e}")
+            return None
+
+    def _build_conversation_context(self, conversation_history: List[Dict]) -> str:
+        """Build a formatted conversation context from history"""
+        try:
+            if not conversation_history:
+                return ""
+            
+            # Get last 5 messages for context (to avoid token limits)
+            recent_history = conversation_history[-10:] if len(conversation_history) > 10 else conversation_history
+            
+            context_lines = []
+            for msg in recent_history:
+                role = msg.get('role', 'unknown')
+                content = msg.get('content', '')
+                
+                if role == 'user':
+                    context_lines.append(f"User: {content}")
+                elif role == 'assistant':
+                    # Clean up assistant response for context (remove HTML formatting)
+                    import re
+                    clean_content = re.sub(r'<[^>]+>', '', content)
+                    clean_content = re.sub(r'[🎯📋💰🌱🌤️📊📍🔧]', '', clean_content)
+                    clean_content = re.sub(r'\*\*([^*]+)\*\*', r'\1', clean_content)
+                    clean_content = clean_content.replace('DIRECT ANSWER', '').replace('DETAILED RECOMMENDATIONS', '').strip()
+                    if len(clean_content) > 300:
+                        clean_content = clean_content[:300] + "..."
+                    context_lines.append(f"Assistant: {clean_content}")
+            
+            return "\n".join(context_lines)
+            
+        except Exception as e:
+            print(f"❌ DEBUG: Error building conversation context: {e}")
+            return ""
 
     async def _handle_irrigation_query(self, query: str, context_data: Dict, user_context: Dict) -> str:
         """Handle irrigation-related queries"""
@@ -1827,6 +2133,54 @@ Soil Analysis for {location_name}:
                             sample = crop_data[0]  # Take first recommendation
                             soil_analysis += f"- {crop.title()}: {sample.get('fertilizer', 'Standard fertilizer')}, "
                             soil_analysis += f"N-P-K: {sample.get('nitrogen', 0)}-{sample.get('phosphorous', 0)}-{sample.get('potassium', 0)}\n"
+            
+            # Add fertilizer dataset recommendations
+            fertilizer_recommendations_text = ""
+            if detected_crops and hasattr(self, 'fertilizer_data') and self.fertilizer_data:
+                soil_type = soil_info.get('soil_type', '').lower()
+                current_temp = current.get('temperature')
+                current_humidity = current.get('humidity')
+                
+                fertilizer_recommendations_text = "\n🌿 FERTILIZER DATASET RECOMMENDATIONS:\n"
+                
+                for crop in detected_crops:
+                    fertilizer_data = self.get_fertilizer_recommendations(
+                        soil_type=soil_type,
+                        crop_type=crop,
+                        temperature=current_temp,
+                        humidity=current_humidity,
+                        moisture=50  # Default moisture level
+                    )
+                    
+                    if fertilizer_data.get('recommendations'):
+                        fertilizer_recommendations_text += f"\n{crop.title()} Fertilizer Recommendations:\n"
+                        for rec in fertilizer_data['recommendations'][:2]:  # Top 2 recommendations
+                            fertilizer_recommendations_text += f"- {rec['fertilizer']}: N-P-K = {rec['npk']['nitrogen']}-{rec['npk']['phosphorus']}-{rec['npk']['potassium']}"
+                            if 'match_score' in rec:
+                                fertilizer_recommendations_text += f" (Match: {rec['match_score']}%)"
+                            fertilizer_recommendations_text += "\n"
+                            if 'ideal_conditions' in rec:
+                                conditions = rec['ideal_conditions']
+                                fertilizer_recommendations_text += f"  Ideal conditions: {conditions['temperature']}°C, {conditions['humidity']}% humidity\n"
+                
+                # If no crop-specific recommendations, get general recommendations based on conditions
+                if not detected_crops and current_temp is not None and current_humidity is not None:
+                    general_fertilizer_data = self.get_fertilizer_recommendations(
+                        temperature=current_temp,
+                        humidity=current_humidity,
+                        moisture=50
+                    )
+                    
+                    if general_fertilizer_data.get('recommendations'):
+                        fertilizer_recommendations_text += "\nGeneral Fertilizer Recommendations for Current Conditions:\n"
+                        for rec in general_fertilizer_data['recommendations'][:3]:  # Top 3 recommendations
+                            fertilizer_recommendations_text += f"- {rec['fertilizer']} for {rec['soil_type']} soil + {rec['crop_type']}: "
+                            fertilizer_recommendations_text += f"N-P-K = {rec['npk']['nitrogen']}-{rec['npk']['phosphorus']}-{rec['npk']['potassium']} "
+                            fertilizer_recommendations_text += f"(Match: {rec['match_score']}%)\n"
+            
+            # Add fertilizer recommendations to soil analysis
+            if fertilizer_recommendations_text.strip():
+                soil_analysis += fertilizer_recommendations_text
             
             # Create comprehensive prompt with direct answer first approach
             if is_nutrient_specific:
