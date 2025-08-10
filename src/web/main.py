@@ -8,7 +8,7 @@ import json
 import asyncio
 from typing import Dict, Optional, List
 from datetime import datetime
-from fastapi import FastAPI, Request, Form, HTTPException, Depends, Header
+from fastapi import FastAPI, Request, Form, HTTPException, Depends, Header, File, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -21,6 +21,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from agents.agri_agent import agri_agent
 from services.firebase_service import firebase_service
 from services.mongodb_service import mongodb_service, startup_mongodb, shutdown_mongodb
+from services.crop_disease_service import crop_disease_service
 from models.auth_models import (
     UserRegistration, UserLogin, TokenVerification, UserResponse,
     ChatThreadCreate, ChatMessage, ChatThreadResponse, ChatMessageResponse
@@ -475,6 +476,53 @@ async def geocode_location(lat: float, lon: float):
             "address": "Unknown Location"
         })
 
+# Crop Disease Detection Endpoints
+@app.post("/api/crop-disease/predict")
+async def predict_crop_disease(file: UploadFile = File(...)):
+    """Predict plant disease from uploaded image"""
+    try:
+        # Validate file type
+        if not file.content_type.startswith('image/'):
+            raise HTTPException(status_code=400, detail="File must be an image")
+        
+        # Read image file
+        contents = await file.read()
+        
+        # Get prediction from service
+        result = crop_disease_service.predict_disease(contents)
+        
+        if result.get("status") == "error":
+            raise HTTPException(status_code=500, detail=result.get("error"))
+        
+        return JSONResponse(content={
+            "filename": file.filename,
+            "predicted_class": result["predicted_class"],
+            "disease_name": result["disease_name"],
+            "confidence": result["confidence"],
+            "explanation": result["explanation"],
+            "all_predictions": result["all_predictions"]
+        })
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
+
+@app.get("/api/crop-disease/classes")
+async def get_disease_classes():
+    """Get all available plant disease classes"""
+    if crop_disease_service.class_indices is None:
+        raise HTTPException(status_code=500, detail="Disease classes not loaded")
+    
+    return JSONResponse(content={
+        "classes": list(crop_disease_service.class_indices.keys()),
+        "total_classes": len(crop_disease_service.class_indices)
+    })
+
+@app.get("/api/crop-disease/info/{disease_name}")
+async def get_disease_info(disease_name: str):
+    """Get detailed information about a specific disease"""
+    info = crop_disease_service.get_disease_info(disease_name)
+    return JSONResponse(content=info)
+
 @app.post("/chat")
 async def chat_submit(
     request: Request, 
@@ -587,6 +635,13 @@ async def schemes_page(request: Request):
     return templates.TemplateResponse("schemes.html", {
         "request": request,
         "schemes": agri_agent.financial_schemes
+    })
+
+@app.get("/crop-disease")
+async def crop_disease_page(request: Request):
+    """Crop disease detection page"""
+    return templates.TemplateResponse("crop_disease.html", {
+        "request": request
     })
 
 # ========================================
@@ -812,6 +867,7 @@ async def health_check():
 async def startup_event():
     """Initialize services on startup"""
     await startup_mongodb()
+    crop_disease_service.initialize()
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -820,7 +876,7 @@ async def shutdown_event():
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "src.web.main:app",
         host=os.getenv("HOST", "0.0.0.0"),
         port=int(os.getenv("PORT", 8000)),
         reload=True
