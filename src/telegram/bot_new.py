@@ -233,9 +233,11 @@ This helps me give you:
             # Process the query using our AI agent
             user_context = self.user_sessions.get(user_id, {})
             
-            # Check if OpenAI is configured
+            # Check if OpenAI or Groq is configured
             openai_key = os.getenv('OPENAI_API_KEY')
-            if not openai_key or openai_key == 'your_openai_api_key_here':
+            groq_key = os.getenv('GROQ_API_KEY')
+            
+            if (not openai_key or openai_key == 'your_openai_api_key_here') and (not groq_key or groq_key == 'your_groq_api_key_here'):
                 response = await self.handle_query_without_ai(message, user_location, user_context)
             else:
                 response = await agri_agent.process_query(
@@ -244,7 +246,12 @@ This helps me give you:
                     user_context=user_context
                 )
             
-            await update.message.reply_text(response, parse_mode='Markdown')
+            # Try sending with Markdown first, fallback to plain text if it fails
+            try:
+                await update.message.reply_text(response, parse_mode='Markdown')
+            except Exception as parse_error:
+                logger.warning(f"Markdown parse error: {parse_error}, sending as plain text")
+                await update.message.reply_text(response)
             
         except Exception as e:
             logger.error(f"Message handling error: {e}")
@@ -253,7 +260,7 @@ This helps me give you:
             )
 
     async def handle_query_without_ai(self, query: str, location: str, user_context: dict) -> str:
-        """Handle queries when OpenAI is not configured"""
+        """Handle queries when OpenAI is not configured but might use Groq for general queries"""
         query_lower = query.lower()
         
         # Weather queries
@@ -305,8 +312,32 @@ This helps me give you:
             except Exception as e:
                 return f"Error fetching price data: {str(e)}"
         
-        # General response
+        # General queries - try Groq if available
         else:
+            groq_key = os.getenv('GROQ_API_KEY')
+            if groq_key and groq_key != 'your_groq_api_key_here':
+                try:
+                    # Use Groq for general agricultural queries
+                    messages = [
+                        {
+                            "role": "system", 
+                            "content": "You are BhoomiSetu, an expert agricultural advisor for Indian farmers. Provide practical, actionable advice in simple language. Focus on Indian farming conditions, crops, and practices. Keep responses concise and helpful."
+                        },
+                        {
+                            "role": "user", 
+                            "content": f"Location: {location}\nQuery: {query}"
+                        }
+                    ]
+                    
+                    response = await agri_agent._call_groq_api(messages, is_agricultural=True)
+                    return response
+                    
+                except Exception as e:
+                    logger.error(f"Groq API error in Telegram: {e}")
+                    # Fall back to static response if Groq fails
+                    pass
+            
+            # Fallback static response
             return ("🌾 **BhoomiSetu Agricultural Advisor**\n\n"
                     "I can help you with:\n"
                     "• **Weather forecasts** - 'weather today'\n"
