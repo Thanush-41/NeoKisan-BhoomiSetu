@@ -1310,26 +1310,26 @@ Response (JSON only):
             Answer in simple, clear language that a farmer can understand and implement.
             """
             
-            # Use Groq API for the response
-            if self.groq_api_key:
-                print("💧 DEBUG: Using Groq for irrigation query")
-                messages = [
-                    {"role": "system", "content": "You are an expert agricultural advisor specializing in irrigation management for Indian farmers."},
-                    {"role": "user", "content": prompt}
-                ]
-                return await self._call_groq_api(messages)
-            elif self.openai_client:
+            # Use OpenAI first, then Groq as fallback
+            if self.openai_client:
                 print("💧 DEBUG: Using OpenAI for irrigation query")
-                response = self.openai_client.chat.completions.create(
+                response = await self.openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are an expert agricultural advisor."},
+                        {"role": "system", "content": "You are an expert agricultural advisor specializing in irrigation management for Indian farmers."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=500,
                     temperature=0.7
                 )
                 return response.choices[0].message.content.strip()
+            elif self.groq_api_key:
+                print("💧 DEBUG: Using Groq as fallback for irrigation query")
+                messages = [
+                    {"role": "system", "content": "You are an expert agricultural advisor specializing in irrigation management for Indian farmers."},
+                    {"role": "user", "content": prompt}
+                ]
+                return await self._call_groq_api(messages)
             else:
                 print("⚠️ DEBUG: No AI API available for irrigation")
                 return "I can help with irrigation advice. Please provide your location and crop type for better recommendations."
@@ -1367,25 +1367,25 @@ Response (JSON only):
             """
             
             # Use Groq API for the response
-            if self.groq_api_key:
-                print("🌾 DEBUG: Using Groq for crop selection query")
-                messages = [
-                    {"role": "system", "content": "You are an expert agricultural advisor specializing in crop selection for Indian farmers."},
-                    {"role": "user", "content": prompt}
-                ]
-                return await self._call_groq_api(messages)
-            elif self.openai_client:
+            if self.openai_client:
                 print("🌾 DEBUG: Using OpenAI for crop selection query")
-                response = self.openai_client.chat.completions.create(
+                response = await self.openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are an expert agricultural advisor."},
+                        {"role": "system", "content": "You are an expert agricultural advisor specializing in crop selection for Indian farmers."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=500,
                     temperature=0.7
                 )
                 return response.choices[0].message.content.strip()
+            elif self.groq_api_key:
+                print("🌾 DEBUG: Using Groq as fallback for crop selection query")
+                messages = [
+                    {"role": "system", "content": "You are an expert agricultural advisor specializing in crop selection for Indian farmers."},
+                    {"role": "user", "content": prompt}
+                ]
+                return await self._call_groq_api(messages)
             else:
                 print("⚠️ DEBUG: No AI API available for crop selection")
                 return "I can help you choose the right crop varieties. Please provide your location and soil type for better recommendations."
@@ -1395,7 +1395,7 @@ Response (JSON only):
             return "I can help you choose the right crop varieties. Please provide your location and soil type for better recommendations."
 
     async def _handle_weather_query(self, query: str, context_data: Dict, user_context: Dict) -> str:
-        """Handle weather-related queries with intelligent crop advice integration"""
+        """Handle weather-related queries with intelligent AI-enhanced responses"""
         weather_info = context_data.get("weather", {})
         
         print(f"🌤️ DEBUG: Weather handler received data: {weather_info.keys() if weather_info else 'No data'}")
@@ -1416,52 +1416,145 @@ Response (JSON only):
         forecast = weather_info.get("forecast", [])
         location_name = weather_info.get("location", {}).get("name", "Unknown Location")
         
-        print(f"🌤️ DEBUG: Formatting weather response for: {location_name}")
+        print(f"🌤️ DEBUG: Formatting AI-enhanced weather response for: {location_name}")
         print(f"🌤️ DEBUG: Current temp: {current.get('temperature', 'N/A')}°C")
         
-        # Check if query mentions crops, survival, agriculture, or farming - use AI for advice
-        agricultural_keywords = [
-            'crop', 'crops', 'survive', 'survival', 'plant', 'plants', 'farming', 'farm',
-            'cultivation', 'harvest', 'irrigation', 'seed', 'seeds', 'protect', 'protection',
-            'stress', 'damage', 'yield', 'growth', 'soil', 'fertilizer', 'pesticide',
-            'rice', 'wheat', 'cotton', 'tomato', 'onion', 'potato', 'maize', 'corn',
-            'sugarcane', 'groundnut', 'chilli', 'turmeric', 'banana', 'mango'
-        ]
+        # Use AI to generate an intelligent weather response
+        return await self._generate_ai_weather_response(query, weather_info, location_name)
+
+    async def _generate_ai_weather_response(self, query: str, weather_info: Dict, location_name: str) -> str:
+        """Generate intelligent, conversational weather responses using AI"""
+        try:
+            current = weather_info.get("current", {})
+            forecast = weather_info.get("forecast", [])
+            
+            # Determine how many days the user asked for
+            query_lower = query.lower()
+            requested_days = 5  # default
+            if "7 day" in query_lower or "7-day" in query_lower or "seven day" in query_lower:
+                requested_days = 7
+            elif "10 day" in query_lower or "10-day" in query_lower:
+                requested_days = 10
+            elif "3 day" in query_lower or "3-day" in query_lower:
+                requested_days = 3
+            elif "week" in query_lower:
+                requested_days = 7
+            
+            # Prepare weather data for AI
+            current_weather_summary = f"""
+Current weather in {location_name}:
+- Temperature: {current.get('temperature', 'N/A')}°C (feels like {current.get('feels_like', 'N/A')}°C)
+- Humidity: {current.get('humidity', 'N/A')}%
+- Weather: {current.get('description', 'N/A')}
+- Wind: {current.get('wind_speed', 'N/A')} m/s
+- Pressure: {current.get('pressure', 'N/A')} hPa
+"""
+
+            forecast_summary = "5-Day Forecast Available:\n"
+            if forecast:
+                for i, day in enumerate(forecast[:5]):
+                    date = datetime.fromtimestamp(day['dt']).strftime('%B %d, %Y')
+                    temp = day['main']['temp']
+                    desc = day['weather'][0]['description']
+                    humidity = day['main']['humidity']
+                    forecast_summary += f"Day {i+1} ({date}): {temp}°C, {desc}, {humidity}% humidity\n"
+            else:
+                forecast_summary = "Forecast data not available."
+
+            # Check for agricultural context
+            agricultural_keywords = [
+                'crop', 'crops', 'survive', 'survival', 'plant', 'plants', 'farming', 'farm',
+                'cultivation', 'harvest', 'irrigation', 'seed', 'seeds', 'protect', 'protection',
+                'stress', 'damage', 'yield', 'growth', 'soil', 'fertilizer', 'pesticide',
+                'rice', 'wheat', 'cotton', 'tomato', 'onion', 'potato', 'maize', 'corn',
+                'sugarcane', 'groundnut', 'chilli', 'turmeric', 'banana', 'mango'
+            ]
+            
+            has_agricultural_context = any(keyword in query_lower for keyword in agricultural_keywords)
+
+            # Create AI prompt for intelligent weather response
+            prompt = f"""
+You are a friendly and intelligent weather assistant. A user asked: "{query}"
+
+{current_weather_summary}
+
+{forecast_summary}
+
+USER REQUESTED: {requested_days} days of forecast
+AVAILABLE: 5 days of forecast data
+
+Please provide a helpful, conversational response that:
+
+1. **Acknowledges the user's specific request**: If they asked for {requested_days} days but we only have 5 days, mention this politely
+2. **Presents weather data clearly**: Use the current conditions and forecast in an easy-to-understand format
+3. **Provides useful insights**: Explain what the weather pattern means (e.g., "expect cooler temperatures", "rain coming", etc.)
+4. **Adds helpful tips**: Based on the weather, give practical advice for daily activities
+{'5. **Include agricultural advice**: Since the user mentioned farming/crops, provide relevant agricultural insights' if has_agricultural_context else '5. **Keep it general**: Focus on general weather impacts and daily planning'}
+
+Use a friendly, conversational tone. Include relevant emojis for weather conditions. Be specific about dates and temperatures.
+Make the response helpful and informative, not just a data dump.
+
+IMPORTANT: If user asked for more than 5 days, politely explain we only have 5-day forecast and suggest general trends based on the pattern.
+"""
+
+            # Try to use AI (Groq first, then OpenAI)
+            if self.groq_api_key:
+                print("🌤️ DEBUG: Using Groq for AI weather response")
+                messages = [
+                    {"role": "system", "content": "You are a helpful weather assistant. Provide clear, conversational weather information with practical insights and tips. Use emojis appropriately and make responses easy to understand."},
+                    {"role": "user", "content": prompt}
+                ]
+                response = await self._call_groq_api(messages)
+                return self._format_response_for_chat(response)
+            elif self.openai_client:
+                print("🌤️ DEBUG: Using OpenAI for AI weather response")
+                response = await self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are a helpful weather assistant. Provide clear, conversational weather information with practical insights and tips. Use emojis appropriately and make responses easy to understand."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=800,
+                    temperature=0.7
+                )
+                response_text = response.choices[0].message.content.strip()
+                return self._format_response_for_chat(response_text)
+            else:
+                # Fallback to enhanced basic format
+                return self._generate_enhanced_basic_weather_response(query, weather_info, location_name, requested_days)
+                
+        except Exception as e:
+            logger.error(f"AI weather response generation error: {e}")
+            return self._generate_enhanced_basic_weather_response(query, weather_info, location_name, requested_days)
+
+    def _generate_enhanced_basic_weather_response(self, query: str, weather_info: Dict, location_name: str, requested_days: int) -> str:
+        """Generate enhanced basic weather response when AI is not available"""
+        current = weather_info.get("current", {})
+        forecast = weather_info.get("forecast", [])
         
-        query_lower = query.lower()
-        has_agricultural_context = any(keyword in query_lower for keyword in agricultural_keywords)
+        response = f"🌍 **Weather Update for {location_name}**\n\n"
         
-        print(f"🌾 DEBUG: Agricultural context detected: {has_agricultural_context}")
+        # Handle forecast availability vs request
+        if requested_days > 5:
+            response += f"📅 You asked for {requested_days}-day forecast, but I can provide 5-day forecast data.\n\n"
         
-        # Start with weather information
-        response = f"🌍 **Weather for {location_name}**\n\n"
-        response += f"**Current Conditions:**\n"
-        response += f"🌡️ Temperature: {current.get('temperature', 'N/A')}°C\n"
+        response += f"**🌤️ Current Conditions:**\n"
+        response += f"🌡️ {current.get('temperature', 'N/A')}°C (feels like {current.get('feels_like', 'N/A')}°C)\n"
         response += f"💧 Humidity: {current.get('humidity', 'N/A')}%\n"
-        response += f"🌤️ Conditions: {current.get('description', 'N/A')}\n"
-        response += f"💨 Wind Speed: {current.get('wind_speed', 'N/A')} m/s\n\n"
+        response += f"☁️ {current.get('description', 'N/A').title()}\n"
+        response += f"💨 Wind: {current.get('wind_speed', 'N/A')} m/s\n\n"
         
         if forecast:
-            response += "**5-Day Forecast:**\n"
-            for i, day in enumerate(forecast[:5]):
-                date = datetime.fromtimestamp(day['dt']).strftime('%Y-%m-%d')
+            response += f"**📅 5-Day Forecast:**\n"
+            for day in forecast[:5]:
+                date = datetime.fromtimestamp(day['dt']).strftime('%b %d')
                 temp = day['main']['temp']
                 desc = day['weather'][0]['description']
-                response += f"{date}: {temp}°C, {desc}\n"
-            response += "\n"
+                response += f"• {date}: {temp}°C, {desc.title()}\n"
+            
+            if requested_days > 5:
+                response += f"\n💡 For days 6-{requested_days}, weather patterns typically continue similar trends. Check back for updated forecasts!"
         
-        # If agricultural context detected, add AI-generated advice
-        if has_agricultural_context:
-            print(f"🤖 DEBUG: Generating agricultural advice for weather query")
-            # Get soil data for better agricultural advice
-            soil_info = self.get_soil_data_for_location(location_name)
-            ai_advice = await self._generate_agricultural_weather_advice(query, weather_info, soil_info, location_name)
-            if ai_advice:
-                response += "---\n\n"
-                response += "🌾 **Agricultural Advice:**\n\n"
-                response += ai_advice
-        
-        print(f"✅ DEBUG: Weather response formatted successfully")
         return response
 
     async def _generate_agricultural_weather_advice(self, query: str, weather_info: Dict, soil_info: Dict, location_name: str) -> str:
@@ -1532,16 +1625,8 @@ Keep the response concise but comprehensive, using simple language that farmers 
 Never ask for additional information - provide direct, actionable advice based on the available weather and soil data.
 """
 
-            # Try Groq first, then OpenAI as fallback
-            if self.groq_api_key:
-                print("🌾 DEBUG: Using Groq for agricultural weather advice with soil data")
-                messages = [
-                    {"role": "system", "content": "You are an expert agricultural advisor for Indian farmers. Provide well-structured advice with clear sections. Use simple text formatting with proper line spacing. Start each major section on a new line with clear headings. Add blank lines between sections for better readability. Focus on practical, actionable advice."},
-                    {"role": "user", "content": prompt}
-                ]
-                response = await self._call_groq_api(messages)
-                return self._format_response_for_chat(response)
-            elif self.openai_client:
+            # Try OpenAI first, then Groq as fallback
+            if self.openai_client:
                 print("🌾 DEBUG: Using OpenAI for agricultural weather advice with soil data")
                 response = await self.openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
@@ -1554,6 +1639,14 @@ Never ask for additional information - provide direct, actionable advice based o
                 )
                 response_text = response.choices[0].message.content.strip()
                 return self._format_response_for_chat(response_text)
+            elif self.groq_api_key:
+                print("🌾 DEBUG: Using Groq as fallback for agricultural weather advice with soil data")
+                messages = [
+                    {"role": "system", "content": "You are an expert agricultural advisor for Indian farmers. Provide well-structured advice with clear sections. Use simple text formatting with proper line spacing. Start each major section on a new line with clear headings. Add blank lines between sections for better readability. Focus on practical, actionable advice."},
+                    {"role": "user", "content": prompt}
+                ]
+                response = await self._call_groq_api(messages)
+                return self._format_response_for_chat(response)
             else:
                 print("⚠️ DEBUG: No AI API available for agricultural advice")
                 # Provide basic advice based on temperature and soil
@@ -1628,6 +1721,8 @@ Never ask for additional information - provide direct, actionable advice based o
     async def _generate_comprehensive_agricultural_advice(self, query: str, weather_info: Dict, soil_info: Dict, location_name: str) -> str:
         """Generate comprehensive agricultural advice considering weather, soil, location, and query context"""
         try:
+            print(f"🌾 DEBUG: Generating comprehensive advice for query: '{query}'")
+            
             current = weather_info.get("current", {})
             forecast = weather_info.get("forecast", [])
             
@@ -1636,6 +1731,7 @@ Never ask for additional information - provide direct, actionable advice based o
             crop_keywords = ['rice', 'wheat', 'cotton', 'tomato', 'onion', 'potato', 'maize', 'sugarcane', 'groundnut']
             detected_crops = [crop for crop in crop_keywords if crop in query_lower]
             
+            # Enhanced action keywords for better query understanding
             action_keywords = {
                 'survive': 'crop survival and stress management',
                 'protect': 'crop protection measures',
@@ -1645,10 +1741,40 @@ Never ask for additional information - provide direct, actionable advice based o
                 'fertilizer': 'fertilization strategies',
                 'pest': 'pest and disease management',
                 'seed': 'seed selection and sowing guidance',
-                'yield': 'yield optimization strategies'
+                'yield': 'yield optimization strategies',
+                'unpredictable': 'drought and flood resistant varieties',
+                'rainfall': 'water management and rainfall adaptation',
+                'nutrients': 'soil nutrition and fertilizer management',
+                'drought': 'drought resistant crop varieties',
+                'flood': 'flood tolerant crop varieties',
+                'resistant': 'disease and stress resistant varieties',
+                'variety': 'specific seed variety recommendations',
+                'best': 'optimal crop selection guidance'
             }
             
             detected_actions = [action for keyword, action in action_keywords.items() if keyword in query_lower]
+            
+            # Identify specific query characteristics
+            is_nutrient_specific = any(word in query_lower for word in ['n=', 'p=', 'k=', 'nutrients', 'nitrogen', 'phosphorus', 'potassium'])
+            is_weather_resistant = any(word in query_lower for word in ['unpredictable', 'drought', 'flood', 'resistant', 'tolerant'])
+            is_variety_specific = any(word in query_lower for word in ['variety', 'varieties', 'seed'])
+            is_timing_specific = any(word in query_lower for word in ['when', 'timing', 'season', 'kharif', 'rabi'])
+            
+            query_focus = []
+            if is_nutrient_specific:
+                query_focus.append("soil nutrient optimization")
+            if is_weather_resistant:
+                query_focus.append("climate resilient varieties")
+            if is_variety_specific:
+                query_focus.append("specific seed variety selection")
+            if is_timing_specific:
+                query_focus.append("optimal planting timing")
+                
+            print(f"🌾 DEBUG: Query focus areas: {query_focus if query_focus else 'General'}")
+            print(f"🌾 DEBUG: Detected actions: {detected_actions if detected_actions else 'None'}")
+            print(f"🌾 DEBUG: Is nutrient specific: {is_nutrient_specific}")
+            print(f"🌾 DEBUG: Is weather resistant: {is_weather_resistant}")
+            print(f"🌾 DEBUG: Is variety specific: {is_variety_specific}")
             
             # Build detailed weather context
             weather_analysis = f"""
@@ -1702,7 +1828,39 @@ Soil Analysis for {location_name}:
                             soil_analysis += f"- {crop.title()}: {sample.get('fertilizer', 'Standard fertilizer')}, "
                             soil_analysis += f"N-P-K: {sample.get('nitrogen', 0)}-{sample.get('phosphorous', 0)}-{sample.get('potassium', 0)}\n"
             
-            # Create comprehensive prompt
+            # Create comprehensive prompt with direct answer first approach
+            if is_nutrient_specific:
+                specific_instructions = """
+NUTRIENT-SPECIFIC ANALYSIS REQUIRED:
+- Extract specific nutrient values mentioned in the query (N, P, K levels)
+- Recommend crops that match these soil nutrient conditions
+- Provide fertilizer recommendations to optimize these nutrient levels
+- Suggest soil management practices for nutrient balance
+"""
+            elif is_weather_resistant:
+                specific_instructions = """
+WEATHER-RESISTANT VARIETY FOCUS:
+- Prioritize drought-tolerant and flood-resistant crop varieties
+- Recommend specific seed varieties that handle unpredictable rainfall
+- Focus on climate adaptation strategies and risk management
+- Include water conservation and drainage techniques
+"""
+            elif is_variety_specific:
+                specific_instructions = """
+SEED VARIETY SELECTION FOCUS:
+- Provide specific named varieties with their characteristics
+- Include local suppliers and availability information
+- Compare different varieties for the given conditions
+- Focus on variety-specific planting and care instructions
+"""
+            else:
+                specific_instructions = """
+GENERAL COMPREHENSIVE ADVICE:
+- Provide balanced recommendations covering all aspects
+- Include multiple crop options with their benefits
+- Cover all major farming practices and considerations
+"""
+
             prompt = f"""
 You are an expert agricultural consultant with deep knowledge of Indian farming practices, crop management, soil science, and climate adaptation strategies.
 
@@ -1715,69 +1873,68 @@ Farmer's Question: "{query}"
 Context Analysis:
 - Detected Crops: {', '.join(detected_crops) if detected_crops else 'General farming'}
 - Focus Areas: {', '.join(detected_actions) if detected_actions else 'General agricultural advice'}
+- Query Focus: {', '.join(query_focus) if query_focus else 'General guidance'}
 - Location: {location_name}
 
-Please provide comprehensive, actionable advice that includes:
+{specific_instructions}
 
-1. IMMEDIATE ACTIONS - What the farmer should do today/this week based on current weather and soil conditions
+CRITICAL INSTRUCTION: Answer the SPECIFIC question asked, NOT a generic farming guide. Focus ONLY on what the farmer actually asked about.
 
-2. CROP-SPECIFIC GUIDANCE - Tailored advice for the crops mentioned or recommend suitable crops for the soil type
+RESPONSE STRUCTURE REQUIRED:
 
-3. WEATHER RESPONSE STRATEGY - How to adapt to current and forecasted conditions
+## 🎯 DIRECT ANSWER
+[Provide a clear, direct answer to the EXACT question asked. If the question is "Should I irrigate my wheat crop this week?", answer YES or NO with a brief reason. If asking about variety selection, name specific varieties for their exact conditions. If asking about nutrients, focus on the specific soil nutrients mentioned. Keep this section concise and actionable.]
 
-4. SOIL MANAGEMENT - Specific advice for the {soil_info.get('soil_type', 'local')} soil type
+## 📋 DETAILED RECOMMENDATIONS
 
-5. FERTILIZER RECOMMENDATIONS - NPK requirements based on soil and crop type
+ONLY include recommendations that are DIRECTLY RELATED to the farmer's specific question:
 
-6. RISK MANAGEMENT - Preventive measures for potential weather and soil-related problems
+- If they asked about irrigation: Focus on water management, timing, and soil moisture
+- If they asked about nutrients (N=40, P=25, K=30): Focus on crop selection based on these specific levels and nutrient management
+- If they asked about varieties for unpredictable rainfall: Focus ONLY on drought/flood resistant varieties and weather adaptation
+- If they asked about pest control: Focus on pest management strategies
+- If they asked about timing: Focus on planting/harvesting schedules
 
-7. TIMING RECOMMENDATIONS - Best times for various agricultural activities
-
-8. RESOURCE OPTIMIZATION - Water, fertilizer, and labor management tips
-
-Consider:
-- Current season and typical crop cycles in the region
-- Soil-specific cultivation practices
-- Temperature stress thresholds for crops
-- Humidity effects on disease development
-- Soil moisture management
-- Nutrient availability in {soil_info.get('soil_type', 'local')} soil
+DO NOT provide generic farming advice covering all topics. ONLY address what was specifically asked.
 
 FORMATTING REQUIREMENTS:
-- Use ALL CAPS for main section headers (e.g., "IMMEDIATE ACTIONS")
-- Add double line breaks between each major section
-- Use numbered lists for actionable steps
-- Write in clear, easy-to-read paragraphs
-- Keep recommendations specific and practical
+- Start with the ## 🎯 DIRECT ANSWER section that directly answers the query
+- In detailed recommendations, focus ONLY on the specific topic asked about
+- Use bullet points for specific actions related to the question
+- Keep it relevant - if they asked about seeds, don't include extensive fertilizer advice unless directly related
+- If they asked about one specific thing, don't provide comprehensive farming guidance
 
-Provide practical, implementable solutions using simple language. Include specific timings, quantities, or methods where possible.
-Never ask the farmer for additional information - provide direct answers based on the available data.
+EXAMPLES:
+- Question about nutrients N=40,P=25,K=30 → Focus on crops that match these levels and nutrient adjustments
+- Question about varieties for unpredictable rainfall → Focus on drought/flood resistant varieties only
+- Question about irrigation timing → Focus on water management and soil moisture assessment
+
+The farmer asked a SPECIFIC question - answer THAT question, not everything about farming.
 """
 
-            # Try Groq first, then OpenAI
-            if self.groq_api_key:
-                print("🌾 DEBUG: Using Groq for comprehensive agricultural advice with soil data")
-                messages = [
-                    {"role": "system", "content": "You are an expert agricultural consultant for Indian farmers. Provide well-structured advice with clear sections. Use simple text formatting with proper line spacing. Start each major section on a new line with clear headings. Add blank lines between sections for better readability. Focus on practical, actionable advice."},
-                    {"role": "user", "content": prompt}
-                ]
-                response = await self._call_groq_api(messages)
-                # Ensure proper line breaks for chat interface
-                return self._format_response_for_chat(response)
-            elif self.openai_client:
+            # Try OpenAI first, then Groq as fallback
+            if self.openai_client:
                 print("🌾 DEBUG: Using OpenAI for comprehensive agricultural advice with soil data")
                 response = await self.openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are an expert agricultural consultant for Indian farmers. Provide well-structured advice with clear sections. Use simple text formatting with proper line spacing. Start each major section on a new line with clear headings. Add blank lines between sections for better readability. Focus on practical, actionable advice."},
+                        {"role": "system", "content": "You are an expert agricultural consultant for Indian farmers. CRITICAL: Answer ONLY the specific question asked. Start EVERY response with a DIRECT ANSWER section that immediately answers the farmer's exact question. Use this format: '## 🎯 DIRECT ANSWER\n[Clear specific answer to their exact question]\n\n## 📋 DETAILED RECOMMENDATIONS\n[Only advice related to their specific question]'. Do NOT provide comprehensive farming guides. If they ask about nutrients, focus on nutrients. If they ask about varieties, focus on varieties. If they ask about irrigation, focus on irrigation. Stay focused on their specific question."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=1000,
                     temperature=0.7
                 )
                 response_text = response.choices[0].message.content.strip()
-                # Ensure proper line breaks for chat interface
                 return self._format_response_for_chat(response_text)
+            elif self.groq_api_key:
+                print("🌾 DEBUG: Using Groq as fallback for comprehensive agricultural advice with soil data")
+                messages = [
+                    {"role": "system", "content": "You are an expert agricultural consultant for Indian farmers. CRITICAL: Answer ONLY the specific question asked. Start EVERY response with a DIRECT ANSWER section that immediately answers the farmer's exact question. Use this format: '## 🎯 DIRECT ANSWER\n[Clear specific answer to their exact question]\n\n## 📋 DETAILED RECOMMENDATIONS\n[Only advice related to their specific question]'. Do NOT provide comprehensive farming guides. If they ask about nutrients, focus on nutrients. If they ask about varieties, focus on varieties. If they ask about irrigation, focus on irrigation. Stay focused on their specific question."},
+                    {"role": "user", "content": prompt}
+                ]
+                response = await self._call_groq_api(messages)
+                # Ensure proper line breaks for chat interface
+                return self._format_response_for_chat(response)
             else:
                 return await self._generate_fallback_agricultural_advice_with_soil(query, current, detected_crops, soil_info)
                 
@@ -1828,7 +1985,29 @@ Never ask the farmer for additional information - provide direct answers based o
         conditions = current_weather.get("description", "").lower()
         soil_type = soil_info.get("soil_type", "Mixed")
         
-        advice = []
+        # Generate direct answer first based on query analysis
+        query_lower = query.lower()
+        direct_answer = ""
+        
+        # Analyze query for direct answer
+        if "should i irrigate" in query_lower or "irrigate" in query_lower:
+            if temp and temp > 30 or humidity and humidity < 50:
+                direct_answer = "## 🎯 DIRECT ANSWER\n**YES** - Irrigation is recommended based on current weather conditions (high temperature or low humidity).\n\n"
+            elif "rain" in conditions:
+                direct_answer = "## 🎯 DIRECT ANSWER\n**NO** - Avoid irrigation during rainy conditions to prevent waterlogging.\n\n"
+            else:
+                direct_answer = "## 🎯 DIRECT ANSWER\n**CHECK SOIL MOISTURE** - Test soil moisture at 4-6 inch depth. Irrigate if soil feels dry.\n\n"
+        elif "variety" in query_lower or "seed" in query_lower:
+            suitable_crops = soil_info.get("suitable_crops", ["wheat", "rice", "cotton"])
+            direct_answer = f"## 🎯 DIRECT ANSWER\n**Recommended varieties for {soil_type} soil:** {', '.join(suitable_crops[:3])}\n\n"
+        elif "fertilizer" in query_lower or "nutrient" in query_lower:
+            direct_answer = "## 🎯 DIRECT ANSWER\n**Apply balanced NPK fertilizer** - Specific ratios depend on crop type and soil test results.\n\n"
+        elif "when" in query_lower and ("plant" in query_lower or "sow" in query_lower):
+            direct_answer = "## 🎯 DIRECT ANSWER\n**Planting timing depends on crop type and season** - Current weather conditions appear suitable for most crops.\n\n"
+        else:
+            direct_answer = "## 🎯 DIRECT ANSWER\n**Recommendations provided below** - Based on current weather and soil conditions.\n\n"
+        
+        advice = [direct_answer + "## 📋 DETAILED RECOMMENDATIONS\n"]
         
         # Temperature-based advice
         if temp and isinstance(temp, (int, float)):
@@ -1866,7 +2045,29 @@ Never ask the farmer for additional information - provide direct answers based o
     async def _generate_general_agricultural_advice(self, query: str) -> str:
         """Generate general agricultural advice when weather data is not available"""
         try:
-            if self.groq_api_key:
+            if self.openai_client:
+                prompt = f"""
+You are an expert agricultural advisor for Indian farmers. The farmer has asked: "{query}"
+
+Provide practical, actionable advice focusing on:
+1. General best practices for the mentioned topic
+2. Seasonal considerations for Indian agriculture
+3. Cost-effective solutions for small farmers
+4. Preventive measures and timing recommendations
+
+Keep the response concise but helpful, using simple language.
+"""
+                response = await self.openai_client.chat.completions.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": "system", "content": "You are an expert agricultural advisor for Indian farmers."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    max_tokens=500,
+                    temperature=0.7
+                )
+                return response.choices[0].message.content.strip()
+            elif self.groq_api_key:
                 prompt = f"""
 You are an expert agricultural advisor for Indian farmers. The farmer has asked: "{query}"
 
@@ -1936,8 +2137,11 @@ Keep the response concise but helpful, using simple language.
             found_commodities = list(set(record.get("commodity", "") for record in data[:10]))
             primary_commodity = found_commodities[0] if found_commodities else "commodity"
             
-            # Determine location context
+            # Determine location context and get the best price for direct answer
             location_context = ""
+            best_price = None
+            best_location = ""
+            
             if data:
                 first_record = data[0]
                 state = first_record.get("state", "")
@@ -1950,19 +2154,136 @@ Keep the response concise but helpful, using simple language.
                     location_context = district
                 elif state:
                     location_context = state
+                
+                # Get best price for direct answer
+                modal_price = first_record.get("modal_price", "N/A")
+                if modal_price and modal_price != "N/A":
+                    try:
+                        best_price = float(modal_price)
+                        best_location = location_context
+                    except:
+                        best_price = None
+            
+            # Helper function to convert quintal to kg
+            def quintal_to_kg_price(quintal_price):
+                try:
+                    return float(quintal_price) / 100  # 1 quintal = 100 kg
+                except:
+                    return None
+            
+            # Extract user-provided price and transport cost from query
+            def extract_user_pricing(query_text):
+                """Extract user's local price and transport cost from query"""
+                import re
+                
+                # Pattern to match prices like ₹15/kg, ₹15 per kg, 15 rupees per kg
+                price_patterns = [
+                    r'₹(\d+(?:\.\d+)?)\s*(?:/|per)\s*kg',
+                    r'(\d+(?:\.\d+)?)\s*rupees?\s*(?:/|per)\s*kg',
+                    r'price.*?₹(\d+(?:\.\d+)?)',
+                    r'selling.*?₹(\d+(?:\.\d+)?)',
+                    r'local.*?₹(\d+(?:\.\d+)?)'
+                ]
+                
+                # Pattern to match transport cost
+                transport_patterns = [
+                    r'transport.*?₹(\d+(?:\.\d+)?)\s*(?:/|per)\s*kg',
+                    r'transport.*?cost.*?₹(\d+(?:\.\d+)?)',
+                    r'shipping.*?₹(\d+(?:\.\d+)?)',
+                    r'delivery.*?₹(\d+(?:\.\d+)?)'
+                ]
+                
+                user_price = None
+                transport_cost = None
+                
+                # Extract user price
+                for pattern in price_patterns:
+                    match = re.search(pattern, query_text, re.IGNORECASE)
+                    if match:
+                        try:
+                            user_price = float(match.group(1))
+                            break
+                        except:
+                            continue
+                
+                # Extract transport cost
+                for pattern in transport_patterns:
+                    match = re.search(pattern, query_text, re.IGNORECASE)
+                    if match:
+                        try:
+                            transport_cost = float(match.group(1))
+                            break
+                        except:
+                            continue
+                
+                return user_price, transport_cost
+            
+            # Extract user-provided pricing information
+            user_price, transport_cost = extract_user_pricing(query)
+            
+            # Create direct answer section with personalized recommendation
+            direct_answer = "## 🎯 DIRECT ANSWER\n"
+            
+            if user_price and transport_cost and best_price:
+                # Calculate net price after transport
+                net_user_price = user_price - transport_cost
+                kg_price = quintal_to_kg_price(best_price)
+                
+                if kg_price:
+                    # Calculate potential profit from selling in mandi
+                    mandi_net = kg_price - transport_cost
+                    profit_diff = mandi_net - net_user_price
+                    
+                    if profit_diff > 2:  # Significant profit margin
+                        direct_answer += f"**Recommendation: SELL IN MANDI** 🎯\n\n"
+                        direct_answer += f"• Your local net price: ₹{user_price}/kg - ₹{transport_cost}/kg transport = **₹{net_user_price:.2f}/kg**\n"
+                        direct_answer += f"• Mandi price: ₹{kg_price:.2f}/kg - ₹{transport_cost}/kg transport = **₹{mandi_net:.2f}/kg**\n"
+                        direct_answer += f"• **Extra profit: ₹{profit_diff:.2f}/kg** by selling in mandi\n\n"
+                    elif profit_diff > 0:
+                        direct_answer += f"**Recommendation: MANDI SLIGHTLY BETTER** ⚖️\n\n"
+                        direct_answer += f"• Your local net: ₹{net_user_price:.2f}/kg vs Mandi net: ₹{mandi_net:.2f}/kg\n"
+                        direct_answer += f"• Small advantage: ₹{profit_diff:.2f}/kg extra in mandi\n"
+                        direct_answer += f"• Consider local sales for convenience\n\n"
+                    else:
+                        direct_answer += f"**Recommendation: SELL LOCALLY** 🏠\n\n"
+                        direct_answer += f"• Your local net: ₹{net_user_price:.2f}/kg vs Mandi net: ₹{mandi_net:.2f}/kg\n"
+                        direct_answer += f"• Local sale saves transport cost and effort\n\n"
+                else:
+                    direct_answer += f"**Your pricing analysis**: ₹{user_price}/kg - ₹{transport_cost}/kg transport = ₹{net_user_price:.2f}/kg net\n\n"
+            elif user_price and best_price:
+                # User provided price but no transport cost
+                kg_price = quintal_to_kg_price(best_price)
+                if kg_price:
+                    if kg_price > user_price * 1.2:  # 20% higher
+                        direct_answer += f"**Mandi prices significantly higher**: ₹{kg_price:.2f}/kg vs your ₹{user_price}/kg\n"
+                        direct_answer += f"Consider transport costs, but mandi sale could be profitable\n\n"
+                    else:
+                        direct_answer += f"**Price comparison**: Mandi ₹{kg_price:.2f}/kg vs your ₹{user_price}/kg\n\n"
+            elif best_price and best_location:
+                # Standard response when no user pricing provided
+                kg_price = quintal_to_kg_price(best_price)
+                if kg_price:
+                    direct_answer += f"**{primary_commodity.title()} price in {best_location}**: ₹{best_price}/quintal (₹{kg_price:.2f}/kg)\n\n"
+                else:
+                    direct_answer += f"**{primary_commodity.title()} price in {best_location}**: ₹{best_price}/quintal\n\n"
+            else:
+                direct_answer += f"**{primary_commodity.title()} prices** are available from multiple markets below.\n\n"
             
             # Format response based on data source
+            response = direct_answer
+            response += "## 📋 DETAILED MARKET INFORMATION\n\n"
+            
             if source == "api":
-                response = f"🌐 **Live Market Prices** ({primary_commodity.title()})\n"
+                response += f"🌐 **Live Market Prices** ({primary_commodity.title()})\n"
                 response += f"📡 Source: Government API (Real-time data)\n\n"
             elif source == "csv":
-                response = f"📊 **Market Prices** ({primary_commodity.title()})\n"
+                response += f"📊 **Market Prices** ({primary_commodity.title()})\n"
                 response += f"📋 Source: Local Market Database\n"
                 if location_context:
                     response += f"📍 Area: {location_context}\n"
                 response += "\n"
             else:
-                response = f"💰 **Market Prices** ({primary_commodity.title()})\n\n"
+                response += f"💰 **Market Prices** ({primary_commodity.title()})\n\n"
             
             # Show top 5-8 relevant price records
             count = 0
@@ -1991,12 +2312,30 @@ Keep the response concise but helpful, using simple language.
                 else:
                     location_str = market
                 
-                # Format price
+                # Format price with per kg conversion
                 if modal_price and modal_price != "N/A":
-                    if min_price != "N/A" and max_price != "N/A" and min_price != max_price:
-                        price_str = f"₹{modal_price} (₹{min_price}-₹{max_price})"
-                    else:
-                        price_str = f"₹{modal_price}"
+                    try:
+                        quintal_price_float = float(modal_price)
+                        kg_price = quintal_price_float / 100  # 1 quintal = 100 kg
+                        
+                        if min_price != "N/A" and max_price != "N/A" and min_price != max_price:
+                            try:
+                                min_kg = float(min_price) / 100
+                                max_kg = float(max_price) / 100
+                                price_str = f"₹{modal_price} (₹{min_price}-₹{max_price}) per quintal"
+                                price_str += f"\n   💰 ₹{kg_price:.2f} (₹{min_kg:.2f}-₹{max_kg:.2f}) per kg"
+                            except:
+                                price_str = f"₹{modal_price} (₹{min_price}-₹{max_price}) per quintal"
+                                price_str += f"\n   💰 ₹{kg_price:.2f} per kg"
+                        else:
+                            price_str = f"₹{modal_price} per quintal"
+                            price_str += f"\n   💰 ₹{kg_price:.2f} per kg"
+                    except:
+                        # Fallback if conversion fails
+                        if min_price != "N/A" and max_price != "N/A" and min_price != max_price:
+                            price_str = f"₹{modal_price} (₹{min_price}-₹{max_price}) per quintal"
+                        else:
+                            price_str = f"₹{modal_price} per quintal"
                 else:
                     price_str = "Price not available"
                 
@@ -2004,7 +2343,7 @@ Keep the response concise but helpful, using simple language.
                 date_str = f" • {arrival_date}" if arrival_date else ""
                 
                 response += f"📍 **{location_str}**\n"
-                response += f"   💰 {price_str} per quintal{date_str}\n\n"
+                response += f"   {price_str}{date_str}\n\n"
                 
                 count += 1
             
@@ -2024,7 +2363,7 @@ Keep the response concise but helpful, using simple language.
             if location and location.lower() in ["vijayawada", "guntur", "tirupati"]:
                 response += f"🎯 Showing prices relevant to {location.title()}"
             
-            return response
+            return self._format_response_for_chat(response)
             
         except Exception as e:
             logger.error(f"Error in market query handling: {e}")
@@ -2055,26 +2394,26 @@ Keep the response concise but helpful, using simple language.
             Make the information actionable and location-specific.
             """
             
-            # Use Groq API for the response
-            if self.groq_api_key:
-                print("💰 DEBUG: Using Groq for finance query")
-                messages = [
-                    {"role": "system", "content": "You are an expert in agricultural finance and government schemes for Indian farmers."},
-                    {"role": "user", "content": prompt}
-                ]
-                return await self._call_groq_api(messages)
-            elif self.openai_client:
+            # Use OpenAI first, then Groq as fallback
+            if self.openai_client:
                 print("💰 DEBUG: Using OpenAI for finance query")
-                response = self.openai_client.chat.completions.create(
+                response = await self.openai_client.chat.completions.create(
                     model="gpt-3.5-turbo",
                     messages=[
-                        {"role": "system", "content": "You are an expert in agricultural finance."},
+                        {"role": "system", "content": "You are an expert in agricultural finance and government schemes for Indian farmers."},
                         {"role": "user", "content": prompt}
                     ],
                     max_tokens=500,
                     temperature=0.7
                 )
                 return response.choices[0].message.content.strip()
+            elif self.groq_api_key:
+                print("💰 DEBUG: Using Groq as fallback for finance query")
+                messages = [
+                    {"role": "system", "content": "You are an expert in agricultural finance and government schemes for Indian farmers."},
+                    {"role": "user", "content": prompt}
+                ]
+                return await self._call_groq_api(messages)
             else:
                 print("⚠️ DEBUG: No AI API available for finance")
                 return "I can help with information about agricultural loans and government schemes. Please specify your location for more relevant information."
@@ -2242,88 +2581,41 @@ Keep the response concise but helpful, using simple language.
     async def _handle_crop_advice_query(self, query: str, context_data: Dict, user_context: Dict, location: str) -> str:
         """Enhanced handler for crop advice queries with real weather data"""
         try:
-            if not self.openai_client:
-                # Fallback to basic crop advice
-                return await self._basic_crop_advice(query, location)
+            print(f"🌾 DEBUG: _handle_crop_advice_query called with query: '{query}'")
             
-            # Get current season and detailed weather context
-            season = self._get_current_season()
+            # Extract weather and soil data
             weather_data = context_data.get("weather", {})
-            ai_classification = context_data.get("ai_classification", {})
+            soil_data = context_data.get("soil", {})
             
-            # Extract detailed weather information
-            current_weather = weather_data.get('current', {})
-            forecast = weather_data.get('forecast', [])
+            if not weather_data:
+                print("⚠️ DEBUG: No weather data available, fetching...")
+                weather_data = await self.get_weather_data(location)
+                
+            if not soil_data:
+                print("⚠️ DEBUG: No soil data available, fetching...")
+                soil_data = self.get_soil_data_for_location(location)
             
-            # Build detailed weather context string
-            weather_context = f"""
-CURRENT WEATHER CONDITIONS:
-- Temperature: {current_weather.get('temperature', 'N/A')}°C (feels like {current_weather.get('feels_like', 'N/A')}°C)
-- Humidity: {current_weather.get('humidity', 'N/A')}%
-- Weather: {current_weather.get('description', 'N/A')}
-- Wind Speed: {current_weather.get('wind_speed', 'N/A')} km/h
-- Pressure: {current_weather.get('pressure', 'N/A')} hPa
-- Visibility: {current_weather.get('visibility', 'N/A')} km
-- UV Index: {current_weather.get('uv_index', 'N/A')}"""
-
-            # Add 5-day forecast summary
-            if forecast:
-                weather_context += "\n\n5-DAY FORECAST:"
-                for i, day in enumerate(forecast[:5]):
-                    weather_context += f"\nDay {i+1}: {day.get('temperature', 'N/A')}°C, {day.get('description', 'N/A')}, Humidity: {day.get('humidity', 'N/A')}%"
-            
-            # Build comprehensive context
-            prompt = f"""You are an expert agricultural advisor for Indian farmers. You have REAL-TIME weather data for the farmer's location. Use this data to provide specific crop recommendations.
-
-LOCATION: {location or 'India'}
-SEASON: {season}
-DATE: {datetime.now().strftime('%B %d, %Y')}
-
-{weather_context}
-
-FARMER'S QUESTION: "{query}"
-
-IMPORTANT: You have the ACTUAL current weather conditions and forecast above. Do NOT ask them to consider climate - you already know their climate conditions. Give direct advice based on this real data.
-
-Based on the actual weather conditions shown above, provide:
-
-1. **Immediate Crop Recommendations**: 
-   - Specific varieties perfect for current temperature ({current_weather.get('temperature', 'N/A')}°C) and humidity ({current_weather.get('humidity', 'N/A')}%)
-   - Varieties that can handle the current weather pattern: {current_weather.get('description', 'N/A')}
-
-2. **Weather-Based Timing**: 
-   - Best planting dates considering the 5-day forecast
-   - If current conditions are suitable for immediate planting or if they should wait
-
-3. **Risk Assessment**: 
-   - How the current weather conditions affect crop success
-   - Any weather-related risks in the forecast
-
-4. **Specific Action Plan**: 
-   - Exact steps to take this week based on weather
-   - Seed varieties with tolerance for current humidity/temperature levels
-
-5. **Regional Varieties**: 
-   - Seeds available in {location} that match current conditions
-   - Local suppliers and markets
-
-Give SPECIFIC variety names and direct advice. Since you know the exact weather, don't give generic advice about "considering climate" - you already have that data."""
-
-            response = await self.openai_client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.1,
-                max_tokens=700
+            # Use the enhanced comprehensive agricultural advice system
+            print("🌾 DEBUG: Calling comprehensive agricultural advice with enhanced query analysis")
+            return await self._generate_comprehensive_agricultural_advice(
+                query=query,
+                weather_info=weather_data,
+                soil_info=soil_data,
+                location_name=location
             )
             
-            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error(f"Enhanced crop advice query error: {e}")
+            # Fallback to basic crop advice
+            return await self._basic_crop_advice(query, location)
             
         except Exception as e:
-            print(f"❌ DEBUG: Crop advice query error: {e}")
+            logger.error(f"Enhanced crop advice query error: {e}")
+            # Fallback to basic crop advice
             return await self._basic_crop_advice(query, location)
 
     async def _handle_financial_query(self, query: str, context_data: Dict, user_context: Dict, location: str) -> str:
-        """Enhanced handler for financial and affordability queries"""
+        """Enhanced handler for financial and affordability queries with direct answer format"""
         try:
             if not self.openai_client:
                 return await self._basic_financial_advice(query)
@@ -2341,30 +2633,44 @@ CONTEXT:
 
 FARMER'S QUESTION: "{query}"
 
-Please provide:
-1. **Cost Analysis**: Break down typical costs for farming improvements
-2. **Funding Options**: Government schemes, bank loans, subsidies available
-3. **ROI Assessment**: Expected returns and payback periods
-4. **Risk Mitigation**: How to minimize financial risks
-5. **Step-by-step Plan**: Practical steps to afford improvements
+IMPORTANT: Format your response with this structure:
+
+## 🎯 DIRECT ANSWER
+[Provide immediate, specific answer to the farmer's question - main schemes/funding available, key eligibility criteria, and primary action steps]
+
+## 📋 DETAILED FINANCIAL GUIDANCE
+
+**💰 Cost Analysis**
+[Break down typical costs for farming improvements]
+
+**🏛️ Government Schemes & Funding**
+[PM-KISAN, KCC, PMFBY schemes, state-specific schemes for AP/Telangana, subsidies available]
+
+**📈 ROI Assessment**
+[Expected returns, payback periods, profitability analysis]
+
+**🛡️ Risk Mitigation**
+[How to minimize financial risks, insurance options]
+
+**📝 Step-by-Step Action Plan**
+[Practical steps to apply for funding, documentation needed, timeline]
 
 Focus on:
-- PM-KISAN, KCC, PMFBY schemes
-- State-specific schemes for AP/Telangana if applicable
+- Specific eligibility criteria and application processes
 - Microfinance and SHG options
-- Crop insurance and risk management
 - Budget-friendly alternatives
+- Crop insurance and risk management
 
-Be specific about application processes and eligibility criteria."""
+Be practical and actionable for Indian farmers."""
 
             response = await self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
                 temperature=0.1,
-                max_tokens=600
+                max_tokens=800
             )
             
-            return response.choices[0].message.content.strip()
+            return self._format_response_for_chat(response.choices[0].message.content.strip())
             
         except Exception as e:
             print(f"❌ DEBUG: Financial query error: {e}")
@@ -2390,20 +2696,31 @@ CONTEXT:
 
 FARMER'S QUESTION: "{query}"
 
-Please provide:
-1. **Disease/Pest Identification**: Most likely issues based on symptoms
-2. **Immediate Treatment**: Emergency steps to prevent spread
-3. **Organic Solutions**: Eco-friendly treatment options
-4. **Chemical Treatment**: If necessary, specific products and dosages
-5. **Prevention**: How to prevent future occurrences
+CRITICAL INSTRUCTION: Start with a DIRECT ANSWER section that immediately addresses the farmer's specific question, then provide detailed recommendations.
+
+RESPONSE STRUCTURE REQUIRED:
+
+## 🎯 DIRECT ANSWER
+[Provide a clear, direct answer to the exact question asked. If they ask about pest outbreaks, state whether there are expected outbreaks and name the specific pests/diseases. If they ask about treatment for specific symptoms, provide the most likely diagnosis and immediate action needed. Keep this section concise and actionable.]
+
+## 📋 DETAILED RECOMMENDATIONS
+
+Focus on these sections based on the farmer's specific question:
+
+1. **DISEASE/PEST IDENTIFICATION**: Most likely issues based on current weather and regional patterns
+2. **IMMEDIATE TREATMENT**: Emergency steps to prevent spread or treat current issues
+3. **ORGANIC SOLUTIONS**: Eco-friendly treatment options with specific concentrations
+4. **CHEMICAL TREATMENT**: If necessary, specific products and dosages
+5. **PREVENTION STRATEGIES**: How to prevent future occurrences
 
 Consider:
-- Weather conditions affecting disease spread
-- Regional common pests and diseases
+- Current weather conditions affecting disease/pest activity
+- Regional common pests and diseases for {location or 'the area'}
 - Integrated Pest Management (IPM) approaches
 - Cost-effective solutions for small farmers
+- Urgent vs. preventive actions based on the query
 
-Be specific about product names, concentrations, and application methods."""
+Be specific about product names, concentrations, and application methods. Answer the farmer's exact question first, then provide supporting details."""
 
             response = await self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -2412,14 +2729,15 @@ Be specific about product names, concentrations, and application methods."""
                 max_tokens=600
             )
             
-            return response.choices[0].message.content.strip()
+            response_text = response.choices[0].message.content.strip()
+            return self._format_response_for_chat(response_text)
             
         except Exception as e:
             print(f"❌ DEBUG: Disease query error: {e}")
             return await self._basic_disease_advice(query)
 
     async def _handle_general_query_with_context(self, query: str, context_data: Dict, user_context: Dict, location: str) -> str:
-        """Enhanced general query handler with real weather data"""
+        """Enhanced general query handler with real weather data and direct answer format"""
         try:
             if not self.openai_client:
                 return await self._handle_general_query(query, context_data, user_context)
@@ -2456,7 +2774,13 @@ DATE: {datetime.now().strftime('%B %d, %Y')}
 
 FARMER'S QUESTION: "{query}"
 
-IMPORTANT: You have the ACTUAL current weather conditions above. Use this real data in your response. Do NOT give generic advice about "considering weather conditions" - you already know their exact weather.
+IMPORTANT: Format your response with this structure:
+
+## 🎯 DIRECT ANSWER
+[Provide immediate, specific answer to the farmer's question using the real weather data available]
+
+## 📋 DETAILED RECOMMENDATIONS
+[Provide comprehensive advice tailored to current conditions]
 
 Guidelines:
 - Reference the specific weather conditions (temperature: {current_weather.get('temperature', 'N/A')}°C, humidity: {current_weather.get('humidity', 'N/A')}%, conditions: {current_weather.get('description', 'N/A')})
@@ -2476,7 +2800,7 @@ Since you know the exact weather, give specific, weather-aware recommendations."
                 max_tokens=700
             )
             
-            return response.choices[0].message.content.strip()
+            return self._format_response_for_chat(response.choices[0].message.content.strip())
             
         except Exception as e:
             print(f"❌ DEBUG: Enhanced general query error: {e}")
