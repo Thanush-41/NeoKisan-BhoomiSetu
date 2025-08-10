@@ -15,7 +15,17 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system                    // Look for the bot response in the parsed HTML
+                    const botResponseElement = doc.querySelector('.bot-message .message-bubble');
+                    if (botResponseElement) {
+                        const botResponse = botResponseElement.innerHTML || botResponseElement.textContent || botResponseElement.innerText;
+                        
+                        // Remove typing indicator
+                        const indicator = document.getElementById('typing-indicator');
+                        if (indicator) indicator.remove();
+                        
+                        // Add bot response with HTML formatting
+                        addMessage(botResponse, 'bot');ystemFont, sans-serif;
             background: linear-gradient(135deg, #0f3d2c 0%, #1a5f47 25%, #2d8f5e 50%, #40b574 75%, #52d689 100%);
             min-height: 100vh;
             overflow: hidden;
@@ -765,7 +775,12 @@ I'm your intelligent agricultural advisor, ready to help with:
             // Create message bubble
             const bubble = document.createElement('div');
             bubble.className = 'message-bubble';
-            bubble.textContent = message;
+            // Use innerHTML for bot messages to render HTML formatting, textContent for user messages
+            if (sender === 'bot') {
+                bubble.innerHTML = message;
+            } else {
+                bubble.textContent = message;
+            }
             
             // Append elements in correct order
             if (sender === 'user') {

@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Detection - BhoomiSetu AI Advisor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --accent-yellow: #fefcf5;
+            --light-bg: #fefcf5;
+            --dark-text: #212121;
+            --muted-text: #555;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            margin-top: 60px;
+        }
+
+        /* Navbar Glass Style */
+        .navbar-glass {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Container inside navbar */
+        .navbar-glass .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Brand styling */
+        .navbar-glass .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #2a7a1f;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Brand icon color */
+        .navbar-glass .navbar-brand i.fas.fa-seedling {
+            color: #4caf50;
+        }
+
+        /* Navigation links container */
+        .navbar-glass .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        /* Individual nav links */
+        .navbar-glass .nav-link {
+            color: #2a7a1f;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Active nav link style */
+        .navbar-glass .nav-link.active,
+        .navbar-glass .nav-link:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        /* Nav icons color */
+        .navbar-glass .nav-link i.fas {
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        /* Auth buttons styling */
+        .navbar-glass .btn-outline-light {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            background: transparent;
+        }
+
+        .navbar-glass .btn-outline-light:hover {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light:hover {
+            background-color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            color: white !important;
+        }
+
+        /* User menu styling */
+        #userMenu .btn {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+        }
+
+        #userMenu .btn:hover {
+            background-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        #userMenu .dropdown-menu {
+            background: white;
+            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        #userMenu .dropdown-item {
+            color: var(--dark-text) !important;
+        }
+
+        #userMenu .dropdown-item:hover {
+            background-color: var(--light-bg);
+            color: #4caf50 !important;
+        }
+
+        #userName {
+            color: #2a7a1f !important;
+        }
+
+        #userEmail {
+            color: var(--muted-text) !important;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-glass .container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .navbar-glass .navbar-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.7rem;
+                margin-left: auto;
+            }
+        }
+
+        /* Main Content Styles */
+        .main-container {
+            padding: 2rem 0;
+            min-height: calc(100vh - 60px);
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            color: var(--primary-green);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--muted-text);
+            font-size: 1.1rem;
+        }
+
+        /* File Upload Styling */
+        .file-upload-area {
+            background: rgba(46, 139, 87, 0.05);
+            border: 2px dashed var(--primary-green);
+            border-radius: 20px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .file-upload-area:hover, .file-upload-area.dragover {
+            background: rgba(46, 139, 87, 0.1);
+            border-color: #4caf50;
+            transform: translateY(-2px);
+        }
+
+        .file-upload-area i {
+            color: var(--primary-green);
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area h5 {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-upload-area p {
+            color: var(--muted-text);
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Form Controls */
+        .form-select, .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-select:focus, .form-control:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 0.2rem rgba(46, 139, 87, 0.25);
+        }
+
+        /* Button Styling */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-green), #4caf50);
+            border: none;
+            border-radius: 12px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(46, 139, 87, 0.3);
+        }
+
+        /* Results Styling */
+        .results-section {
+            display: none;
+        }
+
+        .result-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-card h5 {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .confidence-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 10px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            background: linear-gradient(90deg, var(--primary-green), #4caf50);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Treatment Recommendations */
+        .treatment-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .treatment-category h6 {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .treatment-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .treatment-list li {
+            background: rgba(46, 139, 87, 0.05);
+            padding: 0.75rem 1rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        /* Loading and Alert Styles */
+        .loading-overlay {
+            background: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 24px;
+            z-index: 100;
+        }
+
+        .alert {
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
+        }
+
+        .alert-success {
+            background: rgba(46, 139, 87, 0.1);
+            color: var(--primary-green);
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.1);
+            color: #dc3545;
+            border-left: 4px solid #dc3545;
+        }
+
+        .alert-info {
+            background: rgba(13, 110, 253, 0.1);
+            color: #0d6efd;
+            border-left: 4px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Enhanced Navigation with Authentication -->
+    <nav class="navbar-glass fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling"></i> BhoomiSetu AI
+            </a>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
+                <a class="nav-link" href="/weather"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link active" href="/disease-detection"><i class="fas fa-microscope"></i> Disease Detection</a>
+                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
+                
+                <!-- Authentication Buttons -->
+                <div id="authButtons" class="d-flex gap-2">
+                    <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="showRegisterModal()">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </div>
+                
+                <!-- User Menu (hidden by default) -->
+                <div id="userMenu" class="dropdown" style="display: none;">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> <span id="userName">User</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
+                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container main-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1><i class="fas fa-microscope me-3"></i>Plant Disease Detection</h1>
+            <p>Upload plant leaf images for AI-powered disease identification and treatment recommendations</p>
+        </div>
+
+        <div class="row">
+            <!-- Upload Section -->
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <h3 class="mb-4"><i class="fas fa-upload me-2"></i>Upload Plant Image</h3>
+                    
+                    <!-- File Upload Area -->
+                    <div class="file-upload-area" id="fileUploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <h5>Drop your plant image here</h5>
+                        <p class="text-muted">or click to select a file</p>
+                        <p class="small text-muted">Supported formats: JPG, JPEG, PNG (Max 10MB)</p>
+                    </div>
+                    
+                    <input type="file" id="imageInput" class="file-input" accept=".jpg,.jpeg,.png">
+                    
+                    <!-- Language Selection -->
+                    <div class="mt-4">
+                        <label for="languageSelect" class="form-label fw-bold">Select language for disease description:</label>
+                        <select class="form-select" id="languageSelect">
+                            <option value="English">English</option>
+                            <option value="Hindi">Hindi (हिंदी)</option>
+                            <option value="Bengali">Bengali (বাংলা)</option>
+                            <option value="Telugu">Telugu (తెలుగు)</option>
+                            <option value="Marathi">Marathi (मराठी)</option>
+                            <option value="Tamil">Tamil (தமிழ்)</option>
+                            <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                            <option value="Kannada">Kannada (ಕನ್ನಡ)</option>
+                            <option value="Malayalam">Malayalam (മലയാളം)</option>
+                            <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Predict Button -->
+                    <button class="btn btn-primary w-100 mt-4" id="predictBtn" disabled>
+                        <i class="fas fa-search me-2"></i>Analyze Plant Disease
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Results Section -->
+            <div class="col-lg-6">
+                <div class="content-card">
+                    <h3 class="mb-4"><i class="fas fa-chart-line me-2"></i>Analysis Results</h3>
+                    
+                    <!-- Image Preview -->
+                    <div id="imagePreview" class="text-center mb-4" style="display: none;">
+                        <img id="previewImg" class="image-preview" alt="Uploaded image">
+                    </div>
+                    
+                    <!-- Results Container -->
+                    <div id="resultsContainer" class="results-section">
+                        <!-- Detection Results -->
+                        <div class="result-card">
+                            <h5><i class="fas fa-leaf me-2"></i>Detection Results</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Plant Type:</strong> <span id="plantType" class="text-success">-</span></p>
+                                    <p><strong>Disease:</strong> <span id="diseaseName" class="text-danger">-</span></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Confidence:</strong> <span id="confidence" class="fw-bold">-</span></p>
+                                    <div class="confidence-bar mt-2">
+                                        <div class="confidence-fill" id="confidenceBar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Disease Description -->
+                        <div class="result-card">
+                            <h5><i class="fas fa-info-circle me-2"></i>Disease Information</h5>
+                            <div id="diseaseDescription">
+                                <div class="text-center">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Loading description...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Getting AI-powered description...</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Treatment Recommendations -->
+                        <div class="result-card">
+                            <h5><i class="fas fa-medkit me-2"></i>Treatment Recommendations</h5>
+                            <div id="treatmentRecommendations">
+                                <div class="text-center">
+                                    <div class="spinner-border text-success" role="status">
+                                        <span class="visually-hidden">Loading treatments...</span>
+                                    </div>
+                                    <p class="mt-2 text-muted">Loading treatment recommendations...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Loading Overlay -->
+                    <div class="loading-overlay d-none" id="loadingOverlay">
+                        <div class="text-center">
+                            <div class="spinner-border text-success" style="width: 3rem; height: 3rem;" role="status">
+                                <span class="visually-hidden">Analyzing image...</span>
+                            </div>
+                            <p class="mt-3 fw-bold text-success">Analyzing your plant image...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Error Message -->
+                    <div class="alert alert-danger d-none" id="errorAlert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span id="errorMessage">An error occurred during analysis.</span>
+                    </div>
+                    
+                    <!-- Info Message -->
+                    <div class="alert alert-info" id="infoAlert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Upload a plant leaf image to get started with AI-powered disease detection.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Authentication Modals -->
+    
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" style="color: var(--primary-green);"><i class="fas fa-sign-in-alt"></i> Login to BhoomiSetu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--dark-text);">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--dark-text);">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                            <button type="button" class="btn btn-outline-success" onclick="googleLogin()">
+                                <i class="fab fa-google"></i> Login with Google
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small style="color: var(--muted-text);">
+                                Don't have an account? 
+                                <a href="#" style="color: var(--primary-green);" onclick="showRegisterModal()">Register here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content" style="background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); border: 1px solid rgba(0,0,0,0.1);">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" style="color: var(--primary-green);"><i class="fas fa-user-plus"></i> Register for BhoomiSetu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--dark-text);">Display Name</label>
+                            <input type="text" class="form-control" id="registerName" placeholder="Your Name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--dark-text);">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--dark-text);">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" style="color: var(--dark-text);">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                            <button type="button" class="btn btn-outline-success" onclick="googleLogin()">
+                                <i class="fab fa-google"></i> Sign up with Google
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small style="color: var(--muted-text);">
+                                Already have an account? 
+                                <a href="#" style="color: var(--primary-green);" onclick="showLoginModal()">Login here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+        <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Authentication State Manager -->
+    <script src="/static/js/auth-state-manager.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules (only for authentication)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js';
+        
+        // Initialize Firebase dynamically with config from server
+        async function initializeFirebase() {
+            try {
+                const response = await fetch('/api/firebase-config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Firebase config');
+                }
+                const firebaseConfig = await response.json();
+                
+                // Initialize Firebase (only for auth)
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const analytics = getAnalytics(app);
+                const provider = new GoogleAuthProvider();
+                
+                return { app, auth, analytics, provider };
+            } catch (error) {
+                console.error('Failed to initialize Firebase:', error);
+                throw error;
+            }
+        }
+        
+        // Initialize Firebase and set up authentication
+        let app, auth, analytics, provider;
+        
+        initializeFirebase().then(({ app: firebaseApp, auth: firebaseAuth, analytics: firebaseAnalytics, provider: googleProvider }) => {
+            app = firebaseApp;
+            auth = firebaseAuth;
+            analytics = firebaseAnalytics;
+            provider = googleProvider;
+            
+            // Set up global Firebase references
+            window.firebaseAuth = auth;
+            window.getAuth = () => auth;
+            window.googleProvider = provider;
+            window.signInWithPopup = signInWithPopup;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+            window.onAuthStateChanged = onAuthStateChanged;
+            
+            console.log('Firebase authentication initialized successfully!');
+            
+            // Mark Firebase as ready
+            window.firebaseReady = true;
+            
+            // Let AuthStateManager handle auth state
+            if (window.authStateManager) {
+                window.authStateManager.initializeAuth();
+            }
+        }).catch(error => {
+            console.error('Failed to initialize Firebase:', error);
+        });
+    </script>
+
+    <script>
+        // Global variables
+        let currentUser = null;
+        let selectedImage = null;
+
+        // Authentication functions that work with Firebase
+        function showLoginModal() {
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            if (registerModal) registerModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+            modal.show();
+        }
+
+        function showRegisterModal() {
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            if (loginModal) loginModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('registerModal'));
+            modal.show();
+        }
+
+        function logout() {
+            if (window.firebaseAuth && window.signOut) {
+                window.signOut(window.firebaseAuth).then(() => {
+                    console.log('User signed out successfully');
+                    showAlert('Logged out successfully', 'info');
+                }).catch((error) => {
+                    console.error('Error signing out:', error);
+                    showAlert('Logout failed: ' + error.message, 'danger');
+                });
+            }
+        }
+
+        // Hide authentication modals
+        function hideAuthModals() {
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            
+            if (loginModal) loginModal.hide();
+            if (registerModal) registerModal.hide();
+        }
+
+        // Handle successful login
+        function handleLoginSuccess(user) {
+            hideAuthModals();
+            showAlert('Login successful! Welcome ' + (user.displayName || user.email), 'success');
+        }
+
+        // Google Login
+        async function googleLogin() {
+            try {
+                if (!window.firebaseReady) {
+                    showAlert('Firebase is still loading. Please try again in a moment.', 'warning');
+                    return;
+                }
+                
+                if (typeof window.signInWithPopup === 'undefined') {
+                    showAlert('Google login not available. Please try again in a moment.', 'warning');
+                    return;
+                }
+                
+                if (!window.firebaseAuth || !window.googleProvider) {
+                    showAlert('Authentication not ready. Please refresh and try again.', 'warning');
+                    return;
+                }
+                
+                const result = await window.signInWithPopup(window.firebaseAuth, window.googleProvider);
+                const token = await result.user.getIdToken();
+                
+                handleLoginSuccess({
+                    uid: result.user.uid,
+                    email: result.user.email,
+                    displayName: result.user.displayName,
+                    token: token
+                });
+            } catch (error) {
+                console.error('Google login error:', error);
+                showAlert('Google login failed: ' + error.message, 'danger');
+            }
+        }
+
+        // Show alert message
+        function showAlert(message, type) {
+            // Create alert element
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.style.position = 'fixed';
+            alertDiv.style.top = '80px';
+            alertDiv.style.right = '20px';
+            alertDiv.style.zIndex = '9999';
+            alertDiv.style.minWidth = '300px';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Disease Detection Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Authentication will be handled by AuthStateManager
+            
+            const fileUploadArea = document.getElementById('fileUploadArea');
+            const imageInput = document.getElementById('imageInput');
+            const predictBtn = document.getElementById('predictBtn');
+            const imagePreview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            const resultsContainer = document.getElementById('resultsContainer');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const errorAlert = document.getElementById('errorAlert');
+            const infoAlert = document.getElementById('infoAlert');
+
+            // File upload area click handler
+            fileUploadArea.addEventListener('click', () => {
+                imageInput.click();
+            });
+
+            // Drag and drop handlers
+            fileUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.add('dragover');
+            });
+
+            fileUploadArea.addEventListener('dragleave', () => {
+                fileUploadArea.classList.remove('dragover');
+            });
+
+            fileUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                fileUploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            // File input change handler
+            imageInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            // Predict button click handler
+            predictBtn.addEventListener('click', () => {
+                if (selectedImage) {
+                    predictDisease();
+                }
+            });
+
+            function handleFileSelect(file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    showError('Please select a valid image file (JPG, JPEG, PNG).');
+                    return;
+                }
+
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showError('File size must be less than 10MB.');
+                    return;
+                }
+
+                selectedImage = file;
+                
+                // Show image preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewImg.src = e.target.result;
+                    imagePreview.style.display = 'block';
+                    predictBtn.disabled = false;
+                    hideError();
+                    infoAlert.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            }
+
+            async function predictDisease() {
+                const formData = new FormData();
+                formData.append('file', selectedImage);
+
+                showLoading();
+                hideError();
+                resultsContainer.classList.remove('results-section');
+                resultsContainer.style.display = 'block';
+
+                try {
+                    // Make prediction request
+                    const response = await fetch('/api/plant-disease/predict', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    
+                    // Display prediction results
+                    displayResults(result);
+                    
+                    // Get additional information
+                    await getAdditionalInfo(result.prediction.class, result.prediction.confidence);
+
+                } catch (error) {
+                    console.error('Error during prediction:', error);
+                    showError('An error occurred during analysis. Please try again.');
+                } finally {
+                    hideLoading();
+                }
+            }
+
+            function displayResults(result) {
+                const prediction = result.prediction;
+                
+                // Parse plant and disease from class name
+                const [plant, ...diseaseParts] = prediction.class.split(' - ');
+                const disease = diseaseParts.join(' - ');
+                
+                // Update UI elements
+                document.getElementById('plantType').textContent = plant || 'Unknown';
+                document.getElementById('diseaseName').textContent = disease || 'Unknown';
+                document.getElementById('confidence').textContent = `${(prediction.confidence * 100).toFixed(2)}%`;
+                
+                // Update confidence bar
+                const confidencePercent = prediction.confidence * 100;
+                document.getElementById('confidenceBar').style.width = `${confidencePercent}%`;
+            }
+
+            async function getAdditionalInfo(diseaseClass, confidence) {
+                const language = document.getElementById('languageSelect').value;
+                
+                try {
+                    // Get disease description
+                    const descResponse = await fetch('/api/plant-disease/description', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            disease_class: diseaseClass,
+                            language: language
+                        })
+                    });
+
+                    if (descResponse.ok) {
+                        const descResult = await descResponse.json();
+                        document.getElementById('diseaseDescription').innerHTML = 
+                            `<p>${descResult.description}</p>`;
+                    } else {
+                        document.getElementById('diseaseDescription').innerHTML = 
+                            '<p class="text-muted">Description not available.</p>';
+                    }
+
+                    // Get treatment recommendations
+                    const treatmentResponse = await fetch('/api/plant-disease/treatment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            disease_class: diseaseClass,
+                            confidence: confidence,
+                            language: language
+                        })
+                    });
+
+                    if (treatmentResponse.ok) {
+                        const treatmentResult = await treatmentResponse.json();
+                        displayTreatments(treatmentResult.treatments);
+                    } else {
+                        document.getElementById('treatmentRecommendations').innerHTML = 
+                            '<p class="text-muted">Treatment recommendations not available.</p>';
+                    }
+
+                } catch (error) {
+                    console.error('Error getting additional info:', error);
+                    document.getElementById('diseaseDescription').innerHTML = 
+                        '<p class="text-muted">Unable to load description.</p>';
+                    document.getElementById('treatmentRecommendations').innerHTML = 
+                        '<p class="text-muted">Unable to load treatment recommendations.</p>';
+                }
+            }
+
+            function displayTreatments(treatments) {
+                let html = '';
+                
+                if (treatments.organic && treatments.organic.length > 0) {
+                    html += `
+                        <div class="treatment-category">
+                            <h6><i class="fas fa-leaf me-2"></i>Organic Treatment</h6>
+                            <ul class="treatment-list">
+                                ${treatments.organic.map(treatment => `<li>${treatment}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (treatments.chemical && treatments.chemical.length > 0) {
+                    html += `
+                        <div class="treatment-category">
+                            <h6><i class="fas fa-flask me-2"></i>Chemical Treatment</h6>
+                            <ul class="treatment-list">
+                                ${treatments.chemical.map(treatment => `<li>${treatment}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (treatments.cultural && treatments.cultural.length > 0) {
+                    html += `
+                        <div class="treatment-category">
+                            <h6><i class="fas fa-tools me-2"></i>Cultural Practices</h6>
+                            <ul class="treatment-list">
+                                ${treatments.cultural.map(treatment => `<li>${treatment}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (treatments.preventive && treatments.preventive.length > 0) {
+                    html += `
+                        <div class="treatment-category">
+                            <h6><i class="fas fa-shield-alt me-2"></i>Preventive Measures</h6>
+                            <ul class="treatment-list">
+                                ${treatments.preventive.map(treatment => `<li>${treatment}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+
+                if (html === '') {
+                    html = '<p class="text-muted">No specific treatment recommendations available.</p>';
+                }
+
+                document.getElementById('treatmentRecommendations').innerHTML = html;
+            }
+
+            function showLoading() {
+                loadingOverlay.classList.remove('d-none');
+            }
+
+            function hideLoading() {
+                loadingOverlay.classList.add('d-none');
+            }
+
+            function showError(message) {
+                errorAlert.querySelector('#errorMessage').textContent = message;
+                errorAlert.classList.remove('d-none');
+            }
+
+            function hideError() {
+                errorAlert.classList.add('d-none');
+            }
+        });
+
+        // Authentication form handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form submission
+            document.getElementById('loginForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                
+                try {
+                    const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                    const user = userCredential.user;
+                    const token = await user.getIdToken();
+                    
+                    handleLoginSuccess({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: user.displayName || user.email.split('@')[0],
+                        token: token
+                    });
+                } catch (error) {
+                    showAlert('Login failed: ' + error.message, 'danger');
+                }
+            });
+
+            // Register form submission
+            document.getElementById('registerForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const name = document.getElementById('registerName').value;
+                const email = document.getElementById('registerEmail').value;
+                const password = document.getElementById('registerPassword').value;
+                const confirmPassword = document.getElementById('confirmPassword').value;
+                
+                if (password !== confirmPassword) {
+                    showAlert('Passwords do not match', 'danger');
+                    return;
+                }
+                
+                try {
+                    const userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                    const user = userCredential.user;
+                    
+                    if (name && user.updateProfile) {
+                        await user.updateProfile({ displayName: name });
+                    }
+                    
+                    const token = await user.getIdToken();
+                    
+                    handleLoginSuccess({
+                        uid: user.uid,
+                        email: user.email,
+                        displayName: name || user.email.split('@')[0],
+                        token: token
+                    });
+                } catch (error) {
+                    showAlert('Registration error: ' + error.message, 'danger');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+    
+    <script>
+        // DOM Elements
+        const fileUploadArea = document.getElementById('fileUploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const predictBtn = document.getElementById('predictBtn');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const errorAlert = document.getElementById('errorAlert');
+        const infoAlert = document.getElementById('infoAlert');
+        const languageSelect = document.getElementById('languageSelect');
+        
+        // Result elements
+        const plantType = document.getElementById('plantType');
+        const diseaseName = document.getElementById('diseaseName');
+        const confidence = document.getElementById('confidence');
+        const confidenceBar = document.getElementById('confidenceBar');
+        const diseaseDescription = document.getElementById('diseaseDescription');
+        const treatmentRecommendations = document.getElementById('treatmentRecommendations');
+        
+        let selectedFile = null;
+        
+        // File upload area click
+        fileUploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+        
+        // Drag and drop functionality
+        fileUploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.add('dragover');
+        });
+        
+        fileUploadArea.addEventListener('dragleave', () => {
+            fileUploadArea.classList.remove('dragover');
+        });
+        
+        fileUploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileUploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+        
+        // File input change
+        imageInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+        
+        // Handle file selection
+        function handleFileSelection(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showError('Please select a valid image file (JPG, JPEG, PNG)');
+                return;
+            }
+            
+            selectedFile = file;
+            
+            // Show image preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+                predictBtn.disabled = false;
+                hideError();
+                hideInfo();
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Predict button click
+        predictBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            try {
+                // Show loading
+                loadingIndicator.classList.remove('d-none');
+                predictBtn.disabled = true;
+                hideError();
+                hideResults();
+                
+                // Create form data
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                
+                // Make prediction request
+                const response = await fetch('/api/plant-disease/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showResults(result);
+                    await getDescriptionAndTreatments(result.disease_name);
+                } else {
+                    showError(result.error || 'Prediction failed');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                loadingIndicator.classList.add('d-none');
+                predictBtn.disabled = false;
+            }
+        });
+        
+        // Show prediction results
+        function showResults(result) {
+            plantType.textContent = result.plant_type;
+            diseaseName.textContent = result.disease_name;
+            confidence.textContent = result.confidence_percentage + '%';
+            confidenceBar.style.width = result.confidence_percentage + '%';
+            
+            resultsContainer.style.display = 'block';
+        }
+        
+        // Get disease description and treatments
+        async function getDescriptionAndTreatments(diseaseNameValue) {
+            try {
+                // Get description
+                const descFormData = new FormData();
+                descFormData.append('disease_name', diseaseNameValue);
+                descFormData.append('language', languageSelect.value);
+                
+                const descResponse = await fetch('/api/plant-disease/description', {
+                    method: 'POST',
+                    body: descFormData
+                });
+                
+                const descResult = await descResponse.json();
+                
+                if (descResult.success) {
+                    diseaseDescription.innerHTML = `<p>${descResult.description}</p>`;
+                } else {
+                    diseaseDescription.innerHTML = '<p>Unable to load description at this time.</p>';
+                }
+                
+                // Get treatments
+                const treatmentResponse = await fetch(`/api/plant-disease/treatment/${diseaseNameValue}`);
+                const treatmentResult = await treatmentResponse.json();
+                
+                if (treatmentResult.success) {
+                    displayTreatments(treatmentResult.treatments);
+                } else {
+                    treatmentRecommendations.innerHTML = '<p>Unable to load treatment recommendations at this time.</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading additional info:', error);
+                diseaseDescription.innerHTML = '<p>Error loading description.</p>';
+                treatmentRecommendations.innerHTML = '<p>Error loading treatments.</p>';
+            }
+        }
+        
+        // Display treatment recommendations
+        function displayTreatments(treatments) {
+            let html = '';
+            
+            Object.keys(treatments).forEach(category => {
+                if (Array.isArray(treatments[category])) {
+                    html += `
+                        <div class="treatment-category">
+                            <h6>${category.replace(/_/g, ' ').toUpperCase()}</h6>
+                            <ul class="treatment-list">
+                                ${treatments[category].map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                }
+            });
+            
+            if (html === '') {
+                html = '<p>No specific treatment recommendations available for this disease.</p>';
+            }
+            
+            treatmentRecommendations.innerHTML = html;
+        }
+        
+        // Helper functions
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            errorAlert.classList.remove('d-none');
+        }
+        
+        function hideError() {
+            errorAlert.classList.add('d-none');
+        }
+        
+        function hideInfo() {
+            infoAlert.style.display = 'none';
+        }
+        
+        function hideResults() {
+            resultsContainer.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
