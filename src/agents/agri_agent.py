@@ -627,9 +627,27 @@ class AgricultureAIAgent:
             print(f"📡 DEBUG: Forecast API response status: {forecast_response.status_code}")
             
             forecast_data = {}
+            daily_forecasts = []
             if forecast_response.status_code == 200:
                 forecast_data = forecast_response.json()
                 print(f"✅ DEBUG: Successfully fetched forecast data with {len(forecast_data.get('list', []))} entries")
+                
+                # Process forecast to get one entry per day
+                seen_dates = set()
+                for entry in forecast_data.get('list', []):
+                    # Extract date from dt_txt (format: "2025-08-11 12:00:00")
+                    date_part = entry['dt_txt'].split(' ')[0]
+                    
+                    # Only add if we haven't seen this date yet
+                    if date_part not in seen_dates:
+                        seen_dates.add(date_part)
+                        daily_forecasts.append(entry)
+                        
+                        # Stop after collecting 5 unique days
+                        if len(daily_forecasts) >= 5:
+                            break
+                
+                print(f"📅 DEBUG: Processed {len(daily_forecasts)} unique daily forecasts")
             else:
                 print(f"⚠️ DEBUG: Forecast API failed with status {forecast_response.status_code}")
             
@@ -651,7 +669,7 @@ class AgricultureAIAgent:
                     "wind_speed": current_data["wind"]["speed"],
                     "pressure": current_data["main"]["pressure"]
                 },
-                "forecast": forecast_data.get("list", [])[:5] if forecast_response.status_code == 200 else []
+                "forecast": daily_forecasts if forecast_response.status_code == 200 else []
             }
         except requests.exceptions.RequestException as e:
             print(f"🌐 DEBUG: Network error during weather fetch: {e}")
