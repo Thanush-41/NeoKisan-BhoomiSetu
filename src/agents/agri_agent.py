@@ -30,7 +30,12 @@ class AgricultureAIAgent:
         # Initialize OpenAI client (if available)
         openai_key = os.getenv('OPENAI_API_KEY')
         if openai_key and openai_key != 'your_openai_api_key_here':
-            self.openai_client = AsyncOpenAI(api_key=openai_key)
+            try:
+                self.openai_client = AsyncOpenAI(api_key=openai_key)
+                print("✅ OpenAI client initialized successfully")
+            except Exception as e:
+                print(f"⚠️ Failed to initialize OpenAI client: {e}")
+                self.openai_client = None
         else:
             self.openai_client = None
             

@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from agents.agri_agent import agri_agent
+from agents.crop_recommender import crop_recommender
 from services.firebase_service import firebase_service
 from services.mongodb_service import mongodb_service, startup_mongodb, shutdown_mongodb
 from services.crop_disease_service import crop_disease_service
@@ -70,6 +71,12 @@ class WeatherRequest(BaseModel):
 
 class PriceRequest(BaseModel):
     commodity: Optional[str] = None
+
+class CropRecommendationRequest(BaseModel):
+    farm_description: str
+    location: Optional[str] = None
+    season: Optional[str] = None
+    coordinates: Optional[Coordinates] = None
 
 # In-memory session storage (in production, use Redis or database)
 user_sessions = {}
@@ -694,6 +701,76 @@ async def disease_detection_page(request: Request):
     return templates.TemplateResponse("disease_detection.html", {
         "request": request
     })
+
+@app.get("/crop-recommender")
+async def crop_recommender_page(request: Request):
+    """Crop recommendation page"""
+    return templates.TemplateResponse("crop_recommender.html", {
+        "request": request
+    })
+
+# ========================================
+# CROP RECOMMENDATION API
+# ========================================
+
+@app.post("/api/crop-recommendation")
+async def get_crop_recommendations(request: CropRecommendationRequest):
+    """Get AI-powered crop recommendations based on farm description"""
+    try:
+        print(f"🌾 Crop recommendation request: {request.dict()}")
+        
+        # Determine location from coordinates if not provided
+        location = request.location
+        if not location and request.coordinates:
+            try:
+                location = await get_city_from_coordinates(
+                    request.coordinates.latitude, 
+                    request.coordinates.longitude
+                )
+                print(f"📍 Location from coordinates: {location}")
+            except Exception as e:
+                print(f"⚠️ Error getting location from coordinates: {e}")
+                # Fallback to coordinates as string
+                location = f"{request.coordinates.latitude:.2f}, {request.coordinates.longitude:.2f}"
+        
+        # Combine location and farm description
+        user_input = request.farm_description
+        if location:
+            user_input += f" Location: {location}"
+        if request.season:
+            user_input += f" Season: {request.season}"
+        
+        print(f"🌾 Final user input: {user_input}")
+        
+        # Prepare coordinates for weather fetching
+        coords = None
+        if request.coordinates:
+            coords = {
+                'latitude': request.coordinates.latitude,
+                'longitude': request.coordinates.longitude
+            }
+            print(f"📍 Using coordinates for weather: {coords}")
+        
+        # Get recommendations from the crop recommendation agent
+        result = await crop_recommender.recommend_crops(
+            user_input=user_input,
+            location=location,
+            coordinates=coords
+        )
+        
+        print(f"✅ Crop recommendation result: {result}")
+        
+        return JSONResponse(content=result)
+        
+    except Exception as e:
+        print(f"❌ Error in crop recommendation: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": str(e)
+            }
+        )
 
 # ========================================
 # AUTHENTICATION ROUTES

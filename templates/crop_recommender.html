@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Recommender - BhoomiSetu</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-green: #2E7D32;
+            --secondary-green: #4a7c59;
+            --light-green: #7fb069;
+            --accent-yellow: #f4d03f;
+            --light-bg: #fefcf5;
+            --dark-text: #212121;
+            --muted-text: #555;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background: linear-gradient(135deg, var(--light-bg) 0%, #e8f5e8 100%);
+            color: var(--dark-text);
+            line-height: 1.6;
+            margin-top: 60px;
+        }
+        
+        /* Navbar Glass Style - Consistent with other pages */
+        .navbar-glass {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1030;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar-glass .container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .navbar-glass .navbar-brand {
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #2a7a1f;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .navbar-glass .navbar-brand i.fas.fa-seedling {
+            color: #4caf50;
+        }
+
+        .navbar-glass .navbar-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-left: auto;
+        }
+
+        .navbar-glass .nav-link {
+            color: #2a7a1f;
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 4px;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .navbar-glass .nav-link.active,
+        .navbar-glass .nav-link:hover {
+            background-color: #4caf50;
+            color: white;
+        }
+
+        .navbar-glass .nav-link i.fas {
+            color: inherit;
+            font-size: 1rem;
+        }
+
+        .navbar-glass .btn-outline-light {
+            color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            background: transparent;
+        }
+
+        .navbar-glass .btn-outline-light:hover {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light {
+            background-color: #4caf50 !important;
+            border-color: #4caf50 !important;
+            color: white !important;
+        }
+
+        .navbar-glass .btn-light:hover {
+            background-color: #2a7a1f !important;
+            border-color: #2a7a1f !important;
+            color: white !important;
+        }
+
+        /* Responsive navbar */
+        @media (max-width: 768px) {
+            .navbar-glass .container {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .navbar-glass .navbar-nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 0.7rem;
+                margin-left: auto;
+            }
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .recommendation-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+            border: none;
+        }
+        
+        .recommendation-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .crop-input-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        /* Priority location section */
+        .location-priority-section {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            color: white;
+            box-shadow: 0 8px 25px rgba(76, 175, 80, 0.3);
+        }
+
+        .priority-location-btn {
+            background: white;
+            color: #2e7d32;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .priority-location-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+            color: #1b5e20;
+        }
+
+        .priority-location-btn i {
+            font-size: 1.3rem;
+            margin-right: 10px;
+        }
+        
+        .btn-recommend {
+            background: linear-gradient(135deg, var(--secondary-green) 0%, var(--light-green) 100%);
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-recommend:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--secondary-green);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .crop-icon {
+            font-size: 2rem;
+            color: var(--secondary-green);
+            margin-bottom: 1rem;
+        }
+        
+        .confidence-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary-green) 0%, var(--light-green) 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .soil-analysis {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        
+        .soil-param {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .param-label {
+            font-weight: 600;
+            color: var(--primary-green);
+            font-size: 0.9rem;
+        }
+        
+        .param-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--secondary-green);
+        }
+
+        .weather-indicator {
+            background: rgba(76, 175, 80, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin-top: 1rem;
+            color: #2e7d32;
+            font-size: 0.9rem;
+        }
+
+        .weather-indicator i {
+            color: #4caf50;
+            margin-right: 5px;
+        }
+
+        /* Modal styles for authentication */
+        .glass-container {
+            background: linear-gradient(135deg, rgba(46, 125, 50, 0.95), rgba(74, 124, 89, 0.95));
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .glass-container .form-control {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+
+        .glass-container .form-control:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--accent-yellow);
+            box-shadow: 0 0 0 0.2rem rgba(244, 208, 63, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation - Consistent with other pages -->
+    <nav class="navbar-glass fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-seedling"></i> BhoomiSetu AI
+            </a>
+            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
+                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
+                <a class="nav-link active" href="/crop-recommender"><i class="fas fa-seedling"></i> Crop Recommender</a>
+                <a class="nav-link" href="/weather"><i class="fas fa-cloud"></i> Weather</a>
+                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
+                <a class="nav-link" href="/disease-detection"><i class="fas fa-microscope"></i> Disease Detection</a>
+                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
+                
+                <!-- Authentication Buttons -->
+                <div id="authButtons" class="d-flex gap-2">
+                    <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </button>
+                    <button class="btn btn-light btn-sm" onclick="showRegisterModal()">
+                        <i class="fas fa-user-plus"></i> Register
+                    </button>
+                </div>
+                
+                <!-- User Menu (hidden by default) -->
+                <div id="userMenu" class="dropdown" style="display: none;">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> <span id="userName">User</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
+                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container text-center">
+            <h1 class="display-4 fw-bold mb-3">
+                <i class="fas fa-seedling me-3"></i>
+                Smart Crop Recommender
+            </h1>
+            <p class="lead">
+                Get AI-powered crop recommendations based on your location, soil conditions, and real-time weather data
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Priority Location Detection Section -->
+        <div class="location-priority-section text-center">
+            <h3 class="mb-3">
+                <i class="fas fa-crosshairs me-2"></i>
+                Quick Start: Auto-Detect Your Location
+            </h3>
+            <p class="mb-4">
+                Get instant crop recommendations using your current location and real-time weather data
+            </p>
+            <button type="button" class="priority-location-btn" onclick="quickLocationRecommendation()">
+                <i class="fas fa-location-arrow"></i>
+                Get Recommendations for My Location
+            </button>
+            <div class="weather-indicator mt-3" id="weatherIndicator" style="display: none;">
+                <i class="fas fa-cloud-sun"></i>
+                Using current weather and location data for recommendations
+            </div>
+        </div>
+        <!-- Input Section -->
+        <div class="crop-input-section">
+            <h3 class="text-center mb-4">
+                <i class="fas fa-edit text-success me-2"></i>
+                Advanced Options <span class="text-muted">(Optional)</span>
+            </h3>
+            <p class="text-center text-muted mb-4">
+                Provide additional details for more personalized recommendations
+            </p>
+            
+            <form id="cropRecommendationForm">
+                <div class="row">
+                    <div class="col-md-12 mb-3">
+                        <label for="farmDescription" class="form-label">
+                            <i class="fas fa-edit me-2"></i>
+                            Describe your farm conditions <span class="text-muted">(Optional)</span>
+                        </label>
+                        <textarea 
+                            class="form-control" 
+                            id="farmDescription" 
+                            rows="4" 
+                            placeholder="Example: I have clay soil. The area receives good rainfall during monsoon. My previous crops were wheat and rice. The soil is slightly alkaline..."
+                        ></textarea>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Optional: Add details about soil type, previous crops, rainfall, or any farming conditions. If not provided, we'll use typical data for your location.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="location" class="form-label">
+                            <i class="fas fa-location-dot me-2"></i>
+                            Location (Optional)
+                        </label>
+                        <div class="input-group">
+                            <input 
+                                type="text" 
+                                class="form-control" 
+                                id="location" 
+                                placeholder="e.g., Punjab, Haryana, etc."
+                            >
+                            <button 
+                                type="button" 
+                                class="btn btn-outline-success" 
+                                id="detectLocationBtn"
+                                onclick="detectLocation()"
+                                title="Detect my location"
+                            >
+                                <i class="fas fa-crosshairs"></i>
+                            </button>
+                        </div>
+                        <div class="form-text">
+                            <span id="locationStatus" class="text-muted">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Click the crosshair to auto-detect your location
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="season" class="form-label">
+                            <i class="fas fa-calendar me-2"></i>
+                            Preferred Season
+                        </label>
+                        <select class="form-select" id="season">
+                            <option value="">Select season</option>
+                            <option value="kharif">Kharif (Monsoon)</option>
+                            <option value="rabi">Rabi (Winter)</option>
+                            <option value="zaid">Zaid (Summer)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="text-center">
+                    <button type="submit" class="btn btn-recommend btn-lg">
+                        <i class="fas fa-magic me-2"></i>
+                        Get Crop Recommendations
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Loading Section -->
+        <div id="loadingSection" class="text-center" style="display: none;">
+            <div class="recommendation-card p-4">
+                <div class="loading-spinner"></div>
+                <p class="mt-3 mb-0">Analyzing your farm conditions...</p>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="resultsSection" style="display: none;">
+            <!-- Recommended Crops -->
+            <div class="recommendation-card p-4 mb-4">
+                <h3 class="text-center mb-4">
+                    <i class="fas fa-trophy text-warning me-2"></i>
+                    Recommended Crops for Your Farm
+                </h3>
+                <div id="cropRecommendations" class="row">
+                    <!-- Crop cards will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Soil Analysis -->
+            <div class="recommendation-card p-4 mb-4">
+                <h4>
+                    <i class="fas fa-flask text-info me-2"></i>
+                    Soil & Climate Analysis
+                    <small class="text-muted">
+                        <i class="fas fa-cloud-sun ms-2"></i>
+                        Using current weather data
+                    </small>
+                </h4>
+                <div id="soilAnalysis" class="soil-analysis">
+                    <!-- Soil parameters will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Detailed Explanation -->
+            <div class="recommendation-card p-4 mb-4">
+                <h4>
+                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                    Expert Recommendations
+                </h4>
+                <div id="detailedExplanation" class="mt-3">
+                    <!-- Explanation will be inserted here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Section -->
+        <div id="errorSection" class="alert alert-danger" style="display: none;">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Error</h5>
+            <p id="errorMessage"></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-light py-4 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2024 BhoomiSetu - Agricultural AI Advisor. Made with ❤️ for Indian Farmers.</p>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Quick location recommendation function
+        async function quickLocationRecommendation() {
+            const btn = document.querySelector('.priority-location-btn');
+            const originalHtml = btn.innerHTML;
+            const weatherIndicator = document.getElementById('weatherIndicator');
+            
+            try {
+                // Show loading state
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting your location...';
+                btn.disabled = true;
+                
+                if (!navigator.geolocation) {
+                    throw new Error('Geolocation is not supported by this browser');
+                }
+
+                // Get user's current position
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 300000
+                    });
+                });
+
+                userLocation.latitude = position.coords.latitude;
+                userLocation.longitude = position.coords.longitude;
+                
+                // Show weather indicator
+                weatherIndicator.style.display = 'block';
+                weatherIndicator.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching weather data and generating recommendations...';
+                
+                // Update button
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing conditions...';
+                
+                // Make recommendation request
+                const requestData = {
+                    farm_description: 'Quick recommendation based on current location and weather',
+                    location: '',
+                    season: '',
+                    coordinates: {
+                        latitude: userLocation.latitude,
+                        longitude: userLocation.longitude
+                    }
+                };
+                
+                const response = await fetch('/api/crop-recommendation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update weather indicator with success message
+                    weatherIndicator.innerHTML = '<i class="fas fa-check-circle"></i> Recommendations generated using current location and weather data!';
+                    weatherIndicator.className = 'weather-indicator mt-3';
+                    
+                    // Show results
+                    displayResults(data);
+                    
+                    // Scroll to results
+                    document.getElementById('resultsSection').scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    throw new Error(data.error || 'Failed to get recommendations');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                weatherIndicator.style.display = 'block';
+                weatherIndicator.innerHTML = `<i class="fas fa-exclamation-triangle"></i> Error: ${error.message}`;
+                weatherIndicator.className = 'weather-indicator mt-3 text-danger';
+                
+                // Fallback: show the advanced form
+                document.querySelector('.crop-input-section').scrollIntoView({ behavior: 'smooth' });
+            } finally {
+                // Restore button
+                btn.innerHTML = originalHtml;
+                btn.disabled = false;
+            }
+        }
+
+        // Crop icons mapping
+        const cropIcons = {
+            'rice': 'fas fa-seedling',
+            'wheat': 'fas fa-wheat-awn',
+            'maize': 'fas fa-corn',
+            'cotton': 'fas fa-cotton-bureau',
+            'sugarcane': 'fas fa-leaf',
+            'soybean': 'fas fa-circle',
+            'groundnut': 'fas fa-circle-dot',
+            'jute': 'fas fa-rope',
+            'coffee': 'fas fa-coffee',
+            'tea': 'fas fa-mug-hot'
+        };
+
+        // User location data
+        let userLocation = {
+            latitude: null,
+            longitude: null,
+            city: null,
+            address: null
+        };
+
+        // Load saved location from localStorage
+        function loadSavedLocation() {
+            const saved = localStorage.getItem('bhoomiSetuLocation');
+            if (saved) {
+                try {
+                    const location = JSON.parse(saved);
+                    userLocation = location;
+                    if (location.city) {
+                        document.getElementById('location').value = location.city;
+                        updateLocationStatus(`📍 Using saved location: ${location.city}`);
+                    }
+                } catch (error) {
+                    console.error('Error loading saved location:', error);
+                }
+            }
+        }
+
+        // Update location status display
+        function updateLocationStatus(message, isError = false) {
+            const statusElement = document.getElementById('locationStatus');
+            const iconClass = isError ? 'fas fa-exclamation-triangle' : 'fas fa-map-marker-alt';
+            const textClass = isError ? 'text-danger' : 'text-success';
+            
+            statusElement.innerHTML = `<i class="${iconClass} me-1"></i>${message}`;
+            statusElement.className = `form-text ${textClass}`;
+        }
+
+        // Detect user's current location
+        function detectLocation() {
+            if (!navigator.geolocation) {
+                updateLocationStatus('Geolocation is not supported by this browser', true);
+                return;
+            }
+
+            const detectBtn = document.getElementById('detectLocationBtn');
+            const originalHtml = detectBtn.innerHTML;
+            
+            // Show loading state
+            detectBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            detectBtn.disabled = true;
+            updateLocationStatus('Getting your location...');
+
+            navigator.geolocation.getCurrentPosition(
+                async function(position) {
+                    userLocation.latitude = position.coords.latitude;
+                    userLocation.longitude = position.coords.longitude;
+                    
+                    try {
+                        // Use reverse geocoding to get city name
+                        const response = await fetch(`/api/geocode?lat=${userLocation.latitude}&lon=${userLocation.longitude}`);
+                        if (response.ok) {
+                            const data = await response.json();
+                            if (data.city) {
+                                userLocation.city = data.city;
+                                userLocation.address = data.address || data.city;
+                                
+                                // Update the location input field
+                                document.getElementById('location').value = data.city;
+                                updateLocationStatus(`📍 Location detected: ${data.city}`);
+                                
+                                // Save to localStorage for future use
+                                localStorage.setItem('bhoomiSetuLocation', JSON.stringify(userLocation));
+                            } else {
+                                throw new Error('No city data received');
+                            }
+                        } else {
+                            throw new Error('Geocoding API failed');
+                        }
+                    } catch (error) {
+                        console.error('Reverse geocoding failed:', error);
+                        // Fallback: use coordinates as location
+                        const coordsLocation = `${userLocation.latitude.toFixed(2)}, ${userLocation.longitude.toFixed(2)}`;
+                        document.getElementById('location').value = coordsLocation;
+                        userLocation.city = coordsLocation;
+                        updateLocationStatus(`📍 Using coordinates: ${coordsLocation}`);
+                    }
+                    
+                    // Restore button state
+                    detectBtn.innerHTML = originalHtml;
+                    detectBtn.disabled = false;
+                },
+                function(error) {
+                    console.error('Error getting location:', error);
+                    let errorMessage = 'Unable to get location';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMessage = 'Location access denied by user';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMessage = 'Location information unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            errorMessage = 'Location request timed out';
+                            break;
+                    }
+                    
+                    updateLocationStatus(errorMessage, true);
+                    
+                    // Restore button state
+                    detectBtn.innerHTML = originalHtml;
+                    detectBtn.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 300000 // 5 minutes
+                }
+            );
+        }
+
+        // Form submission handler
+        document.getElementById('cropRecommendationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const farmDescription = document.getElementById('farmDescription').value;
+            const location = document.getElementById('location').value;
+            const season = document.getElementById('season').value;
+            
+            // Validate that either description or location is provided
+            if (!farmDescription.trim() && !location.trim() && (!userLocation.latitude || !userLocation.longitude)) {
+                alert('Please provide either:\n1. A description of your farm conditions, OR\n2. Your location (enter manually or use location detection)');
+                return;
+            }
+            
+            // Prepare request data
+            const requestData = {
+                farm_description: farmDescription.trim() || 'General farm conditions',
+                location: location,
+                season: season
+            };
+            
+            // Add coordinates if available
+            if (userLocation.latitude && userLocation.longitude) {
+                requestData.coordinates = {
+                    latitude: userLocation.latitude,
+                    longitude: userLocation.longitude
+                };
+            }
+            
+            // Show loading
+            document.getElementById('loadingSection').style.display = 'block';
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('errorSection').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/crop-recommendation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data);
+                } else {
+                    showError(data.error || 'Failed to get recommendations');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                document.getElementById('loadingSection').style.display = 'none';
+            }
+        });
+
+        function displayResults(data) {
+            // Show results section
+            document.getElementById('resultsSection').style.display = 'block';
+            
+            // Display crop recommendations
+            const cropContainer = document.getElementById('cropRecommendations');
+            cropContainer.innerHTML = '';
+            
+            data.top_recommendations.forEach((crop, index) => {
+                const cropCard = createCropCard(crop, index === 0);
+                cropContainer.appendChild(cropCard);
+            });
+            
+            // Display soil analysis
+            displaySoilAnalysis(data.soil_analysis);
+            
+            // Display explanation
+            document.getElementById('detailedExplanation').innerHTML = 
+                `<p class="lead">${data.explanation}</p>`;
+        }
+
+        function createCropCard(crop, isPrimary) {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 mb-3';
+            
+            const iconClass = cropIcons[crop.crop.toLowerCase()] || 'fas fa-seedling';
+            const borderClass = isPrimary ? 'border-success border-3' : '';
+            const badgeClass = isPrimary ? 'bg-success' : 'bg-secondary';
+            
+            col.innerHTML = `
+                <div class="card h-100 ${borderClass}">
+                    <div class="card-body text-center">
+                        ${isPrimary ? '<span class="badge bg-success mb-2">Top Pick</span>' : ''}
+                        <i class="${iconClass} crop-icon"></i>
+                        <h5 class="card-title text-capitalize">${crop.crop}</h5>
+                        <p class="card-text">
+                            <strong>${crop.percentage}% Confidence</strong>
+                        </p>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${crop.percentage}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return col;
+        }
+
+        function displaySoilAnalysis(soilData) {
+            const container = document.getElementById('soilAnalysis');
+            container.innerHTML = '';
+            
+            const parameters = [
+                { key: 'N', label: 'Nitrogen (N)', unit: '', icon: 'fas fa-atom' },
+                { key: 'P', label: 'Phosphorus (P)', unit: '', icon: 'fas fa-fire' },
+                { key: 'K', label: 'Potassium (K)', unit: '', icon: 'fas fa-leaf' },
+                { key: 'ph', label: 'Soil pH', unit: '', icon: 'fas fa-vial' },
+                { key: 'temperature', label: 'Temperature', unit: '°C', icon: 'fas fa-thermometer-half' },
+                { key: 'humidity', label: 'Humidity', unit: '%', icon: 'fas fa-tint' },
+                { key: 'rainfall', label: 'Annual Rainfall', unit: 'mm', icon: 'fas fa-cloud-rain' }
+            ];
+            
+            const row = document.createElement('div');
+            row.className = 'row';
+            
+            parameters.forEach(param => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-4 mb-3';
+                
+                col.innerHTML = `
+                    <div class="soil-param">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="${param.icon} text-success me-2"></i>
+                            <span class="param-label">${param.label}</span>
+                        </div>
+                        <div class="param-value">
+                            ${soilData[param.key]}${param.unit}
+                        </div>
+                    </div>
+                `;
+                
+                row.appendChild(col);
+            });
+            
+            container.appendChild(row);
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorSection').style.display = 'block';
+        }
+
+        // Add some helpful tips and load saved location
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load saved location on page load
+            loadSavedLocation();
+            
+            const tips = [
+                "💡 Tip: Use location detection for quick recommendations",
+                "🌱 Tip: Add previous crop details for better suggestions",
+                "🌧️ Tip: Mention rainfall patterns if you know them",
+                "🏔️ Tip: Specify if your farm is in plains, hills, or coastal area",
+                "📍 Tip: Click the crosshair button to auto-detect your location"
+            ];
+            
+            let tipIndex = 0;
+            const farmDescription = document.getElementById('farmDescription');
+            
+            setInterval(() => {
+                if (farmDescription === document.activeElement) return;
+                
+                const basePlaceholder = "Optional: Add details about soil type, previous crops, rainfall, etc.";
+                farmDescription.placeholder = `${basePlaceholder} ${tips[tipIndex]}`;
+                tipIndex = (tipIndex + 1) % tips.length;
+            }, 4000);
+        });
+
+        // Placeholder functions for authentication (to avoid errors from navbar)
+        function showLoginModal() {
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            if (registerModal) registerModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('loginModal'));
+            modal.show();
+        }
+
+        function showRegisterModal() {
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            if (loginModal) loginModal.hide();
+            
+            const modal = new bootstrap.Modal(document.getElementById('registerModal'));
+            modal.show();
+        }
+
+        function showThreadsModal() {
+            const modal = new bootstrap.Modal(document.getElementById('threadsModal'));
+            modal.show();
+        }
+
+        function createNewThread() {
+            window.location.href = '/chat';
+        }
+
+        function logout() {
+            if (window.firebaseAuth && window.signOut) {
+                window.signOut(window.firebaseAuth).then(() => {
+                    console.log('✅ User signed out');
+                }).catch((error) => {
+                    console.error('❌ Sign out error:', error);
+                });
+            } else {
+                alert('Logout functionality will be implemented soon!');
+            }
+        }
+
+        // Google Login
+        async function googleLogin() {
+            try {
+                if (typeof window.signInWithPopup === 'undefined') {
+                    alert('Google login not available');
+                    return;
+                }
+                
+                const result = await window.signInWithPopup(window.firebaseAuth, window.googleProvider);
+                const token = await result.user.getIdToken();
+                
+                // Verify token with our backend
+                const response = await fetch('/api/auth/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ token })
+                });
+                
+                if (response.ok) {
+                    hideAuthModals();
+                    showAlert('Login successful! Welcome ' + result.user.displayName, 'success');
+                }
+            } catch (error) {
+                console.error('Google login failed:', error);
+                alert('Google login failed: ' + error.message);
+            }
+        }
+
+        function hideAuthModals() {
+            const loginModal = bootstrap.Modal.getInstance(document.getElementById('loginModal'));
+            const registerModal = bootstrap.Modal.getInstance(document.getElementById('registerModal'));
+            if (loginModal) loginModal.hide();
+            if (registerModal) registerModal.hide();
+        }
+
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 100px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.parentNode.removeChild(alertDiv);
+                }
+            }, 5000);
+        }
+    </script>
+
+    <!-- Authentication Modals -->
+    
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content glass-container">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white"><i class="fas fa-sign-in-alt"></i> Login to BhoomiSetu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" required>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </button>
+                            <button type="button" class="btn btn-outline-light" onclick="googleLogin()">
+                                <i class="fab fa-google"></i> Login with Google
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-light">
+                                Don't have an account? 
+                                <a href="#" class="text-warning" onclick="showRegisterModal()">Register here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content glass-container">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white"><i class="fas fa-user-plus"></i> Register for BhoomiSetu</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="registerForm">
+                        <div class="mb-3">
+                            <label class="form-label text-white">Display Name</label>
+                            <input type="text" class="form-control" id="registerName" placeholder="Your Name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" required minlength="6">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-user-plus"></i> Create Account
+                            </button>
+                            <button type="button" class="btn btn-outline-light" onclick="googleLogin()">
+                                <i class="fab fa-google"></i> Sign up with Google
+                            </button>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-light">
+                                Already have an account? 
+                                <a href="#" class="text-warning" onclick="showLoginModal()">Login here</a>
+                            </small>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Threads Modal -->
+    <div class="modal fade" id="threadsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content glass-container">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title text-white"><i class="fas fa-comments"></i> My Chat History</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="d-flex justify-content-between mb-3">
+                        <button class="btn btn-success btn-sm" onclick="createNewThread()">
+                            <i class="fas fa-plus"></i> New Chat
+                        </button>
+                    </div>
+                    <div id="threadsList">
+                        <div class="text-center text-light">
+                            <p>Chat history will be available after logging in.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </script>
+
+    <!-- Shared Authentication State Manager -->
+    <script src="/static/js/auth-state-manager.js"></script>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import Firebase modules (only for authentication)
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js';
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js';
+        import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.13.0/firebase-analytics.js';
+        
+        // Initialize Firebase dynamically with config from server
+        async function initializeFirebase() {
+            try {
+                const response = await fetch('/api/firebase-config');
+                if (!response.ok) {
+                    throw new Error('Failed to fetch Firebase config');
+                }
+                const firebaseConfig = await response.json();
+                
+                // Initialize Firebase (only for auth)
+                const app = initializeApp(firebaseConfig);
+                const auth = getAuth(app);
+                const analytics = getAnalytics(app);
+                const provider = new GoogleAuthProvider();
+                
+                return { app, auth, analytics, provider };
+            } catch (error) {
+                console.error('Failed to initialize Firebase:', error);
+                throw error;
+            }
+        }
+        
+        // Initialize Firebase and set up authentication
+        let app, auth, analytics, provider;
+        
+        initializeFirebase().then(({ app: firebaseApp, auth: firebaseAuth, analytics: firebaseAnalytics, provider: googleProvider }) => {
+            app = firebaseApp;
+            auth = firebaseAuth;
+            analytics = firebaseAnalytics;
+            provider = googleProvider;
+            
+            // Set up global Firebase references
+            window.firebaseAuth = auth;
+            window.googleProvider = provider;
+            window.signInWithPopup = signInWithPopup;
+            window.signInWithEmailAndPassword = signInWithEmailAndPassword;
+            window.createUserWithEmailAndPassword = createUserWithEmailAndPassword;
+            window.signOut = signOut;
+            window.onAuthStateChanged = onAuthStateChanged;
+            
+            console.log('Firebase authentication initialized successfully on crop recommender page!');
+            
+            // Let AuthStateManager handle auth state
+            if (window.authStateManager) {
+                window.authStateManager.initializeAuth();
+            }
+
+            // Set up form handlers after Firebase is ready
+            setupFormHandlers();
+        }).catch(error => {
+            console.error('Failed to initialize Firebase:', error);
+        });
+
+        // Set up login and register form handlers
+        function setupFormHandlers() {
+            // Login form submission
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    
+                    try {
+                        // Use Firebase Auth directly for login
+                        const userCredential = await window.signInWithEmailAndPassword(window.firebaseAuth, email, password);
+                        const user = userCredential.user;
+                        const token = await user.getIdToken();
+                        
+                        // Verify with backend
+                        const response = await fetch('/api/auth/verify', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ token })
+                        });
+                        
+                        if (response.ok) {
+                            hideAuthModals();
+                            showAlert('Login successful! Welcome ' + (user.displayName || user.email), 'success');
+                        } else {
+                            showAlert('Login verification failed', 'danger');
+                        }
+                    } catch (error) {
+                        showAlert('Login failed: ' + error.message, 'danger');
+                    }
+                });
+            }
+
+            // Register form submission
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('registerName').value;
+                    const email = document.getElementById('registerEmail').value;
+                    const password = document.getElementById('registerPassword').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+                    
+                    if (password !== confirmPassword) {
+                        showAlert('Passwords do not match', 'danger');
+                        return;
+                    }
+                    
+                    try {
+                        // Use Firebase Auth directly for registration
+                        const userCredential = await window.createUserWithEmailAndPassword(window.firebaseAuth, email, password);
+                        const user = userCredential.user;
+                        
+                        // Update display name if provided
+                        if (name && user.updateProfile) {
+                            await user.updateProfile({ displayName: name });
+                        }
+                        
+                        // Get ID token for backend verification
+                        const token = await user.getIdToken();
+                        
+                        // Verify with backend
+                        const response = await fetch('/api/auth/verify', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ token })
+                        });
+                        
+                        if (response.ok) {
+                            hideAuthModals();
+                            showAlert('Account created successfully! Welcome ' + (name || email), 'success');
+                        } else {
+                            showAlert('Account created but verification failed', 'warning');
+                        }
+                    } catch (error) {
+                        showAlert('Registration error: ' + error.message, 'danger');
+                    }
+                });
+            }
+        }
+        }).catch(error => {
+            console.error('Failed to initialize Firebase:', error);
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
