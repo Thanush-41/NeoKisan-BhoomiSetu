@@ -42,9 +42,12 @@ app = FastAPI(
 # Security
 security = HTTPBearer(auto_error=False)
 
+# Get the project root directory
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+
 # Mount static files and templates
-app.mount("/static", StaticFiles(directory="static"), name="static")
-templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory=os.path.join(project_root, "static")), name="static")
+templates = Jinja2Templates(directory=os.path.join(project_root, "templates"))
 
 # Pydantic models for API
 class Coordinates(BaseModel):
@@ -135,6 +138,16 @@ async def chat_interface(request: Request):
 async def test_auth(request: Request):
     """Serve the authentication test page"""
     return templates.TemplateResponse("test_auth.html", {"request": request})
+
+@app.get("/theme-test", response_class=HTMLResponse)
+async def theme_test(request: Request):
+    """Serve the theme test page"""
+    return templates.TemplateResponse("theme-test.html", {"request": request})
+
+@app.get("/theme-debug", response_class=HTMLResponse)
+async def theme_debug(request: Request):
+    """Serve the theme debug page"""
+    return templates.TemplateResponse("theme-debug.html", {"request": request})
 
 @app.get("/api/firebase-config")
 async def get_firebase_config():

@@ -1,0 +1,131 @@
+/* Additional Dark Theme Improvements for BhoomiSetu */
+
+/* Enhanced card hover effects for dark theme */
+[data-theme="dark"] .card:hover {
+    background-color: #252525;
+    transition: background-color 0.3s ease;
+}
+
+/* Improved form styling for dark theme */
+[data-theme="dark"] .form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+[data-theme="dark"] .form-select:focus {
+    box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+}
+
+/* Enhanced button styling */
+[data-theme="dark"] .btn-outline-primary:hover {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+/* Better visibility for text on dark backgrounds */
+[data-theme="dark"] .text-muted {
+    color: var(--muted-text) !important;
+}
+
+[data-theme="dark"] .text-dark {
+    color: var(--dark-text) !important;
+}
+
+/* Improved table styling for dark theme */
+[data-theme="dark"] .table {
+    --bs-table-bg: var(--card-bg);
+    --bs-table-striped-bg: rgba(255, 255, 255, 0.05);
+    --bs-table-border-color: var(--border-color);
+}
+
+/* Better list group styling */
+[data-theme="dark"] .list-group-item {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--dark-text);
+}
+
+/* Improved offcanvas/sidebar styling */
+[data-theme="dark"] .offcanvas {
+    background-color: var(--card-bg);
+    color: var(--dark-text);
+}
+
+/* Better spinner/loading animations */
+[data-theme="dark"] .spinner-border {
+    color: var(--primary-green);
+}
+
+/* Enhanced tooltip styling */
+[data-theme="dark"] .tooltip .tooltip-inner {
+    background-color: var(--card-bg);
+    color: var(--dark-text);
+    border: 1px solid var(--border-color);
+}
+
+/* Better pagination styling */
+[data-theme="dark"] .page-link {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .page-link:hover {
+    background-color: var(--primary-green);
+    border-color: var(--primary-green);
+    color: white;
+}
+
+/* Improved accordion styling */
+[data-theme="dark"] .accordion-item {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] .accordion-button {
+    background-color: var(--card-bg);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .accordion-button:not(.collapsed) {
+    background-color: var(--input-bg);
+    color: var(--primary-green);
+}
+
+/* Better breadcrumb styling */
+[data-theme="dark"] .breadcrumb-item a {
+    color: var(--primary-green);
+}
+
+[data-theme="dark"] .breadcrumb-item.active {
+    color: var(--muted-text);
+}
+
+/* Enhanced code blocks */
+[data-theme="dark"] code {
+    background-color: var(--input-bg);
+    color: var(--primary-green);
+}
+
+[data-theme="dark"] pre {
+    background-color: var(--input-bg);
+    border: 1px solid var(--border-color);
+    color: var(--dark-text);
+}
+
+/* Better hr styling */
+[data-theme="dark"] hr {
+    border-color: var(--border-color);
+}
+
+/* Enhanced focus ring */
+[data-theme="dark"] :focus {
+    outline: 2px solid var(--primary-green);
+    outline-offset: 2px;
+}
+
+/* Improved selection styling */
+[data-theme="dark"] ::selection {
+    background-color: var(--primary-green);
+    color: white;
+}
