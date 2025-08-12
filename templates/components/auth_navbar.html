@@ -24,8 +24,12 @@
                 </li>
             </ul>
             
-            <!-- Authentication Buttons (shown when not logged in) -->
-            <div class="d-flex gap-2" id="authButtons">
+            <!-- Theme Toggle & Authentication Buttons (shown when not logged in) -->
+            <div class="d-flex gap-2 align-items-center" id="authButtons">
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle btn btn-outline-light btn-sm" id="themeToggle" title="Switch Theme">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
                 <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
@@ -35,7 +39,11 @@
             </div>
             
             <!-- User Menu (shown when logged in) -->
-            <div class="dropdown" id="userMenu" style="display: none;">
+            <div class="dropdown d-flex gap-2 align-items-center" id="userMenu" style="display: none;">
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle btn btn-outline-light btn-sm" id="themeToggleUser" title="Switch Theme">
+                    <i class="fas fa-moon" id="themeIconUser"></i>
+                </button>
                 <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
                     <i class="fas fa-user-circle"></i>
                     <span id="userName">User</span>
@@ -537,3 +545,6 @@
         }, 5000);
     }
 </script>
+
+<!-- Include Theme Manager -->
+<script src="/static/js/theme-manager.js"></script>
