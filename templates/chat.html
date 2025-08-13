@@ -657,61 +657,175 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="navbar-glass fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-seedling"></i> BhoomiSetu AI
+    <!-- Include Professional Navbar with Chat History -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, rgba(46, 125, 50, 0.95), rgba(67, 160, 71, 0.95)); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
+        <div class="container-fluid px-4">
+            <!-- Brand -->
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="/?lang={{ language }}" style="font-size: 1.4rem; letter-spacing: 0.5px;">
+                <i class="fas fa-seedling me-2" style="font-size: 1.6rem; color: #81C784;"></i>
+                <span style="background: linear-gradient(45deg, #ffffff, #e8f5e8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">BhoomiSetu AI</span>
             </a>
-            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
-                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                <a class="nav-link active" href="/chat"><i class="fas fa-comments"></i> Chat</a>
-                <a class="nav-link" href="/weather"><i class="fas fa-cloud"></i> Weather</a>
-                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
-                <a class="nav-link" href="/disease-detection"><i class="fas fa-microscope"></i> Disease Detection</a>
-                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
-                
-                <!-- Chat-specific navigation extras -->
-                <div class="nav-link" onclick="showThreadsModal()" style="cursor: pointer;">
-                    <i class="fas fa-history"></i> History
-                </div>
-                <div class="nav-link" onclick="saveCurrentThread()" style="cursor: pointer;">
-                    <i class="fas fa-save"></i> Save
-                </div>
-                
-                <!-- Theme Toggle Buttons -->
-                <button id="themeToggle" class="btn btn-outline-light btn-sm" title="Toggle Dark Mode">
-                    <i id="themeIcon" class="fas fa-moon"></i>
-                </button>
-                
-                <!-- Authentication Buttons -->
-                <div id="authButtons" class="d-flex gap-2">
-                    <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
-                        <i class="fas fa-sign-in-alt"></i> Login
+
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Navbar Content -->
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <!-- Navigation Links -->
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item mx-1">
+                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/?lang={{ language }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-home me-2"></i>{{ t('nav.home') }}
+                        </a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link px-3 py-2 rounded-3 bg-white bg-opacity-20 text-white fw-semibold" href="/chat?lang={{ language }}">
+                            <i class="fas fa-comments me-2"></i>{{ t('nav.chat') }}
+                        </a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/weather?lang={{ language }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-cloud me-2"></i>{{ t('nav.weather') }}
+                        </a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/prices?lang={{ language }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-chart-line me-2"></i>{{ t('nav.prices') }}
+                        </a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/disease-detection?lang={{ language }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-microscope me-2"></i>{{ t('nav.disease') }}
+                        </a>
+                    </li>
+                    <li class="nav-item mx-1">
+                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/schemes?lang={{ language }}" style="transition: all 0.3s ease;">
+                            <i class="fas fa-file-alt me-2"></i>{{ t('nav.schemes') }}
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Right Side Actions -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- Chat History Button -->
+                    <button class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" onclick="showThreadsModal()" title="Chat History" style="border: 1.5px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
+                        <i class="fas fa-history me-2"></i>History
                     </button>
-                    <button class="btn btn-light btn-sm" onclick="showRegisterModal()">
-                        <i class="fas fa-user-plus"></i> Register
+
+                    <!-- Language Selector -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle px-3 py-2 rounded-3 d-flex align-items-center" 
+                                type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false"
+                                style="border: 1.5px solid rgba(255,255,255,0.3); min-width: 120px; transition: all 0.3s ease;">
+                            <i class="fas fa-globe me-2"></i>
+                            <span>{{ languages[language] }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.95);">
+                            {% for code, name in languages.items() %}
+                            <li>
+                                <a class="dropdown-item py-2 px-3 rounded-2 mx-1 my-1" 
+                                   href="javascript:void(0)" onclick="changeLanguage('{{ code }}')"
+                                   style="transition: all 0.2s ease; {% if code == language %}background: rgba(46, 125, 50, 0.1); font-weight: 600;{% endif %}">
+                                    {{ name }}
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="themeToggle" class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" 
+                            title="Toggle Dark Mode" 
+                            style="border: 1.5px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
+                        <i id="themeIcon" class="fas fa-moon"></i>
                     </button>
-                </div>
-                
-                <!-- User Menu (hidden by default) -->
-                <div id="userMenu" class="dropdown" style="display: none;">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> <span id="userName">User</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="exportCurrentChat()"><i class="fas fa-download"></i> Export Chat</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="clearCurrentChat()"><i class="fas fa-trash"></i> Clear Chat</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
+
+                    <!-- Authentication Section -->
+                    <div id="authButtons" class="d-flex gap-2">
+                        <button class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" onclick="showLoginModal()"
+                                style="border: 1.5px solid rgba(255,255,255,0.4); transition: all 0.3s ease;">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                        <button class="btn btn-light btn-sm px-3 py-2 rounded-3 fw-semibold" onclick="showRegisterModal()"
+                                style="background: rgba(255,255,255,0.9); color: #2E7D32; border: none; transition: all 0.3s ease;">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </button>
+                    </div>
+
+                    <!-- User Menu (hidden by default) -->
+                    <div id="userMenu" class="dropdown" style="display: none;">
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle px-3 py-2 rounded-3 d-flex align-items-center" 
+                                type="button" data-bs-toggle="dropdown"
+                                style="border: 1.5px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
+                            <i class="fas fa-user me-2"></i>
+                            <span id="userName">User</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.95); min-width: 200px;">
+                            <li class="px-3 py-2">
+                                <small id="userEmail" class="text-muted">user@example.com</small>
+                            </li>
+                            <li><hr class="dropdown-divider my-2"></li>
+                            <li><a class="dropdown-item py-2 px-3 rounded-2 mx-1" href="#" onclick="showThreadsModal()"><i class="fas fa-comments me-2 text-primary"></i>My Chats</a></li>
+                            <li><a class="dropdown-item py-2 px-3 rounded-2 mx-1" href="#" onclick="createNewThread()"><i class="fas fa-plus me-2 text-success"></i>New Chat</a></li>
+                            <li><a class="dropdown-item py-2 px-3 rounded-2 mx-1" href="#" onclick="exportCurrentChat()"><i class="fas fa-download me-2 text-info"></i>Export Chat</a></li>
+                            <li><a class="dropdown-item py-2 px-3 rounded-2 mx-1" href="#" onclick="clearCurrentChat()"><i class="fas fa-trash me-2 text-danger"></i>Clear Chat</a></li>
+                            <li><hr class="dropdown-divider my-2"></li>
+                            <li><a class="dropdown-item py-2 px-3 rounded-2 mx-1" href="/" onclick="logout()"><i class="fas fa-sign-out-alt me-2 text-secondary"></i>Logout</a></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </nav>
+
+    <style>
+        /* Chat-specific navbar hover effects */
+        .navbar .nav-link:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .navbar .btn:hover {
+            background: rgba(255, 255, 255, 0.2) !important;
+            border-color: rgba(255, 255, 255, 0.6) !important;
+            transform: translateY(-1px);
+        }
+        
+        .navbar .btn-light:hover {
+            background: rgba(255, 255, 255, 1) !important;
+            color: #1B5E20 !important;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(46, 125, 50, 0.1) !important;
+            color: #2E7D32 !important;
+        }
+        
+        /* Mobile responsive improvements */
+        @media (max-width: 768px) {
+            .navbar-nav {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(10px);
+                border-radius: 10px;
+                padding: 1rem;
+                margin-top: 1rem;
+            }
+            
+            .navbar .d-flex.gap-3 {
+                flex-direction: column;
+                gap: 0.5rem !important;
+                margin-top: 1rem;
+            }
+            
+            .navbar .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
 
     <!-- Floating particles -->
     <div class="floating-particle" style="left: 10%; width: 4px; height: 4px; animation-delay: 0s;"></div>
@@ -811,7 +925,7 @@
                                 <textarea 
                                     class="chat-input" 
                                     id="messageInput" 
-                                    placeholder="Ask me about farming, weather, crop prices..."
+                                    placeholder="{{ t('chat.placeholder') }}"
                                     rows="1"
                                     onkeydown="handleKeyDown(event)"
                                     oninput="autoResize(this)"
@@ -1055,6 +1169,7 @@
                 formData.append('latitude', userLocation.latitude || '');
                 formData.append('longitude', userLocation.longitude || '');
                 formData.append('conversation_history', JSON.stringify(chatHistory));
+                formData.append('language', getCurrentLanguage());
 
                 const response = await fetch('/chat', {
                     method: 'POST',
@@ -2158,6 +2273,38 @@
                 }
             }, 5000);
         }
+        
+        // Language management functions
+        function getCurrentLanguage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('lang') || localStorage.getItem('selectedLanguage') || '{{ language }}';
+        }
+        
+        function changeLanguage(langCode) {
+            // Store selected language in localStorage
+            localStorage.setItem('selectedLanguage', langCode);
+            
+            // Get current URL and update language parameter
+            const url = new URL(window.location);
+            url.searchParams.set('lang', langCode);
+            
+            // Reload page with new language
+            window.location.href = url.toString();
+        }
+        
+        // Initialize language from stored preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedLang = localStorage.getItem('selectedLanguage');
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            
+            // If no URL language parameter but we have stored preference, redirect
+            if (!urlLang && storedLang && storedLang !== '{{ language }}') {
+                const url = new URL(window.location);
+                url.searchParams.set('lang', storedLang);
+                window.location.href = url.toString();
+            }
+        });
     </script>
 
     <script src="/static/js/theme-manager.js"></script>

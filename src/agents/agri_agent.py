@@ -142,7 +142,7 @@ class AgricultureAIAgent:
             import os
             
             # Path to the soil dataset
-            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "data_core.csv")
+            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge", "data_core.csv")
             
             if not os.path.exists(csv_file_path):
                 print(f"⚠️ DEBUG: Soil dataset not found at {csv_file_path}")
@@ -205,7 +205,7 @@ class AgricultureAIAgent:
             import os
             
             # Path to the fertilizer dataset
-            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "Fertilizer Prediction.csv")
+            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge", "Fertilizer Prediction.csv")
             
             if not os.path.exists(csv_file_path):
                 print(f"⚠️ DEBUG: Fertilizer dataset not found at {csv_file_path}")
@@ -577,16 +577,63 @@ class AgricultureAIAgent:
             return 'en'  # Default to English
 
     async def translate_text(self, text: str, target_lang: str = 'en') -> str:
-        """Translate text using OpenAI (simplified)"""
+        """Translate text using OpenAI with comprehensive Indian language support"""
         try:
-            if target_lang == 'en':
+            if target_lang == 'en' or not self.openai_client:
                 return text
             
-            # For now, return the original text
-            # In production, you could use OpenAI for translation
-            return text
+            # Language code mapping to full names for better translation
+            language_map = {
+                'hi': 'Hindi',
+                'te': 'Telugu', 
+                'kn': 'Kannada',
+                'gu': 'Gujarati',
+                'pa': 'Punjabi',
+                'ta': 'Tamil',
+                'ml': 'Malayalam',
+                'bn': 'Bengali',
+                'mr': 'Marathi',
+                'or': 'Odia',
+                'as': 'Assamese'
+            }
+            
+            target_language = language_map.get(target_lang, target_lang)
+            
+            if target_language not in language_map.values():
+                return text
+            
+            # Use OpenAI for translation with specific prompts for agricultural context
+            response = await self.openai_client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": f"""You are a professional translator specializing in agricultural and farming terminology. 
+                        Translate the given text to {target_language} while:
+                        1. Preserving all agricultural terms and technical meanings
+                        2. Using language that farmers would understand
+                        3. Maintaining the helpful and advisory tone
+                        4. Keeping numbers, measurements, and scientific terms accurate
+                        5. Using appropriate regional farming vocabulary when available
+                        
+                        Only return the translated text, nothing else."""
+                    },
+                    {
+                        "role": "user",
+                        "content": f"Translate this agricultural advice to {target_language}: {text}"
+                    }
+                ],
+                max_tokens=1500,
+                temperature=0.3
+            )
+            
+            translated_text = response.choices[0].message.content.strip()
+            print(f"🔤 DEBUG: Translated text from English to {target_language}")
+            return translated_text
+            
         except Exception as e:
             logger.error(f"Translation error: {e}")
+            print(f"⚠️ DEBUG: Translation failed, returning original text")
             return text
 
     def _get_current_season(self) -> str:
@@ -696,8 +743,7 @@ class AgricultureAIAgent:
             import os
             
             # Path to the comprehensive CSV file
-            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                                       "9ef84268-d588-465a-a308-a864a43d0070 (2).csv")
+            csv_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge", "market_data.csv")
             
             print(f"🔍 DEBUG: Manual CSV parsing from: {csv_file_path}")
             
@@ -1187,8 +1233,7 @@ Response (JSON only):
                 import os
                 
                 # Path to the comprehensive CSV file
-                csv_file_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 
-                                           "9ef84268-d588-465a-a308-a864a43d0070 (2).csv")
+                csv_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge", "market_data.csv")
                 
                 print(f"📊 DEBUG: Loading CSV data from: {csv_file_path}")
                 
@@ -1374,7 +1419,7 @@ Response (JSON only):
         else:
             return "general"
 
-    async def process_query(self, query: str, location: str = None, user_context: Dict = None, conversation_history: List[Dict] = None) -> str:
+    async def process_query(self, query: str, location: str = None, user_context: Dict = None, conversation_history: List[Dict] = None, preferred_language: str = "en") -> str:
         """Main method to process agricultural queries with enhanced AI understanding and conversation context"""
         try:
             print(f"🤖 DEBUG: Processing query: '{query}' | Location: '{location}'")
@@ -1470,9 +1515,10 @@ Response (JSON only):
                 # Enhanced general query handling with context (weather already fetched)
                 response = await self._handle_general_query_with_context(specific_question, context_data, user_context, effective_location)
             
-            # Translate back to original language if needed
-            if detected_lang != 'en':
-                response = await self.translate_text(response, detected_lang)
+            # Translate back to original language if needed or use preferred language
+            target_language = preferred_language or detected_lang
+            if target_language != 'en':
+                response = await self.translate_text(response, target_language)
             
             return response
             

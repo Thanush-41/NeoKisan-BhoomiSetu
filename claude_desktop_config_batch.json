@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "bhoomisetu": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "t:\\BhoomiSetu\\mcp_server.bat"
+      ]
+    }
+  }
+}

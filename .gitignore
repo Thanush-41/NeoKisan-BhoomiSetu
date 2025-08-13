@@ -3,6 +3,7 @@
 .env.local
 .env.production
 firebase.env
+mcp.env
 
 # Python
 __pycache__/
