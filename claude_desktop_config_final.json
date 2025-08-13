@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "bhoomisetu": {
+      "command": "python",
+      "args": [
+        "t:\\BhoomiSetu\\mcp_persistent.py"
+      ]
+    }
+  }
+}

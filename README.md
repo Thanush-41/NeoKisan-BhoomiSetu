@@ -36,6 +36,38 @@ BhoomiSetu is an intelligent agricultural advisor that helps farmers make inform
 - **Bot**: python-telegram-bot
 - **Frontend**: HTML5, Bootstrap 5, JavaScript
 - **Database**: SQLite (configurable)
+- **MCP Server**: Model Context Protocol for standardized AI model access
+
+## 🔧 MCP Server
+
+BhoomiSetu includes a **Model Context Protocol (MCP) server** that provides standardized API access to all agricultural AI models and services.
+
+### Features
+- **Standardized API**: REST endpoints following MCP specifications
+- **Multiple Models**: Chat, crop recommendation, disease detection
+- **Health Monitoring**: Real-time status of all models and dependencies
+- **Client Library**: Easy-to-use Python client for integration
+
+### Quick Start MCP Server
+```bash
+# Start MCP server (runs on port 8001)
+python mcp_server.py
+
+# Use the client
+from src.mcp.client import BhoomiSetuMCPClient
+
+async with BhoomiSetuMCPClient("http://localhost:8001") as client:
+    response = await client.chat("What crops for Punjab?")
+    print(response.message)
+```
+
+### MCP Endpoints
+- `GET /v1/health` - Server health status
+- `GET /v1/models` - List available models
+- `POST /v1/chat` - Chat with agricultural AI
+- `POST /v1/models/{model_id}/predict` - Model predictions
+
+**📚 [Complete MCP Documentation](docs/MCP_README.md)**
 
 ## 🚀 Quick Start
 
