@@ -28,6 +28,7 @@ from models.auth_models import (
     UserRegistration, UserLogin, TokenVerification, UserResponse,
     ChatThreadCreate, ChatMessage, ChatThreadResponse, ChatMessageResponse
 )
+from i18n import i18n_service, t, LanguageConfig
 
 # Load environment variables
 load_dotenv()
@@ -125,14 +126,32 @@ async def get_city_from_coordinates(latitude: float, longitude: float) -> str:
         return 'Unknown'
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    """Serve the main web interface"""
-    return templates.TemplateResponse("index.html", {"request": request})
+async def home(request: Request, lang: Optional[str] = "en"):
+    """Serve the main web interface with language support"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
+    return templates.TemplateResponse("index.html", {
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
+    })
 
 @app.get("/chat", response_class=HTMLResponse)
-async def chat_interface(request: Request):
-    """Serve the chat interface"""
-    return templates.TemplateResponse("chat.html", {"request": request})
+async def chat_interface(request: Request, lang: Optional[str] = "en"):
+    """Serve the chat interface with language support"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
+    return templates.TemplateResponse("chat.html", {
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
+    })
 
 @app.get("/test", response_class=HTMLResponse)
 async def test_auth(request: Request):
@@ -583,7 +602,8 @@ async def chat_submit(
     location: str = Form("", description="User location"),
     latitude: str = Form("", description="Latitude coordinate"),
     longitude: str = Form("", description="Longitude coordinate"),
-    conversation_history: str = Form("[]", description="JSON string of conversation history")
+    conversation_history: str = Form("[]", description="JSON string of conversation history"),
+    language: str = Form("en", description="User selected language")
 ):
     """Handle chat form submission - returns JSON for AJAX requests"""
     try:
@@ -622,14 +642,20 @@ async def chat_submit(
             } if latitude and longitude else None
         }
         
-        print(f"DEBUG: User context: {user_context}")
+        # Validate language
+        if language not in LanguageConfig.LANGUAGES:
+            language = LanguageConfig.DEFAULT_LANGUAGE
         
-        # Always try to use AI agent with conversation history
+        print(f"DEBUG: User context: {user_context}")
+        print(f"DEBUG: Selected language: {language}")
+        
+        # Always try to use AI agent with conversation history and language
         response = await agri_agent.process_query(
             query=message,
             location=location,
             user_context=user_context,
-            conversation_history=history
+            conversation_history=history,
+            preferred_language=language
         )
         
         print(f"DEBUG: Full response generated:")
@@ -642,11 +668,16 @@ async def chat_submit(
     except Exception as e:
         print(f"DEBUG: Chat error: {e}")
         print(f"DEBUG: Chat error type: {type(e)}")
-        return {"response": f"Sorry, I encountered an error: {str(e)}"}
+        error_msg = t("chat.error", language) if 'language' in locals() else "Sorry, I encountered an error. Please try again."
+        return {"response": error_msg}
 
 @app.get("/weather")
-async def weather_default_page(request: Request):
+async def weather_default_page(request: Request, lang: Optional[str] = "en"):
     """Weather information page with default location"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     try:
         # Default to Mumbai if no location specified
         default_location = "Mumbai"
@@ -654,72 +685,126 @@ async def weather_default_page(request: Request):
         return templates.TemplateResponse("weather.html", {
             "request": request,
             "location": default_location,
-            "weather": weather_data
+            "weather": weather_data,
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
         })
     except Exception as e:
         return templates.TemplateResponse("error.html", {
             "request": request,
-            "error": str(e)
+            "error": str(e),
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
         })
 
 @app.get("/weather/{location}")
-async def weather_page(request: Request, location: str):
+async def weather_page(request: Request, location: str, lang: Optional[str] = "en"):
     """Weather information page"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     try:
         weather_data = await agri_agent.get_weather_data(location)
         return templates.TemplateResponse("weather.html", {
             "request": request,
             "location": location,
-            "weather": weather_data
+            "weather": weather_data,
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
         })
     except Exception as e:
         return templates.TemplateResponse("error.html", {
             "request": request,
-            "error": str(e)
+            "error": str(e),
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
         })
 
 @app.get("/prices")
-async def prices_page(request: Request):
+async def prices_page(request: Request, lang: Optional[str] = "en"):
     """Market prices page"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     try:
         price_data = await agri_agent.get_commodity_prices(user_location="Vijayawada")
         return templates.TemplateResponse("prices.html", {
             "request": request,
-            "prices": price_data
+            "prices": price_data,
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
         })
     except Exception as e:
         return templates.TemplateResponse("error.html", {
             "request": request,
-            "error": str(e)
+            "error": str(e),
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
         })
 
 @app.get("/schemes")
-async def schemes_page(request: Request):
+async def schemes_page(request: Request, lang: Optional[str] = "en"):
     """Financial schemes page"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     return templates.TemplateResponse("schemes.html", {
         "request": request,
-        "schemes": agri_agent.financial_schemes
+        "schemes": agri_agent.financial_schemes,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
     })
 
 @app.get("/crop-disease")
-async def crop_disease_page(request: Request):
+async def crop_disease_page(request: Request, lang: Optional[str] = "en"):
     """Crop disease detection page"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     return templates.TemplateResponse("crop_disease.html", {
-        "request": request
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
     })
 
 @app.get("/disease-detection")
-async def disease_detection_page(request: Request):
+async def disease_detection_page(request: Request, lang: Optional[str] = "en"):
     """Plant disease detection page using AI model"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     return templates.TemplateResponse("disease_detection.html", {
-        "request": request
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
     })
 
 @app.get("/crop-recommender")
-async def crop_recommender_page(request: Request):
+async def crop_recommender_page(request: Request, lang: Optional[str] = "en"):
     """Crop recommendation page"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
     return templates.TemplateResponse("crop_recommender.html", {
-        "request": request
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
     })
 
 # ========================================

@@ -47,7 +47,7 @@ class CropRecommendationAgent:
             print("⚠️ OpenWeather API key not found. Will use default weather values.")
         
         # Load and prepare the dataset
-        self.dataset_path = "Crop_recommendation.csv"
+        self.dataset_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge", "Crop_recommendation.csv")
         self.model = None
         self.scaler = None
         self.feature_columns = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']

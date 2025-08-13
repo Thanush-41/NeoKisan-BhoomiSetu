@@ -1,0 +1,761 @@
+<!-- Professional Navbar Component -->
+<nav class="navbar navbar-expand-lg navbar-glass fixed-top">
+    <div class="container-fluid px-3 px-lg-4">
+        <!-- Brand -->
+        <a class="navbar-brand d-flex align-items-center" href="/?lang={{ language }}">
+            <i class="fas fa-seedling me-2"></i>
+            <span class="brand-text">BhoomiSetu</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon">
+                <i class="fas fa-bars"></i>
+            </span>
+        </button>
+
+        <!-- Collapsible Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Main Navigation Links -->
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if request.url.path == '/' else '' }}" 
+                       href="/?lang={{ language }}">
+                        <i class="fas fa-home"></i>
+                        <span class="nav-text">{{ t('nav.home') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/chat' in request.url.path else '' }}" 
+                       href="/chat?lang={{ language }}">
+                        <i class="fas fa-comments"></i>
+                        <span class="nav-text">{{ t('nav.chat') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/weather' in request.url.path else '' }}" 
+                       href="/weather?lang={{ language }}">
+                        <i class="fas fa-cloud-sun"></i>
+                        <span class="nav-text">{{ t('nav.weather') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/crop-recommender' in request.url.path else '' }}" 
+                       href="/crop-recommender?lang={{ language }}">
+                        <i class="fas fa-seedling"></i>
+                        <span class="nav-text">{{ t('nav.crops') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/disease-detection' in request.url.path else '' }}" 
+                       href="/disease-detection?lang={{ language }}">
+                        <i class="fas fa-microscope"></i>
+                        <span class="nav-text">{{ t('nav.disease') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/prices' in request.url.path else '' }}" 
+                       href="/prices?lang={{ language }}">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="nav-text">{{ t('nav.prices') }}</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/schemes' in request.url.path else '' }}" 
+                       href="/schemes?lang={{ language }}">
+                        <i class="fas fa-file-contract"></i>
+                        <span class="nav-text">{{ t('nav.schemes') }}</span>
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Right Side Actions -->
+            <div class="navbar-nav ms-auto d-flex align-items-center navbar-actions">
+                <!-- Chat History Button (only on chat page) -->
+                {% if '/chat' in request.url.path %}
+                <div class="nav-item me-2">
+                    <button class="btn btn-outline-primary btn-sm d-flex align-items-center" onclick="showThreadsModal()" title="Chat History">
+                        <i class="fas fa-history"></i>
+                        <span class="d-none d-xl-inline ms-1">History</span>
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Language Selector -->
+                <div class="nav-item dropdown me-2">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center" type="button" 
+                            id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-globe"></i>
+                        <span class="d-none d-xl-inline ms-1">{{ languages[language] }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        {% for code, name in languages.items() %}
+                        <li>
+                            <a class="dropdown-item {{ 'active' if code == language else '' }}" 
+                               href="javascript:void(0)" onclick="changeLanguage('{{ code }}')">
+                                <i class="fas fa-check me-2 {{ 'opacity-100' if code == language else 'opacity-0' }}"></i>
+                                {{ name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+
+                <!-- Theme Toggle -->
+                <div class="nav-item me-2">
+                    <button class="btn btn-outline-light btn-sm d-flex align-items-center" id="themeToggle" title="Toggle Theme">
+                        <i class="fas fa-moon" id="themeIcon"></i>
+                    </button>
+                </div>
+
+                <!-- Authentication Buttons -->
+                <div id="authButtons" class="auth-buttons">
+                    <button class="btn btn-outline-light btn-sm auth-btn" onclick="showLoginModal()">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span class="btn-text">Login</span>
+                    </button>
+                    <button class="btn btn-primary btn-sm auth-btn" onclick="showRegisterModal()">
+                        <i class="fas fa-user-plus"></i>
+                        <span class="btn-text">Register</span>
+                    </button>
+                </div>
+
+                <!-- User Menu (hidden by default) -->
+                <div id="userMenu" class="dropdown user-menu" style="display: none;">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center user-btn" type="button" 
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="fas fa-user"></i>
+                        <span id="userName" class="username-display">User</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                        <li>
+                            <div class="dropdown-header">
+                                <div class="user-info-display">
+                                    <div id="userNameFull" class="user-name-full">User Name</div>
+                                    <small id="userEmail" class="user-email-display">user@example.com</small>
+                                </div>
+                            </div>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="showThreadsModal()">
+                                <i class="fas fa-comments me-2"></i>My Chats
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="/chat?lang={{ language }}" onclick="createNewThread()">
+                                <i class="fas fa-plus me-2"></i>New Chat
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="#" onclick="logout()">
+                                <i class="fas fa-sign-out-alt me-2"></i>Logout
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<style>
+/* Professional Navbar Styles */
+.navbar-glass {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+    min-height: 70px;
+}
+
+[data-theme="dark"] .navbar-glass {
+    background: rgba(26, 32, 44, 0.95);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Brand Styling */
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: var(--primary-green, #2a7a1f) !important;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.navbar-brand:hover {
+    transform: scale(1.05);
+}
+
+.brand-text {
+    background: linear-gradient(135deg, var(--primary-green, #2a7a1f), #4caf50);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* Navigation Links */
+.navbar-nav .nav-link {
+    color: var(--dark-text, #2d3748) !important;
+    font-weight: 500;
+    padding: 0.75rem 1rem !important;
+    margin: 0 0.25rem;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+[data-theme="dark"] .navbar-nav .nav-link {
+    color: var(--light-text, #e2e8f0) !important;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--primary-green, #2a7a1f) !important;
+    background: rgba(74, 175, 80, 0.1);
+    transform: translateY(-1px);
+}
+
+.navbar-nav .nav-link.active {
+    color: var(--primary-green, #2a7a1f) !important;
+    background: rgba(74, 175, 80, 0.15);
+    font-weight: 600;
+}
+
+.navbar-nav .nav-link.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 30px;
+    height: 3px;
+    background: var(--primary-green, #2a7a1f);
+    border-radius: 2px;
+}
+
+/* Icons */
+.navbar-nav .nav-link i {
+    font-size: 1rem;
+    width: 18px;
+    text-align: center;
+}
+
+/* Mobile Toggle */
+.navbar-toggler {
+    border: none;
+    padding: 0.5rem;
+    background: transparent;
+    position: relative;
+    z-index: 1051;
+}
+
+.navbar-toggler:focus {
+    box-shadow: none;
+}
+
+.navbar-toggler-icon {
+    color: var(--dark-text, #2d3748);
+    font-size: 1.25rem;
+    transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .navbar-toggler-icon {
+    color: var(--light-text, #e2e8f0);
+}
+
+/* Rotate hamburger icon when expanded */
+.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+    transform: rotate(90deg);
+}
+
+/* Buttons */
+.navbar .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.navbar .btn-outline-light {
+    border-color: rgba(0, 0, 0, 0.2);
+    color: var(--dark-text, #2d3748);
+}
+
+[data-theme="dark"] .navbar .btn-outline-light {
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--light-text, #e2e8f0);
+}
+
+.navbar .btn-outline-light:hover {
+    background: var(--primary-green, #2a7a1f);
+    border-color: var(--primary-green, #2a7a1f);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.navbar .btn-primary {
+    background: var(--primary-green, #2a7a1f);
+    border-color: var(--primary-green, #2a7a1f);
+}
+
+.navbar .btn-primary:hover {
+    background: #1e5e16;
+    border-color: #1e5e16;
+    transform: translateY(-1px);
+}
+
+.navbar .btn-outline-primary {
+    border-color: var(--primary-green, #2a7a1f);
+    color: var(--primary-green, #2a7a1f);
+}
+
+.navbar .btn-outline-primary:hover {
+    background: var(--primary-green, #2a7a1f);
+    border-color: var(--primary-green, #2a7a1f);
+    transform: translateY(-1px);
+}
+
+/* Dropdown Menus */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    border-radius: 12px;
+    margin-top: 0.5rem;
+    min-width: 200px;
+}
+
+.dropdown-item {
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+}
+
+.dropdown-item:hover {
+    background: rgba(74, 175, 80, 0.1);
+    color: var(--primary-green, #2a7a1f);
+}
+
+.dropdown-item.active {
+    background: rgba(74, 175, 80, 0.15);
+    color: var(--primary-green, #2a7a1f);
+}
+
+/* Responsive Design */
+@media (max-width: 991.98px) {
+    .navbar-nav {
+        padding: 1rem 0;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        margin-top: 1rem;
+    }
+    
+    [data-theme="dark"] .navbar-nav {
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-nav .nav-link {
+        margin: 0.25rem 0;
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .navbar-actions {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid rgba(0, 0, 0, 0.1);
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 0.75rem;
+    }
+    
+    [data-theme="dark"] .navbar-actions {
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+    
+    .navbar-actions > div {
+        width: 100%;
+    }
+    
+    .navbar-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .auth-buttons {
+        flex-direction: column !important;
+        gap: 0.5rem;
+    }
+    
+    .auth-buttons .btn {
+        width: 100%;
+    }
+    
+    .user-menu .btn {
+        width: 100%;
+    }
+    
+    /* Show button text in mobile */
+    .btn-text,
+    .username-display {
+        display: inline !important;
+    }
+}
+
+/* Desktop and Large Screens */
+@media (min-width: 992px) {
+    .navbar-actions {
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 0.5rem;
+        max-width: 100%;
+        overflow: hidden;
+    }
+    
+    .auth-buttons {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        flex-shrink: 0;
+    }
+    
+    .auth-btn {
+        white-space: nowrap;
+        min-width: auto;
+        flex-shrink: 0;
+    }
+    
+    .user-menu {
+        flex-shrink: 0;
+    }
+    
+    .user-btn {
+        max-width: 180px;
+        overflow: hidden;
+        min-width: 44px;
+    }
+    
+    .username-display {
+        max-width: 100px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin-left: 0.5rem;
+    }
+    
+    /* Ensure container doesn't overflow */
+    .container-fluid {
+        max-width: 100vw;
+        padding-left: clamp(0.75rem, 2vw, 2rem);
+        padding-right: clamp(0.75rem, 2vw, 2rem);
+    }
+}
+
+/* Text visibility breakpoints - More aggressive hiding on smaller screens */
+@media (max-width: 1199.98px) {
+    .btn-text {
+        display: none !important;
+    }
+    
+    .username-display {
+        max-width: 80px;
+    }
+}
+
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+    .btn-text {
+        display: none !important;
+    }
+    
+    .username-display {
+        max-width: 90px;
+    }
+}
+
+@media (min-width: 1400px) {
+    .btn-text {
+        display: inline !important;
+        margin-left: 0.5rem;
+    }
+    
+    .username-display {
+        max-width: 120px;
+    }
+}
+
+/* User Menu Styles */
+.user-menu {
+    position: relative;
+}
+
+.user-btn {
+    max-width: 200px;
+    overflow: hidden;
+}
+
+.username-display {
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.user-dropdown {
+    min-width: 250px;
+}
+
+.dropdown-header {
+    padding: 0.75rem 1rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-radius: 8px 8px 0 0;
+}
+
+[data-theme="dark"] .dropdown-header {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.user-info-display {
+    text-align: left;
+}
+
+.user-name-full {
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+[data-theme="dark"] .user-name-full {
+    color: var(--light-text);
+}
+
+.user-email-display {
+    color: var(--muted-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+/* Navbar container fixes */
+.navbar-glass {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+    padding: 0.75rem 0;
+    transition: all 0.3s ease;
+    min-height: 70px;
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+}
+
+.container-fluid {
+    max-width: 100%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+/* Ensure navbar content doesn't overflow */
+.navbar-collapse {
+    flex-grow: 1;
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.navbar-nav {
+    max-width: 100%;
+}
+
+.navbar-nav.ms-auto {
+    flex-shrink: 0;
+    max-width: 50%;
+}
+
+/* Button improvements */
+.navbar .btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-height: 38px;
+}
+
+.auth-btn,
+.user-btn {
+    min-width: 44px; /* Minimum touch target */
+}
+
+@media (max-width: 767.98px) {
+    .navbar-glass {
+        padding: 0.5rem 0;
+        min-height: 60px;
+    }
+    
+    .navbar-brand {
+        font-size: 1.25rem;
+    }
+    
+    .nav-text {
+        margin-left: 0.5rem;
+    }
+    
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+
+/* Smooth Animations */
+.navbar-collapse {
+    transition: all 0.3s ease;
+}
+
+.navbar-nav .nav-item {
+    transition: all 0.3s ease;
+}
+
+/* Focus States for Accessibility */
+.navbar .btn:focus,
+.navbar .nav-link:focus,
+.dropdown-item:focus {
+    box-shadow: 0 0 0 2px rgba(74, 175, 80, 0.25);
+    outline: none;
+}
+</style>
+
+<script>
+// Professional Navbar JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize Bootstrap components properly
+    const navbarToggler = document.querySelector('.navbar-toggler');
+    const navbarCollapse = document.querySelector('#navbarNav');
+    
+    // Auto-close navbar on mobile when clicking nav links
+    if (navbarCollapse) {
+        const navLinks = navbarCollapse.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                // Only auto-close on mobile/tablet
+                if (window.innerWidth < 992) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                    bsCollapse.hide();
+                }
+            });
+        });
+        
+        // Auto-close when clicking outside navbar on mobile
+        document.addEventListener('click', function(event) {
+            if (window.innerWidth < 992) {
+                const isClickInsideNav = navbarCollapse.contains(event.target) || 
+                                       (navbarToggler && navbarToggler.contains(event.target));
+                
+                if (!isClickInsideNav && navbarCollapse.classList.contains('show')) {
+                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
+                    bsCollapse.hide();
+                }
+            }
+        });
+    }
+    
+    // User name truncation with hover tooltip
+    function setupUserDisplay() {
+        const userName = document.getElementById('userName');
+        const userNameFull = document.getElementById('userNameFull');
+        const userEmail = document.getElementById('userEmail');
+        
+        if (userName && userNameFull) {
+            const fullName = userNameFull.textContent.trim();
+            if (fullName && fullName !== 'User Name') {
+                // Truncate display name for button
+                const maxDisplayLength = window.innerWidth >= 1400 ? 12 : 8;
+                if (fullName.length > maxDisplayLength) {
+                    userName.textContent = fullName.substring(0, maxDisplayLength) + '...';
+                    userName.title = fullName; // Tooltip with full name
+                } else {
+                    userName.textContent = fullName;
+                }
+            }
+        }
+        
+        if (userEmail) {
+            const fullEmail = userEmail.textContent.trim();
+            if (fullEmail && fullEmail !== 'user@example.com') {
+                const maxEmailLength = 30;
+                if (fullEmail.length > maxEmailLength) {
+                    userEmail.textContent = fullEmail.substring(0, maxEmailLength) + '...';
+                    userEmail.title = fullEmail; // Tooltip with full email
+                }
+            }
+        }
+    }
+    
+    // Call setup function
+    setupUserDisplay();
+    
+    // Re-setup on window resize
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(setupUserDisplay, 250);
+    });
+    
+    // Ensure dropdowns work properly
+    const dropdownTriggers = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+    dropdownTriggers.forEach(trigger => {
+        // Ensure Bootstrap dropdown is initialized
+        if (!bootstrap.Dropdown.getInstance(trigger)) {
+            new bootstrap.Dropdown(trigger);
+        }
+    });
+});
+
+// Language change function
+function changeLanguage(langCode) {
+    const currentUrl = new URL(window.location.href);
+    currentUrl.searchParams.set('lang', langCode);
+    window.location.href = currentUrl.toString();
+}
+
+// User authentication functions (these should be defined elsewhere, but included for completeness)
+function showLoginModal() {
+    // Implementation should be in main app
+    console.log('Show login modal');
+}
+
+function showRegisterModal() {
+    // Implementation should be in main app
+    console.log('Show register modal');
+}
+
+function logout() {
+    // Implementation should be in main app
+    console.log('Logout user');
+}
+
+function showThreadsModal() {
+    // Implementation should be in chat page
+    console.log('Show threads modal');
+}
+
+function createNewThread() {
+    // Implementation should be in chat page
+    console.log('Create new thread');
+}
+</script>

@@ -1,0 +1,115 @@
+{
+  "nav": {
+    "home": "Home",
+    "chat": "Chat",
+    "weather": "Weather",
+    "crops": "Crop Recommender",
+    "disease": "Disease Detection",
+    "prices": "Market Prices",
+    "schemes": "Government Schemes",
+    "rag": "RAG Chat"
+  },
+  "hero": {
+    "title": "Smart Farming Solutions",
+    "subtitle": "AI-Powered Agricultural Advisor for Indian Farmers",
+    "description": "Get expert advice on crops, weather, diseases, and farming techniques with our advanced AI assistant.",
+    "cta_button": "Start Chat",
+    "language_selector": "Select Language"
+  },
+  "features": {
+    "title": "Features",
+    "crop_advice": {
+      "title": "Crop Advice",
+      "description": "Get personalized crop recommendations based on your location, soil, and season."
+    },
+    "weather_updates": {
+      "title": "Weather Updates",
+      "description": "Real-time weather information and forecasts for better farming decisions."
+    },
+    "disease_detection": {
+      "title": "Disease Detection",
+      "description": "AI-powered plant disease identification and treatment recommendations."
+    },
+    "market_prices": {
+      "title": "Market Prices",
+      "description": "Current commodity prices and market trends to optimize your sales."
+    },
+    "government_schemes": {
+      "title": "Government Schemes",
+      "description": "Information about agricultural subsidies and government support programs."
+    },
+    "expert_chat": {
+      "title": "Expert Chat",
+      "description": "Chat with our AI agricultural expert for instant farming guidance."
+    }
+  },
+  "chat": {
+    "title": "Chat with AI Agricultural Expert",
+    "placeholder": "Ask about crops, weather, diseases, or farming techniques...",
+    "send_button": "Send",
+    "location_placeholder": "Enter your location (optional)",
+    "thinking": "Thinking...",
+    "error": "Sorry, I encountered an error. Please try again.",
+    "empty_message": "Please enter a message to get started!"
+  },
+  "weather": {
+    "title": "Weather Information",
+    "current": "Current Weather",
+    "forecast": "5-Day Forecast",
+    "temperature": "Temperature",
+    "humidity": "Humidity",
+    "wind_speed": "Wind Speed",
+    "pressure": "Pressure",
+    "feels_like": "Feels Like"
+  },
+  "crop_recommender": {
+    "title": "Crop Recommender",
+    "subtitle": "Get AI-powered crop recommendations based on your soil and climate conditions",
+    "soil_parameters": "Soil Parameters",
+    "climate_parameters": "Climate Parameters",
+    "nitrogen": "Nitrogen (N)",
+    "phosphorus": "Phosphorus (P)",
+    "potassium": "Potassium (K)",
+    "temperature": "Temperature (°C)",
+    "humidity": "Humidity (%)",
+    "ph": "pH Level",
+    "rainfall": "Rainfall (mm)",
+    "get_recommendation": "Get Recommendation",
+    "recommended_crop": "Recommended Crop",
+    "confidence": "Confidence"
+  },
+  "disease_detection": {
+    "title": "Plant Disease Detection",
+    "subtitle": "Upload a photo of your plant to detect diseases and get treatment recommendations",
+    "upload_button": "Choose Plant Image",
+    "analyze_button": "Analyze Disease",
+    "drag_drop": "Drag and drop an image here, or click to select",
+    "supported_formats": "Supported formats: JPG, PNG, JPEG",
+    "disease_detected": "Disease Detected",
+    "confidence": "Confidence",
+    "treatment": "Treatment Recommendations",
+    "get_ai_description": "Get AI Description"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "search": "Search",
+    "filter": "Filter",
+    "sort": "Sort",
+    "download": "Download",
+    "upload": "Upload"
+  },
+  "footer": {
+    "copyright": "© 2025 BhoomiSetu. All rights reserved.",
+    "powered_by": "Powered by AI"
+  }
+}

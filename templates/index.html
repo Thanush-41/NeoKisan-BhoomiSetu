@@ -22,7 +22,7 @@
             background-color: var(--light-bg);
             color: var(--dark-text);
             line-height: 1.6;
-            margin-top: 60px;
+            margin-top: 80px;
         }
 
         /* Navbar */
@@ -439,69 +439,19 @@
             box-shadow: 
                 0 8px 32px rgba(0, 0, 0, 0.12),
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
-        }
     </style>
 </head>
 <body>
-    <!-- Navigation Component -->
-    <!-- Include shared authentication navbar -->
-    <nav class="navbar-glass fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="fas fa-seedling"></i> BhoomiSetu AI
-            </a>
-            <div class="navbar-nav ms-auto d-flex flex-row gap-3 align-items-center">
-                <a class="nav-link" href="/"><i class="fas fa-home"></i> Home</a>
-                <a class="nav-link" href="/chat"><i class="fas fa-comments"></i> Chat</a>
-                <a class="nav-link" href="/crop-recommender"><i class="fas fa-seedling"></i> Crop Recommender</a>
-                <a class="nav-link" href="/weather"><i class="fas fa-cloud"></i> Weather</a>
-                <a class="nav-link" href="/prices"><i class="fas fa-chart-line"></i> Prices</a>
-                <a class="nav-link" href="/disease-detection"><i class="fas fa-microscope"></i> Disease Detection</a>
-                <a class="nav-link" href="/schemes"><i class="fas fa-file-alt"></i> Schemes</a>
-                
-                <!-- Theme Toggle & Authentication Buttons -->
-                <div id="authButtons" class="d-flex gap-2 align-items-center">
-                    <!-- Theme Toggle Button -->
-                    <button class="theme-toggle btn btn-outline-light btn-sm" id="themeToggle" title="Switch Theme">
-                        <i class="fas fa-moon" id="themeIcon"></i>
-                    </button>
-                    <button class="btn btn-outline-light btn-sm" onclick="showLoginModal()">
-                        <i class="fas fa-sign-in-alt"></i> Login
-                    </button>
-                    <button class="btn btn-light btn-sm" onclick="showRegisterModal()">
-                        <i class="fas fa-user-plus"></i> Register
-                    </button>
-                </div>
-                
-                <!-- User Menu (hidden by default) -->
-                <div id="userMenu" class="dropdown d-flex gap-2 align-items-center" style="display: none;">
-                    <!-- Theme Toggle Button -->
-                    <button class="theme-toggle btn btn-outline-light btn-sm" id="themeToggleUser" title="Switch Theme">
-                        <i class="fas fa-moon" id="themeIconUser"></i>
-                    </button>
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> <span id="userName">User</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><span class="dropdown-item-text"><small id="userEmail" class="text-muted">user@example.com</small></span></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="showThreadsModal()"><i class="fas fa-comments"></i> My Chats</a></li>
-                        <li><a class="dropdown-item" href="/chat" onclick="createNewThread()"><i class="fas fa-plus"></i> New Chat</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
+    <!-- Include Professional Navbar -->
+    {% include 'components/navbar.html' %}
 
     <!-- Hero Section -->
     <section class="hero">
         <div class="hero-text">
-            <h1>India's Most Advanced Agricultural AI Advisor</h1>
-            <p>Empowering farmers with intelligent insights, real-time data, and expert guidance.</p>
-            <a href="/chat" class="btn btn-primary">Start Chatting</a>
-            <a href="#features" class="btn btn-outline">Learn More</a>
+            <h1>{{ t('hero.title') }}</h1>
+            <p>{{ t('hero.description') }}</p>
+            <a href="/chat?lang={{ language }}" class="btn btn-primary">{{ t('hero.cta_button') }}</a>
+            <a href="#features" class="btn btn-outline">{{ t('nav.home') }}</a>
         </div>
         <div class="hero-image">
             <img src="/static/farmer.jpg" alt="Farmer Illustration">
@@ -1299,6 +1249,37 @@
                 userIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
             }
         }
+        
+        // Language management functions
+        function changeLanguage(langCode) {
+            // Store selected language in localStorage
+            localStorage.setItem('selectedLanguage', langCode);
+            
+            // Get current URL and update language parameter
+            const url = new URL(window.location);
+            url.searchParams.set('lang', langCode);
+            
+            // Reload page with new language
+            window.location.href = url.toString();
+        }
+        
+        function getStoredLanguage() {
+            return localStorage.getItem('selectedLanguage') || '{{ language }}';
+        }
+        
+        // Initialize language from stored preference
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedLang = getStoredLanguage();
+            const urlParams = new URLSearchParams(window.location.search);
+            const urlLang = urlParams.get('lang');
+            
+            // If no URL language parameter but we have stored preference, redirect
+            if (!urlLang && storedLang !== '{{ language }}') {
+                const url = new URL(window.location);
+                url.searchParams.set('lang', storedLang);
+                window.location.href = url.toString();
+            }
+        });
 
         // Initialize theme toggle when page loads
         document.addEventListener('DOMContentLoaded', function() {
