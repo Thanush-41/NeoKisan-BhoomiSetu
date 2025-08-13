@@ -105,17 +105,33 @@ async with BhoomiSetuMCPClient("http://localhost:8001") as client:
 ### Environment Variables (.env)
 ```env
 # Required - Add your own
-OPENAI_API_KEY=your_openai_api_key_here
-OPENWEATHER_API_KEY=your_openweather_api_key_here
+# Environment variables
+TELEGRAM_BOT_TOKEN=your-key
+OPENWEATHER_API_KEY=your-key
+DATA_GOV_API_KEY=your-key
 
-# Pre-configured
-TELEGRAM_BOT_TOKEN=8023646765:AAEdKW_9JnvNg98kuNAm9oyw07MHbL-UgDk
-DATA_GOV_API_KEY=579b464db66ec23bdd00000121ba61b5b04f400760f5e55625b4bb25
+# AI API Keys
+OPENAI_API_KEY=your-key
+GROQ_API_KEY=your-key
 
-# Server Settings
+# Server configuration
 HOST=0.0.0.0
 PORT=8000
 DEBUG=True
+
+# Database
+DATABASE_URL=sqlite:///./bhoomiSetu.db
+MONGO_URL=your-key
+
+# Firebase Configuration for BhoomiSetu
+FIREBASE_PROJECT_ID=your-key
+FIREBASE_API_KEY=your-key
+FIREBASE_AUTH_DOMAIN=your-key
+FIREBASE_DATABASE_URL=your-key
+FIREBASE_STORAGE_BUCKET=your-key
+FIREBASE_MESSAGING_SENDER_ID=your-key
+FIREBASE_APP_ID=your-key
+FIREBASE_MEASUREMENT_ID=your-key
 ```
 
 ## 📱 Usage Examples
