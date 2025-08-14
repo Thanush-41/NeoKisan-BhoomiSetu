@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Dropdown Working Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { padding-top: 80px; }
+        .test-navbar {
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #ddd;
+            z-index: 1030;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg test-navbar fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-seedling me-2"></i>BhoomiSetu
+            </a>
+            
+            <div class="d-flex align-items-center gap-2">
+                <!-- Working Language Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                            type="button" 
+                            id="langDropdown" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
+                        <i class="fas fa-globe"></i> English
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header">Select Language</h6></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item active" href="?lang=en">English</a></li>
+                        <li><a class="dropdown-item" href="?lang=hi">हिंदी (Hindi)</a></li>
+                        <li><a class="dropdown-item" href="?lang=te">తెలుగు (Telugu)</a></li>
+                        <li><a class="dropdown-item" href="?lang=ta">தமிழ் (Tamil)</a></li>
+                        <li><a class="dropdown-item" href="?lang=bn">বাংলা (Bengali)</a></li>
+                        <li><a class="dropdown-item" href="?lang=mr">मराठी (Marathi)</a></li>
+                        <li><a class="dropdown-item" href="?lang=gu">ગુજરાતી (Gujarati)</a></li>
+                        <li><a class="dropdown-item" href="?lang=pa">ਪੰਜਾਬੀ (Punjabi)</a></li>
+                        <li><a class="dropdown-item" href="?lang=kn">ಕನ್ನಡ (Kannada)</a></li>
+                        <li><a class="dropdown-item" href="?lang=ml">മലയാളം (Malayalam)</a></li>
+                        <li><a class="dropdown-item" href="?lang=or">ଓଡ଼ିଆ (Odia)</a></li>
+                        <li><a class="dropdown-item" href="?lang=as">অসমীয়া (Assamese)</a></li>
+                    </ul>
+                </div>
+                
+                <!-- Working User Dropdown -->
+                <div class="dropdown">
+                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" 
+                            type="button" 
+                            id="userDropdown" 
+                            data-bs-toggle="dropdown">
+                        <i class="fas fa-user"></i> User
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <div class="alert alert-success">
+                    <h4><i class="fas fa-check-circle"></i> Language Dropdown Test - Should Work!</h4>
+                    <p>Click the <strong>🌍 globe icon</strong> or <strong>👤 user icon</strong> in the navbar above to test the dropdowns.</p>
+                    <p>This uses the exact same structure as the working test but with the correct language links.</p>
+                </div>
+                
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-globe text-success"></i> Language Features</h5>
+                                <ul class="list-unstyled">
+                                    <li>✅ 12 Languages Supported</li>
+                                    <li>✅ Real URL Links (not JavaScript)</li>
+                                    <li>✅ Clean Bootstrap Styling</li>
+                                    <li>✅ Mobile Responsive</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title"><i class="fas fa-user text-primary"></i> User Features</h5>
+                                <ul class="list-unstyled">
+                                    <li>✅ Profile Management</li>
+                                    <li>✅ Settings Access</li>
+                                    <li>✅ Secure Logout</li>
+                                    <li>✅ Clean UI Design</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-center">
+                    <a href="/" class="btn btn-primary">← Back to Main Site</a>
+                    <a href="/navbar-debug" class="btn btn-info">Debug Tools</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ Working navbar test loaded');
+            
+            // Initialize dropdowns
+            const dropdowns = document.querySelectorAll('[data-bs-toggle="dropdown"]');
+            console.log(`Found ${dropdowns.length} dropdowns`);
+            
+            dropdowns.forEach((dropdown, index) => {
+                console.log(`Initializing dropdown ${index + 1}`);
+                new bootstrap.Dropdown(dropdown);
+                
+                dropdown.addEventListener('click', function() {
+                    console.log(`Dropdown ${index + 1} clicked`);
+                });
+            });
+        });
+    </script>
+</body>
+</html>
