@@ -158,6 +158,71 @@ async def test_auth(request: Request):
     """Serve the authentication test page"""
     return templates.TemplateResponse("test_auth.html", {"request": request})
 
+@app.get("/test-dropdown", response_class=HTMLResponse)
+async def test_dropdown(request: Request):
+    """Test the dropdown functionality"""
+    try:
+        with open(os.path.join(project_root, "test_dropdown.html"), "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading test page: {e}</h1>")
+
+@app.get("/simple-dropdown", response_class=HTMLResponse)
+async def simple_dropdown(request: Request):
+    """Simple dropdown test"""
+    try:
+        with open(os.path.join(project_root, "simple_dropdown_test.html"), "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading simple test: {e}</h1>")
+
+@app.get("/navbar-debug", response_class=HTMLResponse)
+async def navbar_debug(request: Request):
+    """Debug navbar dropdowns"""
+    try:
+        with open(os.path.join(project_root, "navbar_debug.html"), "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading navbar debug: {e}</h1>")
+
+@app.get("/working-navbar", response_class=HTMLResponse)
+async def working_navbar(request: Request):
+    """Working navbar test"""
+    try:
+        with open(os.path.join(project_root, "working_navbar_test.html"), "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
+    except Exception as e:
+        return HTMLResponse(content=f"<h1>Error loading working navbar: {e}</h1>")
+
+@app.get("/test-navbar-fixed")
+async def test_navbar_fixed(request: Request, language: str = "en"):
+    """Test the fixed navbar dropdowns"""
+    try:
+        i18n_service = I18nService()
+        
+        # Get current language
+        current_language = get_language_from_request(request)
+        if language != current_language:
+            current_language = language
+        
+        context = {
+            "request": request,
+            "language": current_language,
+            "languages": i18n_service.get_languages(),
+            "t": lambda key: i18n_service.translate(key, current_language),
+            "page_title": "Fixed Navbar Test"
+        }
+        
+        return templates.TemplateResponse("test_navbar_fixed.html", context)
+        
+    except Exception as e:
+        logger.error(f"Error in test_navbar_fixed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/theme-test", response_class=HTMLResponse)
 async def theme_test(request: Request):
     """Serve the theme test page"""

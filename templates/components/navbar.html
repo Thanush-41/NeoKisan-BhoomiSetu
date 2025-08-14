@@ -82,19 +82,24 @@
                 </div>
                 {% endif %}
 
-                <!-- Language Selector -->
-                <div class="nav-item dropdown me-2">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center" type="button" 
-                            id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <!-- Language Selector - SIMPLIFIED -->
+                <div class="dropdown me-2">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" 
+                            type="button" 
+                            id="languageDropdown" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
                         <i class="fas fa-globe"></i>
-                        <span class="d-none d-xl-inline ms-1">{{ languages[language] }}</span>
+                        <span class="d-none d-md-inline ms-1">{{ languages[language] }}</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><h6 class="dropdown-header"><i class="fas fa-globe me-1"></i>Select Language</h6></li>
+                        <li><hr class="dropdown-divider"></li>
                         {% for code, name in languages.items() %}
                         <li>
-                            <a class="dropdown-item {{ 'active' if code == language else '' }}" 
-                               href="javascript:void(0)" onclick="changeLanguage('{{ code }}')">
-                                <i class="fas fa-check me-2 {{ 'opacity-100' if code == language else 'opacity-0' }}"></i>
+                            <a class="dropdown-item{% if code == language %} active{% endif %}" 
+                               href="?lang={{ code }}">
+                                {% if code == language %}<i class="fas fa-check me-2"></i>{% else %}<span class="me-4"></span>{% endif %}
                                 {{ name }}
                             </a>
                         </li>
@@ -121,20 +126,20 @@
                     </button>
                 </div>
 
-                <!-- User Menu (hidden by default) -->
-                <div id="userMenu" class="dropdown user-menu" style="display: none;">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle d-flex align-items-center user-btn" type="button" 
-                            data-bs-toggle="dropdown" aria-expanded="false">
+                <!-- User Menu (hidden by default) - SIMPLIFIED -->
+                <div id="userMenu" class="dropdown" style="display: none;">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle" 
+                            type="button" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false">
                         <i class="fas fa-user"></i>
-                        <span id="userName" class="username-display">User</span>
+                        <span id="userName" class="d-none d-md-inline ms-1">User</span>
                     </button>
-                    <ul class="dropdown-menu dropdown-menu-end user-dropdown">
+                    <ul class="dropdown-menu dropdown-menu-end">
                         <li>
                             <div class="dropdown-header">
-                                <div class="user-info-display">
-                                    <div id="userNameFull" class="user-name-full">User Name</div>
-                                    <small id="userEmail" class="user-email-display">user@example.com</small>
-                                </div>
+                                <div id="userNameFull" class="fw-bold">User Name</div>
+                                <small id="userEmail" class="text-muted">user@example.com</small>
                             </div>
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -162,7 +167,7 @@
 </nav>
 
 <style>
-/* Professional Navbar Styles */
+/* Professional Navbar Styles - FIXED FOR DROPDOWNS */
 .navbar-glass {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
@@ -172,6 +177,31 @@
     padding: 0.75rem 0;
     transition: all 0.3s ease;
     min-height: 70px;
+    z-index: 1030; /* Ensure navbar stays on top */
+    overflow: visible !important; /* CRITICAL: Allow dropdowns to appear */
+    position: relative !important;
+}
+
+/* Force all navbar containers to allow dropdown visibility */
+.navbar-glass .container,
+.navbar-glass .container-fluid,
+.navbar-glass .navbar-nav,
+.navbar-glass .navbar-actions,
+.navbar-glass .d-flex {
+    overflow: visible !important;
+    position: static !important;
+}
+
+/* Ensure dropdown menus are properly positioned */
+.navbar-glass .dropdown-menu {
+    z-index: 1050 !important;
+    position: absolute !important;
+    top: 100% !important;
+    display: none;
+}
+
+.navbar-glass .dropdown-menu.show {
+    display: block !important;
 }
 
 [data-theme="dark"] .navbar-glass {
@@ -328,28 +358,57 @@
 
 /* Dropdown Menus */
 .dropdown-menu {
-    border: none;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-    border-radius: 12px;
-    margin-top: 0.5rem;
-    min-width: 200px;
+    border: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1) !important;
+    border-radius: 8px !important;
+    margin-top: 0.25rem !important;
+    min-width: 250px !important;
+    z-index: 9999 !important;
+    background: white !important;
+    position: absolute !important;
+    top: 100% !important;
+    left: auto !important;
+    right: 0 !important;
+}
+
+[data-theme="dark"] .dropdown-menu {
+    background: #2d3748 !important;
+    color: white !important;
+}
+
+/* Ensure dropdown parent has proper positioning */
+.dropdown {
+    position: relative !important;
 }
 
 .dropdown-item {
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
+    padding: 0.5rem 1rem !important;
+    color: #2d3748 !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
-.dropdown-item:hover {
-    background: rgba(74, 175, 80, 0.1);
-    color: var(--primary-green, #2a7a1f);
+[data-theme="dark"] .dropdown-item {
+    color: #e2e8f0 !important;
+}
+
+.dropdown-item:hover,
+.dropdown-item:focus {
+    background: rgba(46, 125, 50, 0.1) !important;
+    color: #2a7a1f !important;
 }
 
 .dropdown-item.active {
-    background: rgba(74, 175, 80, 0.15);
-    color: var(--primary-green, #2a7a1f);
+    background: rgba(46, 125, 50, 0.15) !important;
+    color: #2a7a1f !important;
+    font-weight: 600 !important;
+}
+
+.dropdown-header {
+    color: #2a7a1f !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    text-transform: uppercase !important;
 }
 
 /* Responsive Design */
@@ -418,7 +477,7 @@
         align-items: center !important;
         gap: 0.5rem;
         max-width: 100%;
-        overflow: hidden;
+        overflow: visible; /* Allow dropdowns to appear */
     }
     
     .auth-buttons {
@@ -563,7 +622,7 @@
 
 .container-fluid {
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible; /* Allow dropdowns to appear */
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -573,7 +632,7 @@
 .navbar-collapse {
     flex-grow: 1;
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible; /* Allow dropdowns to appear */
 }
 
 .navbar-nav {
@@ -641,121 +700,48 @@
 </style>
 
 <script>
-// Professional Navbar JavaScript
+// Simple dropdown functionality - Let Bootstrap handle everything
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize Bootstrap components properly
-    const navbarToggler = document.querySelector('.navbar-toggler');
-    const navbarCollapse = document.querySelector('#navbarNav');
+    console.log('🚀 Navbar loaded');
     
-    // Auto-close navbar on mobile when clicking nav links
-    if (navbarCollapse) {
-        const navLinks = navbarCollapse.querySelectorAll('.nav-link');
-        navLinks.forEach(link => {
-            link.addEventListener('click', function() {
-                // Only auto-close on mobile/tablet
-                if (window.innerWidth < 992) {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
-                    bsCollapse.hide();
-                }
-            });
-        });
+    // Test dropdown visibility
+    const languageDropdown = document.getElementById('languageDropdown');
+    if (languageDropdown) {
+        console.log('✅ Language dropdown found');
         
-        // Auto-close when clicking outside navbar on mobile
-        document.addEventListener('click', function(event) {
-            if (window.innerWidth < 992) {
-                const isClickInsideNav = navbarCollapse.contains(event.target) || 
-                                       (navbarToggler && navbarToggler.contains(event.target));
-                
-                if (!isClickInsideNav && navbarCollapse.classList.contains('show')) {
-                    const bsCollapse = bootstrap.Collapse.getInstance(navbarCollapse) || new bootstrap.Collapse(navbarCollapse, { toggle: false });
-                    bsCollapse.hide();
-                }
-            }
+        // Add click event for testing
+        languageDropdown.addEventListener('click', function() {
+            console.log('🖱️ Language dropdown clicked');
         });
     }
     
-    // User name truncation with hover tooltip
-    function setupUserDisplay() {
-        const userName = document.getElementById('userName');
-        const userNameFull = document.getElementById('userNameFull');
-        const userEmail = document.getElementById('userEmail');
-        
-        if (userName && userNameFull) {
-            const fullName = userNameFull.textContent.trim();
-            if (fullName && fullName !== 'User Name') {
-                // Truncate display name for button
-                const maxDisplayLength = window.innerWidth >= 1400 ? 12 : 8;
-                if (fullName.length > maxDisplayLength) {
-                    userName.textContent = fullName.substring(0, maxDisplayLength) + '...';
-                    userName.title = fullName; // Tooltip with full name
-                } else {
-                    userName.textContent = fullName;
-                }
-            }
-        }
-        
-        if (userEmail) {
-            const fullEmail = userEmail.textContent.trim();
-            if (fullEmail && fullEmail !== 'user@example.com') {
-                const maxEmailLength = 30;
-                if (fullEmail.length > maxEmailLength) {
-                    userEmail.textContent = fullEmail.substring(0, maxEmailLength) + '...';
-                    userEmail.title = fullEmail; // Tooltip with full email
-                }
-            }
-        }
-    }
-    
-    // Call setup function
-    setupUserDisplay();
-    
-    // Re-setup on window resize
-    let resizeTimeout;
-    window.addEventListener('resize', function() {
-        clearTimeout(resizeTimeout);
-        resizeTimeout = setTimeout(setupUserDisplay, 250);
+    // Initialize all Bootstrap dropdowns
+    const dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+    const dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+        return new bootstrap.Dropdown(dropdownToggleEl);
     });
     
-    // Ensure dropdowns work properly
-    const dropdownTriggers = document.querySelectorAll('[data-bs-toggle="dropdown"]');
-    dropdownTriggers.forEach(trigger => {
-        // Ensure Bootstrap dropdown is initialized
-        if (!bootstrap.Dropdown.getInstance(trigger)) {
-            new bootstrap.Dropdown(trigger);
-        }
-    });
+    console.log(`✅ Initialized ${dropdownList.length} dropdowns`);
 });
 
-// Language change function
+// Simple language change function
 function changeLanguage(langCode) {
+    console.log(`🌍 Changing language to: ${langCode}`);
+    
+    // Store preference
+    localStorage.setItem('selectedLanguage', langCode);
+    
+    // Redirect with language parameter
     const currentUrl = new URL(window.location.href);
     currentUrl.searchParams.set('lang', langCode);
+    
     window.location.href = currentUrl.toString();
 }
 
-// User authentication functions (these should be defined elsewhere, but included for completeness)
-function showLoginModal() {
-    // Implementation should be in main app
-    console.log('Show login modal');
-}
-
-function showRegisterModal() {
-    // Implementation should be in main app
-    console.log('Show register modal');
-}
-
-function logout() {
-    // Implementation should be in main app
-    console.log('Logout user');
-}
-
-function showThreadsModal() {
-    // Implementation should be in chat page
-    console.log('Show threads modal');
-}
-
-function createNewThread() {
-    // Implementation should be in chat page
-    console.log('Create new thread');
-}
+// Placeholder functions for other features
+function showLoginModal() { console.log('Login modal'); }
+function showRegisterModal() { console.log('Register modal'); }
+function logout() { console.log('Logout'); }
+function showThreadsModal() { console.log('Threads modal'); }
+function createNewThread() { console.log('New thread'); }
 </script>
