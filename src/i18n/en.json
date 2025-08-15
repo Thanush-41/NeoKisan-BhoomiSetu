@@ -50,7 +50,18 @@
     "location_placeholder": "Enter your location (optional)",
     "thinking": "Thinking...",
     "error": "Sorry, I encountered an error. Please try again.",
-    "empty_message": "Please enter a message to get started!"
+    "empty_message": "Please enter a message to get started!",
+    "welcome_title": "🌱 Welcome to BhoomiSetu AI",
+    "welcome_description": "Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.",
+    "suggestion_weather": "Weather",
+    "suggestion_prices": "Market Prices",
+    "suggestion_crops": "Crop Advice",
+    "suggestion_schemes": "Schemes",
+    "quick_weather": "Weather forecast for my location",
+    "quick_prices": "Tomato market prices",
+    "quick_crops": "Best crops for kharif season",
+    "quick_schemes": "Government schemes for farmers",
+    "history": "History"
   },
   "weather": {
     "title": "Weather Information",

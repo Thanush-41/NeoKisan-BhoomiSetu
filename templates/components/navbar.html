@@ -74,8 +74,8 @@
             <div class="navbar-nav ms-auto d-flex align-items-center navbar-actions">
                 <!-- Chat History Button (only on chat page) -->
                 {% if '/chat' in request.url.path %}
-                <div class="nav-item me-2">
-                    <button class="btn btn-outline-primary btn-sm d-flex align-items-center" onclick="showThreadsModal()" title="Chat History">
+                <div class="nav-item me-1">
+                    <button class="btn btn-outline-primary btn-sm px-2" onclick="showThreadsModal()" title="Chat History" style="font-size: 0.8rem;">
                         <i class="fas fa-history"></i>
                         <span class="d-none d-xl-inline ms-1">History</span>
                     </button>
@@ -83,14 +83,15 @@
                 {% endif %}
 
                 <!-- Language Selector - SIMPLIFIED -->
-                <div class="dropdown me-2">
-                    <button class="btn btn-outline-light btn-sm dropdown-toggle" 
+                <div class="dropdown me-1">
+                    <button class="btn btn-outline-light btn-sm dropdown-toggle px-2" 
                             type="button" 
                             id="languageDropdown" 
                             data-bs-toggle="dropdown" 
-                            aria-expanded="false">
+                            aria-expanded="false"
+                            style="font-size: 0.8rem;">
                         <i class="fas fa-globe"></i>
-                        <span class="d-none d-md-inline ms-1">{{ languages[language] }}</span>
+                        <span class="d-none d-lg-inline ms-1">{{ languages[language][:2] if languages[language]|length > 10 else languages[language] }}</span>
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end">
                         <li><h6 class="dropdown-header"><i class="fas fa-globe me-1"></i>Select Language</h6></li>
@@ -108,15 +109,15 @@
                 </div>
 
                 <!-- Theme Toggle -->
-                <div class="nav-item me-2">
-                    <button class="btn btn-outline-light btn-sm d-flex align-items-center" id="themeToggle" title="Toggle Theme">
+                <div class="nav-item me-1">
+                    <button class="btn btn-outline-light btn-sm px-2" id="themeToggle" title="Toggle Theme" style="font-size: 0.8rem;">
                         <i class="fas fa-moon" id="themeIcon"></i>
                     </button>
                 </div>
 
                 <!-- Authentication Buttons -->
                 <div id="authButtons" class="auth-buttons">
-                    <button class="btn btn-outline-light btn-sm auth-btn" onclick="showLoginModal()">
+                    <button class="btn btn-outline-light btn-sm auth-btn px-2" onclick="showLoginModal()" style="font-size: 0.8rem;">
                         <i class="fas fa-sign-in-alt"></i>
                         <span class="btn-text">Login</span>
                     </button>

@@ -158,6 +158,20 @@ async def test_auth(request: Request):
     """Serve the authentication test page"""
     return templates.TemplateResponse("test_auth.html", {"request": request})
 
+@app.get("/debug-translation", response_class=HTMLResponse)
+async def debug_translation(request: Request, lang: Optional[str] = "en"):
+    """Debug translation functionality"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
+    return templates.TemplateResponse("../debug_translation.html", {
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
+    })
+
 @app.get("/test-dropdown", response_class=HTMLResponse)
 async def test_dropdown(request: Request):
     """Test the dropdown functionality"""
