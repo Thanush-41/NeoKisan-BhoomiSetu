@@ -22,7 +22,7 @@
             background-color: var(--light-bg);
             color: var(--dark-text);
             line-height: 1.6;
-            margin-top: 60px;
+            margin-top: 15px;
         }
 
         /* Navbar Glass Style */
@@ -838,7 +838,7 @@
     <div class="floating-particle" style="left: 80%; width: 5px; height: 5px; animation-delay: 4.5s;"></div>
     <div class="floating-particle" style="left: 90%; width: 4px; height: 4px; animation-delay: 1.5s;"></div>
 
-    <div class="container-fluid h-100 p-3" style="margin-top: 70px;">
+    <div class="container-fluid h-100 p-3" style="margin-top: 10px;">
         <div class="row h-100 justify-content-center">
             <div class="col-lg-8 col-xl-6">
                 <div class="glass-container chat-container liquid-bg">
@@ -886,21 +886,21 @@
                     <!-- Chat Messages -->
                     <div class="chat-messages" id="chatMessages">
                         <div class="welcome-message">
-                            <h3>🌱 Welcome to BhoomiSetu AI</h3>
-                            <p>Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.</p>
+                            <h3>{{ t('chat.welcome_title') if t else '🌱 Welcome to BhoomiSetu AI' }}</h3>
+                            <p>{{ t('chat.welcome_description') if t else 'Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.' }}</p>
                             
                             <div class="quick-suggestions">
-                                <span class="suggestion-chip" onclick="sendQuickMessage('Weather forecast for my location')">
-                                    <i class="fas fa-cloud-sun"></i> Weather
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_weather') if t else 'Weather forecast for my location' }}')">
+                                    <i class="fas fa-cloud-sun"></i> {{ t('chat.suggestion_weather') if t else 'Weather' }}
                                 </span>
-                                <span class="suggestion-chip" onclick="sendQuickMessage('Tomato market prices')">
-                                    <i class="fas fa-chart-line"></i> Market Prices
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_prices') if t else 'Tomato market prices' }}')">
+                                    <i class="fas fa-chart-line"></i> {{ t('chat.suggestion_prices') if t else 'Market Prices' }}
                                 </span>
-                                <span class="suggestion-chip" onclick="sendQuickMessage('Best crops for kharif season')">
-                                    <i class="fas fa-leaf"></i> Crop Advice
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_crops') if t else 'Best crops for kharif season' }}')">
+                                    <i class="fas fa-leaf"></i> {{ t('chat.suggestion_crops') if t else 'Crop Advice' }}
                                 </span>
-                                <span class="suggestion-chip" onclick="sendQuickMessage('Government schemes for farmers')">
-                                    <i class="fas fa-landmark"></i> Schemes
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_schemes') if t else 'Government schemes for farmers' }}')">
+                                    <i class="fas fa-landmark"></i> {{ t('chat.suggestion_schemes') if t else 'Schemes' }}
                                 </span>
                             </div>
                         </div>
@@ -2177,21 +2177,21 @@
             const messagesContainer = document.getElementById('chatMessages');
             messagesContainer.innerHTML = `
                 <div class="welcome-message">
-                    <h3>🌱 Welcome to BhoomiSetu AI</h3>
-                    <p>Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.</p>
+                    <h3>{{ t('chat.welcome_title') if t else '🌱 Welcome to BhoomiSetu AI' }}</h3>
+                    <p>{{ t('chat.welcome_description') if t else 'Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.' }}</p>
                     
                     <div class="quick-suggestions">
-                        <span class="suggestion-chip" onclick="sendQuickMessage('Weather forecast for my location')">
-                            <i class="fas fa-cloud-sun"></i> Weather
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_weather') if t else 'Weather forecast for my location' }}')">
+                            <i class="fas fa-cloud-sun"></i> {{ t('chat.suggestion_weather') if t else 'Weather' }}
                         </span>
-                        <span class="suggestion-chip" onclick="sendQuickMessage('Tomato market prices')">
-                            <i class="fas fa-chart-line"></i> Market Prices
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_prices') if t else 'Tomato market prices' }}')">
+                            <i class="fas fa-chart-line"></i> {{ t('chat.suggestion_prices') if t else 'Market Prices' }}
                         </span>
-                        <span class="suggestion-chip" onclick="sendQuickMessage('Best crops for this season')">
-                            <i class="fas fa-leaf"></i> Seasonal Crops
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_crops') if t else 'Best crops for this season' }}')">
+                            <i class="fas fa-leaf"></i> {{ t('chat.suggestion_crops') if t else 'Seasonal Crops' }}
                         </span>
-                        <span class="suggestion-chip" onclick="sendQuickMessage('Government schemes for farmers')">
-                            <i class="fas fa-landmark"></i> Schemes
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_schemes') if t else 'Government schemes for farmers' }}')">
+                            <i class="fas fa-landmark"></i> {{ t('chat.suggestion_schemes') if t else 'Schemes' }}
                         </span>
                     </div>
                 </div>
