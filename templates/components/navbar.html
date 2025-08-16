@@ -82,6 +82,15 @@
                         <i class="fas fa-file-contract"></i>
                     </a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/test-queries' in request.url.path else '' }}" 
+                       href="/test-queries"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="Test AI Agent">
+                        <i class="fas fa-flask"></i>
+                    </a>
+                </li>
             </ul>
 
             <!-- Right Side Actions -->

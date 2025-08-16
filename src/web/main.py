@@ -252,12 +252,23 @@ Type any farming question to get started! 🚀"""
                         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
                         from src.agents.agri_agent import agri_agent
                         
-                        # Process the query with the agricultural agent
-                        user_context = {"location": "India"}  # Default for now
+                        # Extract user location if mentioned in the message
+                        # For now, default to India but could be enhanced to detect location from message
+                        location = "India"  # Could be enhanced with location detection
+                        
+                        # Build full user context like web chat
+                        user_context = {
+                            "location": location,
+                            "coordinates": None  # Could be enhanced with user's shared location
+                        }
+                        
+                        # Process the query with the agricultural agent using SAME parameters as web chat
                         response = await agri_agent.process_query(
                             query=text,
+                            location=location,
                             user_context=user_context,
-                            preferred_language="en"
+                            conversation_history=[],  # Could be enhanced to store per-user history
+                            preferred_language="en"   # Could be enhanced with language detection
                         )
                     
                     print(f"🤖 DEBUG: Generated response: {response[:100]}...")
@@ -332,6 +343,30 @@ async def home(request: Request, lang: Optional[str] = "en"):
         "languages": LanguageConfig.LANGUAGES,
         "t": lambda key, **kwargs: t(key, lang, **kwargs)
     })
+
+@app.get("/test-queries", response_class=HTMLResponse)
+async def test_queries_page(request: Request, lang: Optional[str] = "en"):
+    """Comprehensive test queries page for agricultural AI evaluation"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
+    try:
+        return templates.TemplateResponse("test_queries.html", {
+            "request": request,
+            "language": lang,
+            "languages": LanguageConfig.LANGUAGES,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
+        })
+    except Exception as e:
+        logger.error(f"Test queries page error: {e}")
+        print(f"ERROR: Test queries page error: {e}")  # Fallback logging
+        return templates.TemplateResponse("error.html", {
+            "request": request,
+            "error": str(e),
+            "language": lang,
+            "t": lambda key, **kwargs: t(key, lang, **kwargs)
+        })
 
 @app.get("/chat", response_class=HTMLResponse)
 async def chat_interface(request: Request, lang: Optional[str] = "en"):
