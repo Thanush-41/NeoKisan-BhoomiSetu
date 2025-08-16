@@ -460,6 +460,899 @@
         .navbar-glass .navbar-nav {
             overflow: visible !important;
         }
+
+        /* Explore Features Section */
+        .explore-features {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, #f8fffe 0%, #e8f5e8 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .explore-features::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(74, 175, 80, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(52, 152, 219, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 60% 40%, rgba(243, 156, 18, 0.03) 0%, transparent 50%);
+            pointer-events: none;
+            animation: background-float 20s ease-in-out infinite;
+        }
+
+        @keyframes background-float {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        [data-theme="dark"] .explore-features {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0d2818 100%);
+        }
+
+        [data-theme="dark"] .explore-features::before {
+            background: 
+                radial-gradient(circle at 20% 20%, rgba(74, 175, 80, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(52, 152, 219, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 60% 40%, rgba(243, 156, 18, 0.05) 0%, transparent 50%);
+        }
+
+        .section-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-green) 0%, #27ae60 50%, #2ecc71 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-green) 0%, #27ae60 100%);
+            border-radius: 2px;
+        }
+
+        .section-subtitle {
+            font-size: 1.3rem;
+            color: var(--muted-text);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        .feature-showcase {
+            background: var(--card-bg);
+            border-radius: 25px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.1),
+                0 5px 15px rgba(0, 0, 0, 0.05),
+                0 0 0 1px rgba(74, 175, 80, 0.1);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(74, 175, 80, 0.1);
+            height: 100%;
+            backdrop-filter: blur(20px);
+        }
+
+        .feature-showcase::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            opacity: 0;
+        }
+
+        .feature-showcase::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, 
+                rgba(231, 76, 60, 0.1) 0%, 
+                rgba(39, 174, 96, 0.1) 25%, 
+                rgba(52, 152, 219, 0.1) 50%, 
+                rgba(243, 156, 18, 0.1) 75%, 
+                rgba(231, 76, 60, 0.1) 100%);
+            border-radius: 27px;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .feature-showcase:hover {
+            transform: translateY(-20px) scale(1.03);
+            box-shadow: 
+                0 30px 60px rgba(0, 0, 0, 0.15),
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                0 0 0 1px rgba(74, 175, 80, 0.2),
+                0 0 40px rgba(74, 175, 80, 0.1);
+        }
+
+        .feature-showcase:hover::before {
+            opacity: 1;
+        }
+
+        .feature-showcase:hover::after {
+            opacity: 1;
+            animation: gradient-rotate 3s linear infinite;
+        }
+
+        .feature-showcase:hover .feature-animation i {
+            transform: scale(1.15);
+        }
+
+        @keyframes gradient-rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .feature-animation {
+            position: relative;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        /* Disease Detection Animation */
+        .microscope-animation {
+            position: relative;
+            color: #e74c3c;
+            transform-style: preserve-3d;
+        }
+
+        .microscope-animation i {
+            font-size: 5rem;
+            animation: microscope-focus 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(231, 76, 60, 0.5));
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Fallback if FontAwesome doesn't load */
+        .microscope-animation i:before {
+            content: "🔬" !important;
+            font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important;
+            font-size: 5rem !important;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: -30px;
+            right: -30px;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, #e74c3c 20%, #ff6b6b 50%, #e74c3c 80%, transparent);
+            animation: scan 1.5s linear infinite;
+            border-radius: 2px;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.7);
+        }
+
+        .scan-line::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: 0;
+            right: 0;
+            height: 8px;
+            background: linear-gradient(90deg, transparent, rgba(231, 76, 60, 0.4), transparent);
+            animation: scan 1.5s linear infinite;
+            border-radius: 4px;
+        }
+
+        .pulse-ring {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 140px;
+            height: 140px;
+            border: 3px solid #e74c3c;
+            border-radius: 50%;
+            animation: pulse-ring 1.5s ease-out infinite;
+            z-index: 1;
+        }
+
+        .detection-dots {
+            position: absolute;
+            top: 15%;
+            right: 15%;
+            z-index: 3;
+        }
+
+        .detection-dots .dot {
+            display: block;
+            font-size: 1.2rem;
+            animation: blink 1s infinite;
+            margin-bottom: 5px;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .detection-dots .dot-1 { animation-delay: 0s; }
+        .detection-dots .dot-2 { animation-delay: 0.3s; }
+        .detection-dots .dot-3 { animation-delay: 0.6s; }
+
+        @keyframes microscope-focus {
+            0%, 100% { transform: scale(1) rotateY(0deg); }
+            25% { transform: scale(1.1) rotateY(8deg); }
+            50% { transform: scale(1.2) rotateY(0deg); }
+            75% { transform: scale(1.1) rotateY(-8deg); }
+        }
+
+        @keyframes scan {
+            0% { transform: translateY(0); opacity: 0; }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { transform: translateY(100px); opacity: 0; }
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: translate(-50%, -50%) scale(0.3); opacity: 1; border-width: 3px; }
+            100% { transform: translate(-50%, -50%) scale(1.4); opacity: 0; border-width: 1px; }
+        }
+
+        @keyframes blink {
+            0%, 40% { opacity: 1; transform: scale(1); }
+            50%, 90% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        /* Crop Recommendation Animation */
+        .seedling-animation {
+            position: relative;
+            color: #27ae60;
+        }
+
+        .seedling-animation i {
+            font-size: 5rem;
+            animation: grow 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(39, 174, 96, 0.6));
+            transform-origin: bottom center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .growth-rings {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 120px;
+            height: 120px;
+            border: 4px solid #27ae60;
+            border-radius: 50%;
+            opacity: 0;
+            animation: ripple 1.5s infinite;
+            z-index: 1;
+        }
+
+        .growth-rings::before,
+        .growth-rings::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 4px solid #2ecc71;
+            border-radius: 50%;
+            opacity: 0;
+            animation: ripple 1.5s infinite;
+        }
+
+        .growth-rings::before {
+            animation-delay: 0.5s;
+            border-color: #58d68d;
+        }
+
+        .growth-rings::after {
+            animation-delay: 1s;
+            border-color: #85e085;
+        }
+
+        .growth-particles {
+            position: absolute;
+            top: 10%;
+            left: 10%;
+            right: 10%;
+            bottom: 10%;
+            z-index: 3;
+        }
+
+        .growth-particles .particle {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: float-particle 2.5s infinite ease-in-out;
+            filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.3));
+        }
+
+        .growth-particles .particle:nth-child(1) {
+            top: 5%;
+            left: 75%;
+            animation-delay: 0s;
+        }
+
+        .growth-particles .particle:nth-child(2) {
+            top: 65%;
+            left: 15%;
+            animation-delay: 0.8s;
+        }
+
+        .growth-particles .particle:nth-child(3) {
+            top: 85%;
+            left: 85%;
+            animation-delay: 1.6s;
+        }
+
+        @keyframes grow {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.15) rotate(3deg); }
+            50% { transform: scale(1.3) rotate(0deg); }
+            75% { transform: scale(1.15) rotate(-3deg); }
+        }
+
+        @keyframes ripple {
+            0% { 
+                transform: translate(-50%, -50%) scale(0.2); 
+                opacity: 1; 
+                border-width: 4px;
+            }
+            50% {
+                opacity: 0.8;
+                border-width: 3px;
+            }
+            100% { 
+                transform: translate(-50%, -50%) scale(2.8); 
+                opacity: 0; 
+                border-width: 1px;
+            }
+        }
+
+        @keyframes float-particle {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); opacity: 0; }
+            50% { transform: translateY(-25px) rotate(180deg) scale(1.2); opacity: 1; }
+        }
+
+        /* Weather Animation */
+        .weather-animation {
+            position: relative;
+            color: #3498db;
+        }
+
+        .weather-animation i {
+            font-size: 4rem;
+            animation: weather-float 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 12px rgba(52, 152, 219, 0.3));
+        }
+
+        .weather-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .weather-particles::before,
+        .weather-particles::after {
+            content: '💧';
+            position: absolute;
+            font-size: 1.2rem;
+            animation: rain 3s linear infinite;
+            opacity: 0;
+        }
+
+        .weather-particles::before {
+            left: 25%;
+            animation-delay: 0s;
+        }
+
+        .weather-particles::after {
+            left: 75%;
+            animation-delay: 1.5s;
+        }
+
+        /* Additional rain drops */
+        .weather-animation::before,
+        .weather-animation::after {
+            content: '💧';
+            position: absolute;
+            font-size: 1rem;
+            animation: rain 2.5s linear infinite;
+            opacity: 0;
+            z-index: 1;
+        }
+
+        .weather-animation::before {
+            left: 40%;
+            animation-delay: 0.8s;
+        }
+
+        .weather-animation::after {
+            left: 60%;
+            animation-delay: 2.2s;
+        }
+
+        .weather-effects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
+        .weather-effects .weather-icon {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: weather-cycle 4s infinite ease-in-out;
+            opacity: 0;
+        }
+
+        .weather-effects .weather-icon:nth-child(1) {
+            top: 20%;
+            right: 20%;
+            animation-delay: 0s;
+        }
+
+        .weather-effects .weather-icon:nth-child(2) {
+            top: 30%;
+            left: 10%;
+            animation-delay: 1s;
+        }
+
+        .weather-effects .weather-icon:nth-child(3) {
+            bottom: 30%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .weather-effects .weather-icon:nth-child(4) {
+            bottom: 20%;
+            left: 30%;
+            animation-delay: 3s;
+        }
+
+        @keyframes weather-float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(2deg); }
+            50% { transform: translateY(-15px) rotate(0deg); }
+            75% { transform: translateY(-8px) rotate(-2deg); }
+        }
+
+        @keyframes rain {
+            0% { 
+                transform: translateY(-30px) rotate(0deg); 
+                opacity: 0; 
+                font-size: 0.8rem;
+            }
+            10% { 
+                opacity: 0.8; 
+                font-size: 1rem;
+            }
+            90% { 
+                opacity: 0.6; 
+                font-size: 1.2rem;
+            }
+            100% { 
+                transform: translateY(100px) rotate(5deg); 
+                opacity: 0; 
+                font-size: 0.8rem;
+            }
+        }
+
+        @keyframes weather-cycle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            25% { opacity: 1; transform: scale(1.2); }
+            50% { opacity: 0.8; transform: scale(1); }
+            75% { opacity: 0.5; transform: scale(0.8); }
+        }
+
+        /* Market Chart Animation */
+        .chart-animation {
+            position: relative;
+            color: #f39c12;
+        }
+
+        .chart-animation i {
+            font-size: 4rem;
+            animation: chart-pulse 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 12px rgba(243, 156, 18, 0.3));
+        }
+
+        .price-bars {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            height: 35px;
+            align-items: flex-end;
+        }
+
+        .price-bars::before,
+        .price-bars::after {
+            content: '';
+            width: 6px;
+            background: linear-gradient(180deg, #f39c12 0%, #e67e22 100%);
+            animation: bar-grow 1.5s ease-in-out infinite;
+            border-radius: 2px;
+            box-shadow: 0 0 8px rgba(243, 156, 18, 0.4);
+        }
+
+        .price-bars::before {
+            height: 18px;
+            animation-delay: 0s;
+        }
+
+        .price-bars::after {
+            height: 28px;
+            animation-delay: 0.5s;
+        }
+
+        /* Additional price bars */
+        .chart-animation::before,
+        .chart-animation::after {
+            content: '';
+            position: absolute;
+            bottom: 10px;
+            width: 5px;
+            background: linear-gradient(180deg, #f39c12 0%, #d68910 100%);
+            animation: bar-grow 1.8s ease-in-out infinite;
+            border-radius: 2px;
+            box-shadow: 0 0 6px rgba(243, 156, 18, 0.3);
+        }
+
+        .chart-animation::before {
+            left: 35%;
+            height: 22px;
+            animation-delay: 0.3s;
+        }
+
+        .chart-animation::after {
+            right: 35%;
+            height: 15px;
+            animation-delay: 0.8s;
+        }
+
+        .market-indicators {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .market-indicators .indicator {
+            font-size: 1.2rem;
+            animation: indicator-flash 2s infinite ease-in-out;
+        }
+
+        .market-indicators .up {
+            animation-delay: 0s;
+        }
+
+        .market-indicators .down {
+            animation-delay: 0.7s;
+        }
+
+        .market-indicators .stable {
+            animation-delay: 1.4s;
+        }
+
+        @keyframes chart-pulse {
+            0%, 100% { transform: scale(1) rotateY(0deg); }
+            25% { transform: scale(1.03) rotateY(2deg); }
+            50% { transform: scale(1.08) rotateY(0deg); }
+            75% { transform: scale(1.03) rotateY(-2deg); }
+        }
+
+        @keyframes bar-grow {
+            0%, 100% { transform: scaleY(1); opacity: 0.8; }
+            25% { transform: scaleY(1.2); opacity: 1; }
+            50% { transform: scaleY(1.4); opacity: 1; }
+            75% { transform: scaleY(1.1); opacity: 0.9; }
+        }
+
+        @keyframes indicator-flash {
+            0%, 70% { opacity: 0.3; transform: scale(0.8); }
+            15%, 85% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 0.3; transform: scale(0.8); }
+        }
+
+        .feature-content h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 1.25rem;
+            background: linear-gradient(135deg, var(--dark-text) 0%, var(--primary-green) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .feature-content p {
+            color: var(--muted-text);
+            line-height: 1.7;
+            margin-bottom: 1.75rem;
+            font-size: 1.05rem;
+        }
+
+        .feature-benefits {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 2.5rem;
+        }
+
+        .feature-benefits li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            color: var(--dark-text);
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding-left: 0.5rem;
+        }
+
+        .feature-benefits li:hover {
+            background: rgba(74, 175, 80, 0.05);
+            transform: translateX(5px);
+        }
+
+        .feature-benefits i {
+            color: var(--primary-green);
+            margin-right: 0.75rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-benefits li:hover i {
+            transform: scale(1.2);
+            color: #27ae60;
+        }
+
+        .btn-feature {
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            min-width: 200px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 
+                0 8px 20px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .btn-feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-feature:hover::before {
+            left: 100%;
+        }
+
+        .btn-feature i {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-feature:hover i {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .disease-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            box-shadow: 
+                0 8px 20px rgba(231, 76, 60, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .disease-btn:hover {
+            background: linear-gradient(135deg, #ec5e5e 0%, #d44444 100%);
+            box-shadow: 
+                0 12px 30px rgba(231, 76, 60, 0.4),
+                0 0 20px rgba(231, 76, 60, 0.2);
+        }
+
+        .crop-btn {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            box-shadow: 
+                0 8px 20px rgba(39, 174, 96, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .crop-btn:hover {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            box-shadow: 
+                0 12px 30px rgba(39, 174, 96, 0.4),
+                0 0 20px rgba(39, 174, 96, 0.2);
+        }
+
+        .weather-btn {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 
+                0 8px 20px rgba(52, 152, 219, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .weather-btn:hover {
+            background: linear-gradient(135deg, #5dade2 0%, #3498db 100%);
+            box-shadow: 
+                0 12px 30px rgba(52, 152, 219, 0.4),
+                0 0 20px rgba(52, 152, 219, 0.2);
+        }
+
+        .market-btn {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            box-shadow: 
+                0 8px 20px rgba(243, 156, 18, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+        }
+
+        .market-btn:hover {
+            background: linear-gradient(135deg, #f7dc6f 0%, #f39c12 100%);
+            box-shadow: 
+                0 12px 30px rgba(243, 156, 18, 0.4),
+                0 0 20px rgba(243, 156, 18, 0.2);
+        }
+
+        .btn-feature:hover {
+            transform: translateY(-5px) scale(1.02);
+            color: white;
+        }
+
+        .btn-feature:active {
+            transform: translateY(-2px) scale(0.98);
+            transition: all 0.1s ease;
+        }
+
+        /* CTA Box */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-green) 0%, #229954 100%);
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-box h3 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .cta-box p {
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .btn-cta {
+            background: linear-gradient(135deg, white 0%, #f8f9fa 100%);
+            color: var(--primary-green);
+            padding: 1.25rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            box-shadow: 
+                0 10px 25px rgba(0, 0, 0, 0.15),
+                0 0 0 1px rgba(74, 175, 80, 0.1) inset;
+            font-size: 1.1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cta::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(74, 175, 80, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .btn-cta:hover::before {
+            left: 100%;
+        }
+
+        .btn-cta i {
+            font-size: 1.3rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-cta:hover {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.2),
+                0 0 30px rgba(74, 175, 80, 0.1);
+            color: var(--primary-green);
+        }
+
+        .btn-cta:hover i {
+            transform: rotate(15deg) scale(1.1);
+        }
+
+        .btn-cta:active {
+            transform: translateY(-2px) scale(1.02);
+            transition: all 0.1s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .feature-showcase {
+                margin-bottom: 2rem;
+            }
+
+            .cta-box {
+                padding: 2rem 1rem;
+            }
+
+            .cta-box h3 {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -661,6 +1554,155 @@
                             <li>"నేను నా వరిని ఎప్పుడు నీరుపట్టాలి?"</li>
                             <li>"కేసీసీ లోన్ ఎలా తీసుకోవాలి?"</li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Explore Features Section -->
+    <section class="explore-features">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="section-title">{{ t('hero.explore_features') if t else 'Explore Our Powerful Features' }}</h2>
+                    <p class="section-subtitle">{{ t('hero.explore_description') if t else 'Discover how our AI-powered tools can transform your farming experience' }}</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Disease Detection Feature -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="feature-showcase disease-detection" data-aos="fade-up" data-aos-delay="100">
+                        <div class="feature-animation">
+                            <div class="microscope-animation">
+                                <i class="fas fa-microscope">🔬</i>
+                                <div class="scan-line"></div>
+                                <div class="pulse-ring"></div>
+                                <div class="detection-dots">
+                                    <span class="dot dot-1">🔴</span>
+                                    <span class="dot dot-2">🟡</span>
+                                    <span class="dot dot-3">🟢</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <h3>{{ t('nav.disease') if t else 'AI Disease Detection' }}</h3>
+                            <p>{{ t('features.disease_detection.description') if t else 'Upload a photo of your plant and get instant AI-powered disease identification with treatment recommendations. Early detection saves your crops and increases yield.' }}</p>
+                            <ul class="feature-benefits">
+                                <li><i class="fas fa-check-circle"></i> Instant disease identification</li>
+                                <li><i class="fas fa-check-circle"></i> 95%+ accuracy rate</li>
+                                <li><i class="fas fa-check-circle"></i> Treatment recommendations</li>
+                                <li><i class="fas fa-check-circle"></i> Prevention tips</li>
+                            </ul>
+                            <a href="/disease-detection?lang={{ language }}" class="btn btn-feature disease-btn">
+                                <i class="fas fa-camera"></i> Try Disease Detection
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Crop Recommendation Feature -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="feature-showcase crop-recommendation" data-aos="fade-up" data-aos-delay="200">
+                        <div class="feature-animation">
+                            <div class="seedling-animation">
+                                <i class="fas fa-seedling">🌱</i>
+                                <div class="growth-rings"></div>
+                                <div class="growth-particles">
+                                    <span class="particle">🌱</span>
+                                    <span class="particle">🌿</span>
+                                    <span class="particle">🍃</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <h3>{{ t('nav.crops') if t else 'Smart Crop Recommendation' }}</h3>
+                            <p>{{ t('features.crop_advice.description') if t else 'Get personalized crop suggestions based on soil conditions, climate data, and market trends. Maximize your profits with data-driven decisions.' }}</p>
+                            <ul class="feature-benefits">
+                                <li><i class="fas fa-check-circle"></i> Soil-based recommendations</li>
+                                <li><i class="fas fa-check-circle"></i> Weather consideration</li>
+                                <li><i class="fas fa-check-circle"></i> Market price analysis</li>
+                                <li><i class="fas fa-check-circle"></i> Seasonal guidance</li>
+                            </ul>
+                            <a href="/crop-recommender?lang={{ language }}" class="btn btn-feature crop-btn">
+                                <i class="fas fa-brain"></i> Get Recommendations
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather Insights Feature -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="feature-showcase weather-insights" data-aos="fade-up" data-aos-delay="300">
+                        <div class="feature-animation">
+                            <div class="weather-animation">
+                                <i class="fas fa-cloud-sun">🌤️</i>
+                                <div class="weather-particles"></div>
+                                <div class="weather-effects">
+                                    <span class="weather-icon">☀️</span>
+                                    <span class="weather-icon">🌧️</span>
+                                    <span class="weather-icon">⛈️</span>
+                                    <span class="weather-icon">🌈</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <h3>{{ t('nav.weather') if t else 'Weather Intelligence' }}</h3>
+                            <p>{{ t('features.weather_updates.description') if t else 'Access real-time weather data and forecasts tailored for agriculture. Plan irrigation, harvesting, and field activities with confidence.' }}</p>
+                            <ul class="feature-benefits">
+                                <li><i class="fas fa-check-circle"></i> 7-day forecasts</li>
+                                <li><i class="fas fa-check-circle"></i> Rainfall predictions</li>
+                                <li><i class="fas fa-check-circle"></i> Wind & humidity data</li>
+                                <li><i class="fas fa-check-circle"></i> Agricultural advisories</li>
+                            </ul>
+                            <a href="/weather?lang={{ language }}" class="btn btn-feature weather-btn">
+                                <i class="fas fa-cloud-sun"></i> Check Weather
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Market Prices Feature -->
+                <div class="col-lg-6 col-md-12">
+                    <div class="feature-showcase market-prices" data-aos="fade-up" data-aos-delay="400">
+                        <div class="feature-animation">
+                            <div class="chart-animation">
+                                <i class="fas fa-chart-line">📈</i>
+                                <div class="price-bars"></div>
+                                <div class="market-indicators">
+                                    <span class="indicator up">📈</span>
+                                    <span class="indicator down">📉</span>
+                                    <span class="indicator stable">💰</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-content">
+                            <h3>{{ t('nav.prices') if t else 'Live Market Prices' }}</h3>
+                            <p>{{ t('features.market_prices.description') if t else 'Stay updated with real-time commodity prices from mandis across India. Know when and where to sell for maximum profit.' }}</p>
+                            <ul class="feature-benefits">
+                                <li><i class="fas fa-check-circle"></i> Real-time mandi prices</li>
+                                <li><i class="fas fa-check-circle"></i> Price trend analysis</li>
+                                <li><i class="fas fa-check-circle"></i> Best selling locations</li>
+                                <li><i class="fas fa-check-circle"></i> Profit calculations</li>
+                            </ul>
+                            <a href="/prices?lang={{ language }}" class="btn btn-feature market-btn">
+                                <i class="fas fa-rupee-sign"></i> View Prices
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action -->
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <div class="cta-box" data-aos="zoom-in" data-aos-delay="500">
+                        <h3>{{ t('hero.ready_to_start') if t else 'Ready to Transform Your Farming?' }}</h3>
+                        <p>{{ t('hero.start_description') if t else 'Join thousands of farmers who are already using BhoomiSetu to increase their yields and profits' }}</p>
+                        <a href="/chat?lang={{ language }}" class="btn btn-cta">
+                            <i class="fas fa-rocket"></i> {{ t('hero.cta_button') if t else 'Start Your Journey' }}
+                        </a>
                     </div>
                 </div>
             </div>

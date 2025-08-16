@@ -22,7 +22,8 @@
             background-color: var(--light-bg);
             color: var(--dark-text);
             line-height: 1.6;
-            margin-top: 15px;
+            margin-top: 0px;
+            width: 100%;
         }
 
         /* Navbar Glass Style */
@@ -657,97 +658,8 @@
 </head>
 <body>
     <!-- Navigation Bar -->
-    <!-- Include Professional Navbar with Chat History -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top" style="background: linear-gradient(135deg, rgba(46, 125, 50, 0.95), rgba(67, 160, 71, 0.95)); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);">
-        <div class="container-fluid px-4">
-            <!-- Brand -->
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="/?lang={{ language }}" style="font-size: 1.4rem; letter-spacing: 0.5px;">
-                <i class="fas fa-seedling me-2" style="font-size: 1.6rem; color: #81C784;"></i>
-                <span style="background: linear-gradient(45deg, #ffffff, #e8f5e8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">BhoomiSetu AI</span>
-            </a>
-
-            <!-- Mobile Toggle Button -->
-            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-
-            <!-- Navbar Content -->
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <!-- Navigation Links -->
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item mx-1">
-                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/?lang={{ language }}" style="transition: all 0.3s ease;">
-                            <i class="fas fa-home me-2"></i>{{ t('nav.home') }}
-                        </a>
-                    </li>
-                    <li class="nav-item mx-1">
-                        <a class="nav-link px-3 py-2 rounded-3 bg-white bg-opacity-20 text-white fw-semibold" href="/chat?lang={{ language }}">
-                            <i class="fas fa-comments me-2"></i>{{ t('nav.chat') }}
-                        </a>
-                    </li>
-                    <li class="nav-item mx-1">
-                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/weather?lang={{ language }}" style="transition: all 0.3s ease;">
-                            <i class="fas fa-cloud me-2"></i>{{ t('nav.weather') }}
-                        </a>
-                    </li>
-                    <li class="nav-item mx-1">
-                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/prices?lang={{ language }}" style="transition: all 0.3s ease;">
-                            <i class="fas fa-chart-line me-2"></i>{{ t('nav.prices') }}
-                        </a>
-                    </li>
-                    <li class="nav-item mx-1">
-                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/disease-detection?lang={{ language }}" style="transition: all 0.3s ease;">
-                            <i class="fas fa-microscope me-2"></i>{{ t('nav.disease') }}
-                        </a>
-                    </li>
-                    <li class="nav-item mx-1">
-                        <a class="nav-link px-3 py-2 rounded-3 transition-all" href="/schemes?lang={{ language }}" style="transition: all 0.3s ease;">
-                            <i class="fas fa-file-alt me-2"></i>{{ t('nav.schemes') }}
-                        </a>
-                    </li>
-                </ul>
-
-                <!-- Right Side Actions -->
-                <div class="d-flex align-items-center gap-3">
-                    <!-- Chat History Button -->
-                    <button class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" onclick="showThreadsModal()" title="Chat History" style="border: 1.5px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                        <i class="fas fa-history me-2"></i>History
-                    </button>
-
-                    <!-- Language Selector -->
-                    <div class="dropdown">
-                        <button class="btn btn-outline-light btn-sm dropdown-toggle px-3 py-2 rounded-3 d-flex align-items-center" 
-                                type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false"
-                                style="border: 1.5px solid rgba(255,255,255,0.3); min-width: 120px; transition: all 0.3s ease;">
-                            <i class="fas fa-globe me-2"></i>
-                            <span>{{ languages[language] }}</span>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 rounded-3" style="backdrop-filter: blur(10px); background: rgba(255,255,255,0.95);">
-                            {% for code, name in languages.items() %}
-                            <li>
-                                <a class="dropdown-item py-2 px-3 rounded-2 mx-1 my-1" 
-                                   href="javascript:void(0)" onclick="changeLanguage('{{ code }}')"
-                                   style="transition: all 0.2s ease; {% if code == language %}background: rgba(46, 125, 50, 0.1); font-weight: 600;{% endif %}">
-                                    {{ name }}
-                                </a>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-
-                    <!-- Theme Toggle -->
-                    <button id="themeToggle" class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" 
-                            title="Toggle Dark Mode" 
-                            style="border: 1.5px solid rgba(255,255,255,0.3); transition: all 0.3s ease;">
-                        <i id="themeIcon" class="fas fa-moon"></i>
-                    </button>
-
-                    <!-- Authentication Section -->
-                    <div id="authButtons" class="d-flex gap-2">
-                        <button class="btn btn-outline-light btn-sm px-3 py-2 rounded-3" onclick="showLoginModal()"
-                                style="border: 1.5px solid rgba(255,255,255,0.4); transition: all 0.3s ease;">
-                            <i class="fas fa-sign-in-alt me-2"></i>Login
-                        </button>
+    <!-- Include Standard Navbar -->
+    {% include 'components/navbar.html' %}
                         <button class="btn btn-light btn-sm px-3 py-2 rounded-3 fw-semibold" onclick="showRegisterModal()"
                                 style="background: rgba(255,255,255,0.9); color: #2E7D32; border: none; transition: all 0.3s ease;">
                             <i class="fas fa-user-plus me-2"></i>Register
@@ -840,29 +752,33 @@
 
     <div class="container-fluid h-100 p-3" style="margin-top: 10px;">
         <div class="row h-100 justify-content-center">
-            <div class="col-lg-8 col-xl-6">
+            <div class="col-lg-10 col-xl-8 col-xxl-6">
                 <div class="glass-container chat-container liquid-bg">
                     <!-- Chat Header -->
                     <div class="chat-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h1 class="chat-title">
                                 <i class="fas fa-seedling"></i>
-                                BhoomiSetu AI Advisor
+                                {{ t('chat.welcome_title') if t else 'BhoomiSetu AI Advisor' }}
                             </h1>
-                            <!-- Thread Management Buttons -->
-                            <div class="d-flex gap-2" id="threadControls" style="display: none;">
-                                <button class="btn btn-sm btn-outline-light" onclick="saveCurrentThread()" title="Save Chat">
-                                    <i class="fas fa-save"></i>
+                            <!-- Chat Controls -->
+                            <div class="d-flex gap-2 align-items-center">
+                                <!-- Chat History Button -->
+                                <button class="btn btn-outline-success btn-sm px-3 py-2 rounded-3" onclick="showThreadsModal()" title="{{ t('chat.history') if t else 'Chat History' }}">
+                                    <i class="fas fa-history me-2"></i>{{ t('chat.history') if t else 'History' }}
                                 </button>
-                                <button class="btn btn-sm btn-outline-light" onclick="showThreadsModal()" title="Chat History">
-                                    <i class="fas fa-history"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-light" onclick="createNewThread()" title="New Chat">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-light" onclick="exportCurrentChat()" title="Export Chat">
-                                    <i class="fas fa-download"></i>
-                                </button>
+                                <!-- Thread Management Buttons -->
+                                <div class="d-flex gap-2" id="threadControls" style="display: none;">
+                                    <button class="btn btn-sm btn-outline-light" onclick="saveCurrentThread()" title="Save Chat">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-light" onclick="createNewThread()" title="New Chat">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-light" onclick="exportCurrentChat()" title="Export Chat">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="d-flex gap-3 align-items-center">
@@ -886,21 +802,21 @@
                     <!-- Chat Messages -->
                     <div class="chat-messages" id="chatMessages">
                         <div class="welcome-message">
-                            <h3>{{ t('chat.welcome_title') if t else '🌱 Welcome to BhoomiSetu AI' }}</h3>
-                            <p>{{ t('chat.welcome_description') if t else 'Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.' }}</p>
+                            <h3>{{ t('chat.welcome_title') }}</h3>
+                            <p>{{ t('chat.welcome_description') }}</p>
                             
                             <div class="quick-suggestions">
-                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_weather') if t else 'Weather forecast for my location' }}')">
-                                    <i class="fas fa-cloud-sun"></i> {{ t('chat.suggestion_weather') if t else 'Weather' }}
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_weather') }}')">
+                                    <i class="fas fa-cloud-sun"></i> {{ t('chat.suggestion_weather') }}
                                 </span>
-                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_prices') if t else 'Tomato market prices' }}')">
-                                    <i class="fas fa-chart-line"></i> {{ t('chat.suggestion_prices') if t else 'Market Prices' }}
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_prices') }}')">
+                                    <i class="fas fa-chart-line"></i> {{ t('chat.suggestion_prices') }}
                                 </span>
-                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_crops') if t else 'Best crops for kharif season' }}')">
-                                    <i class="fas fa-leaf"></i> {{ t('chat.suggestion_crops') if t else 'Crop Advice' }}
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_crops') }}')">
+                                    <i class="fas fa-leaf"></i> {{ t('chat.suggestion_crops') }}
                                 </span>
-                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_schemes') if t else 'Government schemes for farmers' }}')">
-                                    <i class="fas fa-landmark"></i> {{ t('chat.suggestion_schemes') if t else 'Schemes' }}
+                                <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_schemes') }}')">
+                                    <i class="fas fa-landmark"></i> {{ t('chat.suggestion_schemes') }}
                                 </span>
                             </div>
                         </div>
@@ -941,7 +857,6 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Global variables
         let isLoading = false;
@@ -2177,21 +2092,21 @@
             const messagesContainer = document.getElementById('chatMessages');
             messagesContainer.innerHTML = `
                 <div class="welcome-message">
-                    <h3>{{ t('chat.welcome_title') if t else '🌱 Welcome to BhoomiSetu AI' }}</h3>
-                    <p>{{ t('chat.welcome_description') if t else 'Your intelligent agricultural advisor for Indian farming. Ask me about crops, weather, market prices, government schemes, or any farming-related questions.' }}</p>
+                    <h3>{{ t('chat.welcome_title') }}</h3>
+                    <p>{{ t('chat.welcome_description') }}</p>
                     
                     <div class="quick-suggestions">
-                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_weather') if t else 'Weather forecast for my location' }}')">
-                            <i class="fas fa-cloud-sun"></i> {{ t('chat.suggestion_weather') if t else 'Weather' }}
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_weather') }}')">
+                            <i class="fas fa-cloud-sun"></i> {{ t('chat.suggestion_weather') }}
                         </span>
-                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_prices') if t else 'Tomato market prices' }}')">
-                            <i class="fas fa-chart-line"></i> {{ t('chat.suggestion_prices') if t else 'Market Prices' }}
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_prices') }}')">
+                            <i class="fas fa-chart-line"></i> {{ t('chat.suggestion_prices') }}
                         </span>
-                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_crops') if t else 'Best crops for this season' }}')">
-                            <i class="fas fa-leaf"></i> {{ t('chat.suggestion_crops') if t else 'Seasonal Crops' }}
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_crops') }}')">
+                            <i class="fas fa-leaf"></i> {{ t('chat.suggestion_crops') }}
                         </span>
-                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_schemes') if t else 'Government schemes for farmers' }}')">
-                            <i class="fas fa-landmark"></i> {{ t('chat.suggestion_schemes') if t else 'Schemes' }}
+                        <span class="suggestion-chip" onclick="sendQuickMessage('{{ t('chat.quick_schemes') }}')">
+                            <i class="fas fa-landmark"></i> {{ t('chat.suggestion_schemes') }}
                         </span>
                     </div>
                 </div>
@@ -2310,7 +2225,22 @@
     <script src="/static/js/theme-manager.js"></script>
     <script src="/static/js/language-manager.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    
+    <!-- Initialize Bootstrap components after loading -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize all Bootstrap dropdowns
+            var dropdownElementList = [].slice.call(document.querySelectorAll('.dropdown-toggle'));
+            var dropdownList = dropdownElementList.map(function (dropdownToggleEl) {
+                return new bootstrap.Dropdown(dropdownToggleEl);
+            });
+            
+            // Initialize Bootstrap tooltips if any
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
 </body>
 </html>

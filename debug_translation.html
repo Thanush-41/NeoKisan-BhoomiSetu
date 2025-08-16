@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Translation Debug</title>
+</head>
+<body>
+    <h1>Translation Debug</h1>
+    <p>Language: {{ language }}</p>
+    <p>T function available: {{ t is defined }}</p>
+    
+    <h2>Direct Translation Tests:</h2>
+    <p>welcome_title: "{{ t('chat.welcome_title') }}"</p>
+    <p>welcome_description: "{{ t('chat.welcome_description') }}"</p>
+    <p>suggestion_weather: "{{ t('chat.suggestion_weather') }}"</p>
+    
+    <h2>Key Equality Tests:</h2>
+    <p>welcome_title == 'chat.welcome_title': {{ t('chat.welcome_title') == 'chat.welcome_title' }}</p>
+    <p>suggestion_weather == 'chat.suggestion_weather': {{ t('chat.suggestion_weather') == 'chat.suggestion_weather' }}</p>
+    
+    <h2>Conditional Logic Test:</h2>
+    <p>{{ t('chat.welcome_title') if t and t('chat.welcome_title') != 'chat.welcome_title' else 'FALLBACK USED' }}</p>
+</body>
+</html>
