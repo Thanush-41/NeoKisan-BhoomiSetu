@@ -17,55 +17,69 @@
 
         <!-- Collapsible Content -->
         <div class="collapse navbar-collapse" id="navbarNav">
-            <!-- Main Navigation Links -->
+            <!-- Main Navigation Links - Icons Only with Tooltips -->
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if request.url.path == '/' else '' }}" 
-                       href="/?lang={{ language }}">
+                       href="/?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.home') }}">
                         <i class="fas fa-home"></i>
-                        <span class="nav-text">{{ t('nav.home') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/chat' in request.url.path else '' }}" 
-                       href="/chat?lang={{ language }}">
+                       href="/chat?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.chat') }}">
                         <i class="fas fa-comments"></i>
-                        <span class="nav-text">{{ t('nav.chat') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/weather' in request.url.path else '' }}" 
-                       href="/weather?lang={{ language }}">
+                       href="/weather?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.weather') }}">
                         <i class="fas fa-cloud-sun"></i>
-                        <span class="nav-text">{{ t('nav.weather') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/crop-recommender' in request.url.path else '' }}" 
-                       href="/crop-recommender?lang={{ language }}">
+                       href="/crop-recommender?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.crops') }}">
                         <i class="fas fa-seedling"></i>
-                        <span class="nav-text">{{ t('nav.crops') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/disease-detection' in request.url.path else '' }}" 
-                       href="/disease-detection?lang={{ language }}">
+                       href="/disease-detection?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.disease') }}">
                         <i class="fas fa-microscope"></i>
-                        <span class="nav-text">{{ t('nav.disease') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/prices' in request.url.path else '' }}" 
-                       href="/prices?lang={{ language }}">
+                       href="/prices?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.prices') }}">
                         <i class="fas fa-chart-line"></i>
-                        <span class="nav-text">{{ t('nav.prices') }}</span>
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/schemes' in request.url.path else '' }}" 
-                       href="/schemes?lang={{ language }}">
+                       href="/schemes?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.schemes') }}">
                         <i class="fas fa-file-contract"></i>
-                        <span class="nav-text">{{ t('nav.schemes') }}</span>
                     </a>
                 </li>
             </ul>
@@ -231,7 +245,7 @@
     background-clip: text;
 }
 
-/* Navigation Links */
+/* Navigation Links - Optimized for Icon-Only Display */
 .navbar-nav .nav-link {
     color: var(--dark-text, #2d3748) !important;
     font-weight: 500;
@@ -242,10 +256,12 @@
     position: relative;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    justify-content: center;
     white-space: nowrap;
     font-size: 0.9rem;
     line-height: 1.2;
+    min-width: 44px; /* Ensure touch-friendly size */
+    min-height: 44px;
 }
 
 [data-theme="dark"] .navbar-nav .nav-link {
@@ -276,11 +292,152 @@
     border-radius: 2px;
 }
 
-/* Icons */
+/* Icons - Larger and centered for icon-only display */
 .navbar-nav .nav-link i {
-    font-size: 1rem;
-    width: 18px;
+    font-size: 1.1rem;
+    width: 20px;
     text-align: center;
+}
+
+/* Responsive design for icon-only navigation */
+@media (max-width: 991px) {
+    .navbar-nav {
+        margin-top: 1rem;
+        padding: 0.5rem 0;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+    
+    [data-theme="dark"] .navbar-nav {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .navbar-nav .nav-link {
+        justify-content: flex-start;
+        padding: 0.75rem 1rem;
+        margin: 0.2rem 0.5rem;
+    }
+    
+    .navbar-nav .nav-link::after {
+        content: attr(title);
+        margin-left: 0.75rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* Custom Tooltip Styling - Modern Card Design */
+.tooltip {
+    font-size: 0.85rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    z-index: 1060;
+}
+
+.tooltip-inner {
+    background: linear-gradient(135deg, #2a7a1f 0%, #4caf50 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 0.7rem 1rem;
+    box-shadow: 
+        0 8px 25px rgba(42, 122, 31, 0.4),
+        0 0 20px rgba(76, 175, 80, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    color: white;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    min-width: 80px;
+    text-align: center;
+    position: relative;
+    backdrop-filter: blur(10px);
+    animation: tooltipSlideIn 0.3s ease-out;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Glossy effect */
+.tooltip-inner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
+    border-radius: 12px 12px 0 0;
+    pointer-events: none;
+}
+
+/* Tooltip arrow styling */
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+    border-bottom-color: #2a7a1f;
+    filter: drop-shadow(0 -2px 4px rgba(42, 122, 31, 0.3));
+}
+
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #2a7a1f;
+    filter: drop-shadow(0 2px 4px rgba(42, 122, 31, 0.3));
+}
+
+.tooltip.bs-tooltip-start .tooltip-arrow::before {
+    border-left-color: #2a7a1f;
+    filter: drop-shadow(2px 0 4px rgba(42, 122, 31, 0.3));
+}
+
+.tooltip.bs-tooltip-end .tooltip-arrow::before {
+    border-right-color: #2a7a1f;
+    filter: drop-shadow(-2px 0 4px rgba(42, 122, 31, 0.3));
+}
+
+/* Tooltip slide-in animation with bounce */
+@keyframes tooltipSlideIn {
+    0% {
+        opacity: 0;
+        transform: translateY(-12px) scale(0.8);
+    }
+    70% {
+        opacity: 0.8;
+        transform: translateY(2px) scale(1.05);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Enhanced tooltip for dark theme */
+[data-theme="dark"] .tooltip-inner {
+    background: linear-gradient(135deg, #1a5d14 0%, #2a7a1f 100%);
+    box-shadow: 
+        0 8px 25px rgba(26, 93, 20, 0.6),
+        0 0 20px rgba(42, 122, 31, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+/* Hover effect on nav links when tooltip is about to show */
+.navbar-nav .nav-link:hover {
+    color: var(--primary-green, #2a7a1f) !important;
+    background: rgba(74, 175, 80, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(42, 122, 31, 0.2);
+}
+
+/* Special class for navbar tooltips */
+.navbar-tooltip {
+    --bs-tooltip-max-width: 200px;
+}
+
+/* Pulsing glow effect for active nav items */
+.navbar-nav .nav-link.active {
+    animation: activeGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes activeGlow {
+    from {
+        box-shadow: 0 0 5px rgba(42, 122, 31, 0.3);
+    }
+    to {
+        box-shadow: 0 0 15px rgba(42, 122, 31, 0.5);
+    }
 }
 
 /* Text span in nav links */
@@ -749,7 +906,22 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Dropdown(dropdownToggleEl);
     });
     
+    // Initialize Bootstrap tooltips for navigation icons with enhanced options
+    const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl, {
+            delay: { show: 200, hide: 100 },
+            placement: 'bottom',
+            trigger: 'hover focus',
+            animation: true,
+            customClass: 'navbar-tooltip',
+            html: false,
+            offset: [0, 8]
+        });
+    });
+    
     console.log(`✅ Initialized ${dropdownList.length} dropdowns`);
+    console.log(`✅ Initialized ${tooltipList.length} tooltips`);
 });
 
 // Simple language change function

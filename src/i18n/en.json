@@ -14,25 +14,29 @@
     "subtitle": "AI-Powered Agricultural Advisor for Indian Farmers",
     "description": "Get expert advice on crops, weather, diseases, and farming techniques with our advanced AI assistant.",
     "cta_button": "Start Chat",
-    "language_selector": "Select Language"
+    "language_selector": "Select Language",
+    "explore_features": "Explore Our Powerful Features",
+    "explore_description": "Discover how our AI-powered tools can transform your farming experience",
+    "ready_to_start": "Ready to Transform Your Farming?",
+    "start_description": "Join thousands of farmers who are already using BhoomiSetu to increase their yields and profits"
   },
   "features": {
     "title": "Features",
     "crop_advice": {
       "title": "Crop Advice",
-      "description": "Get personalized crop recommendations based on your location, soil, and season."
+      "description": "Get personalized crop suggestions based on soil conditions, climate data, and market trends. Maximize your profits with data-driven decisions."
     },
     "weather_updates": {
       "title": "Weather Updates",
-      "description": "Real-time weather information and forecasts for better farming decisions."
+      "description": "Access real-time weather data and forecasts tailored for agriculture. Plan irrigation, harvesting, and field activities with confidence."
     },
     "disease_detection": {
       "title": "Disease Detection",
-      "description": "AI-powered plant disease identification and treatment recommendations."
+      "description": "Upload a photo of your plant and get instant AI-powered disease identification with treatment recommendations. Early detection saves your crops and increases yield."
     },
     "market_prices": {
       "title": "Market Prices",
-      "description": "Current commodity prices and market trends to optimize your sales."
+      "description": "Stay updated with real-time commodity prices from mandis across India. Know when and where to sell for maximum profit."
     },
     "government_schemes": {
       "title": "Government Schemes",
