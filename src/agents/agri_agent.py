@@ -62,6 +62,67 @@ class AgricultureAIAgent:
         
         print("✅ DEBUG: AgricultureAIAgent initialization complete")
 
+    def _correct_location_name(self, location: str) -> str:
+        """Correct common location name variations and transliterations"""
+        if not location:
+            return location
+            
+        # Normalize the location string
+        location = location.strip().lower()
+        
+        # Telugu transliteration corrections
+        telugu_corrections = {
+            "కరీంనగర్": "karimnagar",
+            "karanagar": "karimnagar",  # Common transliteration error
+            "karemnagar": "karimnagar",
+            "విజయవాడ": "vijayawada",
+            "హైదరాబాద్": "hyderabad",
+            "గుంటూరు": "guntur",
+            "తిరుపతి": "tirupati",
+            "విశాఖపట్నం": "visakhapatnam"
+        }
+        
+        # Apply Telugu corrections first
+        for telugu, english in telugu_corrections.items():
+            if telugu in location or location.replace(" ", "").replace(",", "") == telugu:
+                location = english
+                break
+                
+        # General location corrections
+        location_corrections = {
+            "banglore": "bangalore",
+            "bangalor": "bangalore", 
+            "bangaluru": "bangalore",
+            "deli": "delhi",
+            "mumbay": "mumbai",
+            "chenai": "chennai",
+            "kolkatta": "kolkata",
+            "hyderabd": "hyderabad",
+            "vijayawda": "vijayawada",
+            "vizag": "visakhapatnam",
+            "karanagar": "karimnagar",
+            "karemnagar": "karimnagar"
+        }
+        
+        # Extract city name if it contains state info
+        if "," in location:
+            city_part = location.split(",")[0].strip()
+            state_part = location.split(",")[1].strip() if len(location.split(",")) > 1 else ""
+            
+            # Correct city name
+            corrected_city = location_corrections.get(city_part, city_part)
+            
+            if corrected_city != city_part:
+                print(f"🔧 DEBUG: Location correction: '{city_part}' → '{corrected_city}'")
+                return f"{corrected_city}, {state_part}" if state_part else corrected_city
+                
+        # Apply corrections to whole location string
+        corrected = location_corrections.get(location, location)
+        if corrected != location:
+            print(f"🔧 DEBUG: Location correction: '{location}' → '{corrected}'")
+            
+        return corrected
+
     def _load_crop_knowledge(self) -> Dict:
         """Load crop-specific knowledge base"""
         return {
@@ -144,8 +205,12 @@ class AgricultureAIAgent:
             # Path to the soil dataset
             csv_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "knowledge", "data_core.csv")
             
+            print(f"📂 DEBUG: Checking soil dataset path: {csv_file_path}")
+            
             if not os.path.exists(csv_file_path):
                 print(f"⚠️ DEBUG: Soil dataset not found at {csv_file_path}")
+                print(f"🔍 DEBUG: Current working directory: {os.getcwd()}")
+                print(f"🔍 DEBUG: Script directory: {os.path.dirname(__file__)}")
                 return {}
             
             # Load the dataset
@@ -937,7 +1002,8 @@ Please analyze and respond with a JSON object containing:
 
 2. "commodity": Extract any crop/commodity mentioned (standardized names like "rice", "wheat", "tomato")
 
-3. "location": Extract location mentioned, or use user's location. Handle typos and common variations.
+3. "location": Extract location mentioned, or use user's location. Handle typos and common variations. 
+   For Telugu locations: కరీంనగర్→Karimnagar, విజయవాడ→Vijayawada, హైదరాబాద్→Hyderabad, గుంటూరు→Guntur
 
 4. "specific_question": Rephrase the query to be more specific and actionable
 
@@ -1117,7 +1183,9 @@ Response (JSON only):
                     "kolkatta": "kolkata",
                     "hyderabd": "hyderabad",
                     "vijayawda": "vijayawada",
-                    "vizag": "visakhapatnam"
+                    "vizag": "visakhapatnam",
+                    "karanagar": "karimnagar",
+                    "karemnagar": "karimnagar"
                 }
                 location = location_corrections.get(location_part, location_part)
                 if location != location_part:
@@ -1167,6 +1235,7 @@ Response (JSON only):
                     "kolkata": {"state": "West Bengal", "city": "Kolkata"},
                     "chennai": {"state": "Tamil Nadu", "city": "Chennai"},
                     "hyderabad": {"state": "Telangana", "city": "Hyderabad"},
+                    "karimnagar": {"state": "Telangana", "city": "Karimnagar"},
                     "vijayawada": {"state": "Andhra Pradesh", "city": "Vijayawada"},
                     "visakhapatnam": {"state": "Andhra Pradesh", "city": "Visakhapatnam"},
                     "guntur": {"state": "Andhra Pradesh", "city": "Guntur"},
@@ -1454,8 +1523,21 @@ Response (JSON only):
             print(f"   Specific Question: {specific_question}")
             print(f"   Urgent: {is_urgent}")
             
-            # Use AI-extracted location if not provided
-            effective_location = location or ai_location or (user_context.get("location") if user_context else None)
+            # Prioritize AI-extracted location when user explicitly mentions a location in their query
+            # Only use passed location if no specific location mentioned in query
+            if ai_location:
+                # User explicitly mentioned a location in their query - use that
+                effective_location = ai_location
+                print(f"🎯 DEBUG: Using AI-extracted location from query: {ai_location}")
+            else:
+                # No specific location in query - use passed location or context location
+                effective_location = location or (user_context.get("location") if user_context else None)
+                print(f"🌍 DEBUG: Using fallback location: {effective_location}")
+            
+            # Apply location corrections for common transliterations
+            if effective_location:
+                effective_location = self._correct_location_name(effective_location)
+            
             print(f"🤖 DEBUG: Effective location: {effective_location}")
             
             # Gather relevant data based on query type
@@ -1847,6 +1929,9 @@ Current weather in {location_name}:
             
             has_agricultural_context = any(keyword in query_lower for keyword in agricultural_keywords)
 
+            # Check if user requested Fahrenheit temperatures
+            fahrenheit_requested = any(term in query.lower() for term in ['°f', 'fahrenheit', 'f please', 'temp in f'])
+            
             # Create AI prompt for intelligent weather response
             prompt = f"""
 You are a friendly and intelligent weather assistant. A user asked: "{query}"
@@ -1857,14 +1942,16 @@ You are a friendly and intelligent weather assistant. A user asked: "{query}"
 
 USER REQUESTED: {requested_days} days of forecast
 AVAILABLE: 5 days of forecast data
+{f"TEMPERATURE UNIT: User specifically requested Fahrenheit (°F). Include both Celsius and Fahrenheit in your response." if fahrenheit_requested else ""}
 
 Please provide a helpful, conversational response that:
 
 1. **Acknowledges the user's specific request**: If they asked for {requested_days} days but we only have 5 days, mention this politely
 2. **Presents weather data clearly**: Use the current conditions and forecast in an easy-to-understand format
-3. **Provides useful insights**: Explain what the weather pattern means (e.g., "expect cooler temperatures", "rain coming", etc.)
-4. **Adds helpful tips**: Based on the weather, give practical advice for daily activities
-{'5. **Include agricultural advice**: Since the user mentioned farming/crops, provide relevant agricultural insights' if has_agricultural_context else '5. **Keep it general**: Focus on general weather impacts and daily planning'}
+{'3. **Include temperature conversions**: Since user requested Fahrenheit, show temperatures in both °C and °F format (°F = °C × 9/5 + 32)' if fahrenheit_requested else '3. **Use appropriate temperature units**: Present temperatures clearly'}
+4. **Provides useful insights**: Explain what the weather pattern means (e.g., "expect cooler temperatures", "rain coming", etc.)
+5. **Adds helpful tips**: Based on the weather, give practical advice for daily activities
+{'6. **Include agricultural advice**: Since the user mentioned farming/crops, provide relevant agricultural insights' if has_agricultural_context else '6. **Keep it general**: Focus on general weather impacts and daily planning'}
 
 Use a friendly, conversational tone. Include relevant emojis for weather conditions. Be specific about dates and temperatures.
 Make the response helpful and informative, not just a data dump.
@@ -1876,7 +1963,7 @@ IMPORTANT: If user asked for more than 5 days, politely explain we only have 5-d
             if self.groq_api_key:
                 print("🌤️ DEBUG: Using Groq for AI weather response")
                 messages = [
-                    {"role": "system", "content": "You are a helpful weather assistant. Provide clear, conversational weather information with practical insights and tips. Use emojis appropriately and make responses easy to understand."},
+                    {"role": "system", "content": "You are an expert agricultural advisor helping Indian farmers. Provide well-structured advice with clear sections using ALL CAPS for headers. Add proper line breaks between sections for better readability. Focus on practical, actionable advice with numbered lists."},
                     {"role": "user", "content": prompt}
                 ]
                 response = await self._call_groq_api(messages)
