@@ -349,17 +349,28 @@ This helps me give you:
 
     def run(self):
         """Start the Telegram bot"""
-        # Create application
-        application = Application.builder().token(self.token).build()
+        # Check if running in production (Render) or local development
+        is_production = os.getenv('HOST') == '0.0.0.0' or os.getenv('RENDER') or os.getenv('WEBHOOK_URL')
         
-        # Add handlers
-        application.add_handler(CommandHandler("start", self.start))
-        application.add_handler(CommandHandler("location", self.set_location))
-        application.add_handler(MessageHandler(filters.LOCATION, self.handle_location))
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
-        
-        # Start the bot
-        application.run_polling()
+        if is_production:
+            print("🌍 INFO: Production environment detected. Bot will use webhook mode.")
+            print("🌍 INFO: Webhook endpoint: /telegram/webhook")
+            # In production, the webhook is handled by FastAPI
+            # The bot handlers are registered in the webhook endpoint
+            return
+        else:
+            print("🏠 INFO: Local development environment detected. Bot will use polling mode.")
+            # Create application for local development
+            application = Application.builder().token(self.token).build()
+            
+            # Add handlers
+            application.add_handler(CommandHandler("start", self.start))
+            application.add_handler(CommandHandler("location", self.set_location))
+            application.add_handler(MessageHandler(filters.LOCATION, self.handle_location))
+            application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
+            
+            # Start the bot with polling
+            application.run_polling()
 
 # Create bot instance
 telegram_bot = TelegramBot()
