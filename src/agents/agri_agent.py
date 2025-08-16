@@ -1523,14 +1523,28 @@ Response (JSON only):
             print(f"   Specific Question: {specific_question}")
             print(f"   Urgent: {is_urgent}")
             
-            # Prioritize AI-extracted location when user explicitly mentions a location in their query
-            # Only use passed location if no specific location mentioned in query
-            if ai_location:
-                # User explicitly mentioned a location in their query - use that
+            # Prioritize passed location parameter over AI-extracted location for queries that use generic terms like "my area", "here"
+            # Only use AI-extracted location if user explicitly mentions a specific place name
+            if ai_location and location:
+                # Check if query contains generic location terms vs specific place names
+                generic_terms = ["my area", "here", "my place", "this place", "current location", "where i am"]
+                query_lower = english_query.lower()
+                is_generic_location_query = any(term in query_lower for term in generic_terms)
+                
+                if is_generic_location_query:
+                    # User used generic terms - prioritize passed location
+                    effective_location = location
+                    print(f"🌍 DEBUG: Generic location query detected, using passed location: {location}")
+                else:
+                    # User mentioned specific place - use AI-extracted location
+                    effective_location = ai_location
+                    print(f"🎯 DEBUG: Specific location mentioned, using AI-extracted location: {ai_location}")
+            elif ai_location:
+                # AI extracted location but no passed location
                 effective_location = ai_location
                 print(f"🎯 DEBUG: Using AI-extracted location from query: {ai_location}")
             else:
-                # No specific location in query - use passed location or context location
+                # No AI location - use passed location or context location
                 effective_location = location or (user_context.get("location") if user_context else None)
                 print(f"🌍 DEBUG: Using fallback location: {effective_location}")
             
