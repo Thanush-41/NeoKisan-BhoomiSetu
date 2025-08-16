@@ -183,25 +183,86 @@ async def telegram_webhook(request: Request):
             
             if chat_id and text:
                 try:
-                    # Import and use the agricultural agent directly
+                    # Import required modules
                     import sys
                     import os
-                    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-                    from src.agents.agri_agent import agri_agent
+                    import re
+                    import aiohttp
                     
-                    # Process the query with the agricultural agent
-                    user_context = {"location": "India"}  # Default for now
-                    response = await agri_agent.process_query(
-                        query=text,
-                        user_context=user_context,
-                        preferred_language="en"
-                    )
+                    # Check if this is a /start command
+                    if text.strip().lower() in ['/start', 'start']:
+                        response = """🌾 *Welcome to NeoKisan - BhoomiSetu Agricultural AI Advisor!* 🌾
+
+🙏 *Namaste, Dear Farmer!*
+
+I'm your intelligent agricultural companion, designed specifically for Indian farmers. I'm here to help you with:
+
+🌱 *CROP GUIDANCE*
+• Best crops for your soil type
+• Seasonal planting recommendations
+• Crop rotation strategies
+
+🌤️ *WEATHER INSIGHTS*
+• Real-time weather updates
+• Rainfall predictions
+• Climate-based farming advice
+
+🌿 *FERTILIZER RECOMMENDATIONS*
+• Soil-specific fertilizer suggestions
+• Organic farming guidance
+• NPK recommendations
+
+🐛 *PEST & DISEASE MANAGEMENT*
+• Disease identification
+• Treatment recommendations
+• Prevention strategies
+
+💰 *MARKET INTELLIGENCE*
+• Current commodity prices
+• Market trends
+• Best selling strategies
+
+🗺️ *LOCATION-BASED ADVICE*
+• Customized for your region
+• Local crop varieties
+• Regional farming practices
+
+🌐 *MULTI-LANGUAGE SUPPORT*
+• Hindi, Telugu, English & more
+• Voice message support
+• Easy communication
+
+📱 *HOW TO USE:*
+Just type your farming question in any language, and I'll provide expert guidance!
+
+Examples:
+• "What crops grow well in black soil?"
+• "Will it rain tomorrow in Hyderabad?"
+• "Best fertilizer for cotton crop?"
+• "Market price of rice today"
+
+🌐 *WEB PLATFORM:*
+Visit our full platform: https://neokisan-bhoomisetu.onrender.com/
+
+🤝 *Ready to help you grow better crops and increase your income!*
+
+Type any farming question to get started! 🚀"""
+                    else:
+                        # Import and use the agricultural agent directly
+                        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+                        from src.agents.agri_agent import agri_agent
+                        
+                        # Process the query with the agricultural agent
+                        user_context = {"location": "India"}  # Default for now
+                        response = await agri_agent.process_query(
+                            query=text,
+                            user_context=user_context,
+                            preferred_language="en"
+                        )
                     
                     print(f"🤖 DEBUG: Generated response: {response[:100]}...")
                     
                     # Send response back using simple HTTP request to Telegram API
-                    import aiohttp
-                    import re
                     token = os.getenv('TELEGRAM_BOT_TOKEN')
                     if token:
                         telegram_url = f"https://api.telegram.org/bot{token}/sendMessage"
