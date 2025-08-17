@@ -177,21 +177,112 @@ async def telegram_webhook(request: Request):
             message = data["message"]
             chat_id = message.get("chat", {}).get("id")
             text = message.get("text", "")
+            location = message.get("location")  # GPS location shared by user
             user_name = message.get("from", {}).get("first_name", "User")
             
             print(f"📨 DEBUG: Message from {user_name} (chat_id: {chat_id}): {text}")
+            if location:
+                print(f"📍 DEBUG: Location shared: lat={location.get('latitude')}, lon={location.get('longitude')}")
             
-            if chat_id and text:
-                try:
-                    # Import required modules
-                    import sys
-                    import os
-                    import re
-                    import aiohttp
-                    
-                    # Check if this is a /start command
-                    if text.strip().lower() in ['/start', 'start']:
-                        response = """🌾 *Welcome to NeoKisan - BhoomiSetu Agricultural AI Advisor!* 🌾
+            if chat_id:
+                # Handle location sharing
+                if location:
+                    try:
+                        # Initialize session storage for webhook users
+                        if not hasattr(app, 'telegram_user_sessions'):
+                            app.telegram_user_sessions = {}
+                        
+                        # Store coordinates
+                        user_session = app.telegram_user_sessions.get(chat_id, {})
+                        user_session['coordinates'] = {
+                            'latitude': location.get('latitude'),
+                            'longitude': location.get('longitude')
+                        }
+                        
+                        # Get city name from coordinates using reverse geocoding
+                        try:
+                            lat = location.get('latitude')
+                            lon = location.get('longitude')
+                            api_key = os.getenv('OPENWEATHER_API_KEY')
+                            
+                            if api_key:
+                                geocode_url = f"http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit=1&appid={api_key}"
+                                
+                                async with aiohttp.ClientSession() as session:
+                                    async with session.get(geocode_url) as geocode_response:
+                                        if geocode_response.status == 200:
+                                            geocode_data = await geocode_response.json()
+                                            if geocode_data and len(geocode_data) > 0:
+                                                city_name = geocode_data[0].get('name', 'Unknown')
+                                                state = geocode_data[0].get('state', '')
+                                                country = geocode_data[0].get('country', '')
+                                                
+                                                user_session['location'] = city_name
+                                                app.telegram_user_sessions[chat_id] = user_session
+                                                
+                                                response = f"""📍 *Location detected: {city_name}, {state}*
+
+✅ Perfect! Now I can provide location-specific agricultural advice.
+
+Ask me anything about farming:
+• "What's the weather today?"
+• "Best crops for my soil?"
+• "Market price of rice today"
+• "When to plant cotton?"
+
+🌾 Ready to help you grow better crops!"""
+                                            else:
+                                                # Fallback to coordinates
+                                                coord_location = f"Lat: {lat:.2f}, Lon: {lon:.2f}"
+                                                user_session['location'] = coord_location
+                                                app.telegram_user_sessions[chat_id] = user_session
+                                                
+                                                response = f"""📍 *Location received: {coord_location}*
+
+✅ I'll use your coordinates for weather and agricultural advice.
+
+Ask me anything about farming!"""
+                                        else:
+                                            raise Exception("Geocoding API failed")
+                            else:
+                                # No API key available
+                                coord_location = f"Lat: {lat:.2f}, Lon: {lon:.2f}"
+                                user_session['location'] = coord_location
+                                app.telegram_user_sessions[chat_id] = user_session
+                                
+                                response = f"""📍 *Location received: {coord_location}*
+
+✅ I'll use your coordinates for agricultural advice.
+
+Ask me anything about farming!"""
+                                
+                        except Exception as geocode_error:
+                            print(f"❌ ERROR: Geocoding failed: {geocode_error}")
+                            # Fallback to just storing coordinates
+                            coord_location = f"Lat: {location.get('latitude'):.2f}, Lon: {location.get('longitude'):.2f}"
+                            user_session['location'] = coord_location
+                            app.telegram_user_sessions[chat_id] = user_session
+                            
+                            response = f"""📍 *Location received: {coord_location}*
+
+✅ I'll use your coordinates for agricultural advice.
+
+Ask me anything about farming!"""
+                        
+                    except Exception as location_error:
+                        print(f"❌ ERROR: Location processing failed: {location_error}")
+                        response = """❌ Sorry, I couldn't process your location. Please try typing your city name like: "I am in Mumbai" """
+                        
+                elif text:
+                    try:
+                        # Import required modules
+                        import sys
+                        import re
+                        import aiohttp
+                        
+                        # Check if this is a /start command
+                        if text.strip().lower() in ['/start', 'start']:
+                            response = """🌾 *Welcome to NeoKisan - BhoomiSetu Agricultural AI Advisor!* 🌾
 
 🙏 *Namaste, Dear Farmer!*
 
@@ -247,45 +338,29 @@ Visit our full platform: https://neokisan-bhoomisetu.onrender.com/
 🤝 *Ready to help you grow better crops and increase your income!*
 
 Type any farming question to get started! 🚀"""
-                    else:
-                        # Import and use the agricultural agent directly
-                        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-                        from src.agents.agri_agent import agri_agent
-                        
-                        # Initialize session storage for webhook users (simple in-memory storage)
-                        if not hasattr(app, 'telegram_user_sessions'):
-                            app.telegram_user_sessions = {}
-                        
-                        # Check if user has provided location before
-                        user_session = app.telegram_user_sessions.get(chat_id, {})
-                        user_location = user_session.get('location')
-                        
-                        # If no location is set, ask for it first
-                        if not user_location:
-                            response = """📍 *I need your location to provide accurate advice!*
-
-To get personalized weather forecasts, market prices, and farming advice for your area, please:
-
-1️⃣ *Share your location* by tapping 📎 → Location
-2️⃣ *Or type your city* like: `/location Mumbai`
-3️⃣ *Or just tell me* like: "I am in Delhi"
-
-This helps me provide:
-• 🌤️ Local weather forecasts
-• 💰 Nearby market prices  
-• 🌾 Region-specific farming advice
-
-*Share your location first, then ask any farming question!*"""
                         else:
-                            # User has location - process the query normally
+                            # Import and use the agricultural agent directly
+                            sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+                            from src.agents.agri_agent import agri_agent
                             
-                            # Check if user is providing location in this message
+                            # Initialize session storage for webhook users (simple in-memory storage)
+                            if not hasattr(app, 'telegram_user_sessions'):
+                                app.telegram_user_sessions = {}
+                            
+                            # Check if user has provided location before
+                            user_session = app.telegram_user_sessions.get(chat_id, {})
+                            user_location = user_session.get('location')
+                            
+                            print(f"🔍 DEBUG: User {chat_id}, Current saved location: {user_location}")
+                            
+                            # Check if user is providing location via command
                             if text.strip().lower().startswith('/location '):
                                 new_location = text.strip()[10:].strip()  # Remove '/location ' prefix
-                                user_session['location'] = new_location
-                                app.telegram_user_sessions[chat_id] = user_session
-                                
-                                response = f"""📍 *Location set to: {new_location}*
+                                if new_location:
+                                    user_session['location'] = new_location
+                                    app.telegram_user_sessions[chat_id] = user_session
+                                    
+                                    response = f"""📍 *Location set to: {new_location}*
 
 ✅ Perfect! Now I can provide location-specific advice.
 
@@ -296,11 +371,16 @@ Ask me anything about farming:
 • "When to plant cotton?"
 
 🌾 Ready to help you grow better crops!"""
+                                else:
+                                    response = """Please provide a city name after /location command.
+Example: `/location Mumbai` or `/location Delhi`"""
                             
                             # Check if user is sharing location information in natural language
                             elif any(phrase in text.lower() for phrase in ["i am in", "i live in", "my location is", "from "]):
                                 # Try to extract location from natural language
                                 location_phrases = ["i am in", "i live in", "my location is", "from "]
+                                extracted_location = None
+                                
                                 for phrase in location_phrases:
                                     if phrase in text.lower():
                                         idx = text.lower().find(phrase)
@@ -308,22 +388,149 @@ Ask me anything about farming:
                                         # Take first few words as location
                                         location_words = potential_location.split()[:3]  # Max 3 words for location
                                         extracted_location = ' '.join(location_words).strip('.,!?')
-                                        
                                         if extracted_location:
-                                            user_session['location'] = extracted_location
-                                            app.telegram_user_sessions[chat_id] = user_session
-                                            user_location = extracted_location
-                                            
-                                            response = f"""📍 *Location detected: {extracted_location}*
-
-✅ Great! Now processing your question with location-specific information..."""
                                             break
+                                
+                                if extracted_location:
+                                    user_session['location'] = extracted_location
+                                    app.telegram_user_sessions[chat_id] = user_session
+                                    
+                                    response = f"""📍 *Location detected: {extracted_location}*
+
+✅ Great! Now I can provide location-specific advice for your area.
+
+Ask me anything about farming:
+• "What's the weather like?"
+• "Best crops for my soil?"
+• "Market prices today"
+• "Disease prevention tips"
+
+🌾 Ready to help you grow better crops!"""
+                                else:
+                                    response = """I couldn't detect your location clearly. Please try:
+- Sharing GPS location via � → Location
+- Using: `/location YourCity`
+- Saying: "I am in [Your City Name]" """
                             
-                            if user_location:
+                            # If no location is set, check if question requires location
+                            elif not user_location:
+                                # Check if this is a location-specific query that requires location
+                                location_required_keywords = [
+                                    "weather", "temperature", "rain", "rainfall", "climate",
+                                    "market price", "commodity price", "mandi rate", "market rate",
+                                    "local variety", "regional", "nearby", "in my area"
+                                ]
+                                
+                                requires_location = any(keyword in text.lower() for keyword in location_required_keywords)
+                                
+                                # Try to extract city name from the query first
+                                extracted_city = None
+                                if requires_location:
+                                    # List of common Indian cities and towns
+                                    indian_cities = [
+                                        "hyderabad", "bangalore", "mumbai", "delhi", "chennai", "kolkata", "pune", "ahmedabad",
+                                        "surat", "jaipur", "lucknow", "kanpur", "nagpur", "indore", "thane", "bhopal",
+                                        "visakhapatnam", "pimpri", "patna", "vadodara", "ghaziabad", "ludhiana", "agra",
+                                        "nashik", "faridabad", "meerut", "rajkot", "kalyan", "vasai", "varanasi",
+                                        "srinagar", "aurangabad", "dhanbad", "amritsar", "navi mumbai", "allahabad",
+                                        "ranchi", "howrah", "coimbatore", "jabalpur", "gwalior", "vijayawada",
+                                        "jodhpur", "madurai", "raipur", "kota", "chandigarh", "gurgaon", "solapur",
+                                        "hubballi", "tiruchirappalli", "bareilly", "mysore", "tiruppur", "guwahati",
+                                        "salem", "mira", "warangal", "guntur", "bhiwandi", "saharanpur", "gorakhpur",
+                                        "bikaner", "amravati", "noida", "jamshedpur", "bhilai", "cuttack", "firozabad",
+                                        "kochi", "nellore", "bhavnagar", "dehradun", "durgapur", "asansol", "rourkela",
+                                        "nanded", "kolhapur", "ajmer", "akola", "gulbarga", "jamnagar", "ujjain",
+                                        "loni", "siliguri", "jhansi", "ulhasnagar", "jammu", "sangli", "mangalore",
+                                        "erode", "belgaum", "ambattur", "tirunelveli", "malegaon", "karimnagar",
+                                        "nizamabad", "medak", "khammam", "adilabad", "mahbubnagar", "nalgonda",
+                                        "ranga reddy", "kadapa", "kurnool", "anantapur", "chittoor", "east godavari",
+                                        "west godavari", "krishna", "prakasam", "srikakulam", "vizianagaram"
+                                    ]
+                                    
+                                    # Check if any city name appears in the query
+                                    query_lower = text.lower()
+                                    for city in indian_cities:
+                                        if city in query_lower:
+                                            extracted_city = city.title()
+                                            break
+                                
+                                if extracted_city:
+                                    # Found city in query - save it and process the query
+                                    user_session['location'] = extracted_city
+                                    app.telegram_user_sessions[chat_id] = user_session
+                                    
+                                    print(f"🏙️ DEBUG: Extracted city '{extracted_city}' from query: {text}")
+                                    
+                                    # Process the query with the extracted location
+                                    user_context = {
+                                        "location": extracted_city,
+                                        "coordinates": None
+                                    }
+                                    
+                                    response = await agri_agent.process_query(
+                                        query=text,
+                                        location=extracted_city,
+                                        user_context=user_context,
+                                        preferred_language="en"
+                                    )
+                                    
+                                elif requires_location:
+                                    # Location-specific query but no location found in text
+                                    response = f"""📍 *I need your location for this query: "{text}"*
+
+For accurate weather forecasts, market prices, and regional advice, please:
+
+1️⃣ *Share your location* by tapping 📎 → Location
+2️⃣ *Or type your city* like: `/location Mumbai`
+3️⃣ *Or just tell me* like: "I am in Delhi"
+
+*Then ask your question again!*"""
+                                else:
+                                    # General farming question - answer without location
+                                    print(f"🌾 DEBUG: Processing general farming query: {text}")
+                                    
+                                    user_context = {
+                                        "location": "General (India)",
+                                        "coordinates": None
+                                    }
+                                    
+                                    # Process the query with the agricultural agent
+                                    response = await agri_agent.process_query(
+                                        query=text,
+                                        location="India",
+                                        user_context=user_context,
+                                        conversation_history=[],
+                                        preferred_language="en"
+                                    )
+                                    
+                                    # Add location note for better experience
+                                    if response and len(response.strip()) > 10:
+                                        response += "\n\n� *Note:* For location-specific weather, market prices, and regional advice, share your location using `/location YourCity`"
+                                    else:
+                                        # Fallback response for general questions
+                                        response = f"""🌾 **{text}**
+
+I can help with general farming guidance! Here are some topics I can assist with:
+
+• 🌱 **Crop recommendations** - Best crops for different seasons
+• 🌿 **Organic farming** - Sustainable farming practices  
+• 💧 **Irrigation** - Water management techniques
+• 🐛 **Pest control** - Natural pest management
+• 🌾 **Fertilizers** - NPK and organic fertilizer guidance
+• 🔬 **Soil health** - Soil testing and improvement
+
+📍 **For personalized advice** (weather, market prices, regional varieties), share your location using `/location YourCity`
+
+Ask me anything about farming! 🚜"""
+                            
+                            else:
+                                # User has location - process the regular farming query
+                                print(f"🌾 DEBUG: Processing query with location: {user_location}")
+                                
                                 # Build full user context like web chat
                                 user_context = {
                                     "location": user_location,
-                                    "coordinates": None
+                                    "coordinates": user_session.get('coordinates')
                                 }
                                 
                                 # Process the query with the agricultural agent
@@ -334,64 +541,72 @@ Ask me anything about farming:
                                     conversation_history=[],
                                     preferred_language="en"
                                 )
-                            else:
-                                # Still no location - ask again
-                                response = """📍 *I still need your location to help you!*
+                                
+                                print(f"🤖 DEBUG: Agent response length: {len(response) if response else 0}")
+                                
+                                # If response is empty or too short, provide fallback
+                                if not response or len(response.strip()) < 10:
+                                    response = f"""🌾 I understand you're asking about farming from {user_location}. 
 
-Please share your location or tell me your city name so I can provide accurate farming advice for your area.
+Could you please be more specific about what you'd like to know? For example:
+• Weather forecasts
+• Crop recommendations  
+• Market prices
+• Disease management
+• Fertilizer advice
 
-Type something like: "I am in Mumbai" or use `/location Delhi`"""
-                    
-                    # Ensure response is defined
-                    if 'response' not in locals():
-                        response = "Sorry, I couldn't process your request. Please try again."
-                    
-                    print(f"🤖 DEBUG: Generated response: {response[:100] if response else 'No response'}...")
-                    
-                    # Send response back using simple HTTP request to Telegram API
-                    token = os.getenv('TELEGRAM_BOT_TOKEN')
-                    if token:
-                        telegram_url = f"https://api.telegram.org/bot{token}/sendMessage"
+I'm here to help with all your agricultural needs!"""
                         
-                        # Clean HTML tags from response for better Telegram compatibility
-                        clean_response = re.sub(r'<br\s*/?>', '\n', response)  # Convert <br> to newlines
-                        clean_response = re.sub(r'<strong>(.*?)</strong>', r'*\1*', clean_response)  # Bold text
-                        clean_response = re.sub(r'<b>(.*?)</b>', r'*\1*', clean_response)  # Bold text
-                        clean_response = re.sub(r'<em>(.*?)</em>', r'_\1_', clean_response)  # Italic text
-                        clean_response = re.sub(r'<i>(.*?)</i>', r'_\1_', clean_response)  # Italic text
-                        clean_response = re.sub(r'<[^>]+>', '', clean_response)  # Remove remaining HTML tags
-                        clean_response = clean_response.replace('&nbsp;', ' ')  # Replace HTML entities
-                        clean_response = clean_response.strip()
+                        # Ensure response is defined
+                        if 'response' not in locals():
+                            response = "Sorry, I couldn't process your request. Please try again."
                         
-                        payload = {
-                            "chat_id": chat_id,
-                            "text": clean_response[:4000],  # Telegram message limit
-                            "parse_mode": "Markdown"
-                        }
+                        print(f"🤖 DEBUG: Generated response: {response[:100] if response else 'No response'}...")
                         
-                        async with aiohttp.ClientSession() as session:
-                            async with session.post(telegram_url, json=payload) as resp:
-                                response_text = await resp.text()
-                                print(f"🔍 DEBUG: Telegram API response: {response_text}")
-                                if resp.status == 200:
-                                    print("✅ DEBUG: Response sent successfully via Telegram API")
-                                    return {"ok": True, "message": "Sent successfully"}
-                                else:
-                                    print(f"❌ ERROR: Failed to send message, status: {resp.status}")
-                                    print(f"❌ ERROR: Response content: {response_text}")
-                                    # For testing with fake chat_id, still return success if processing worked
-                                    if "chat not found" in response_text:
-                                        return {"ok": True, "message": "Query processed successfully (test chat_id)", "response_preview": clean_response[:100]}
-                                    return {"error": f"Failed to send message: {resp.status}"}
-                    else:
-                        print("❌ ERROR: TELEGRAM_BOT_TOKEN not found")
-                        return {"error": "Bot token not configured"}
-                        
-                except Exception as e:
-                    print(f"❌ ERROR: Failed to process with agri_agent: {e}")
-                    import traceback
-                    traceback.print_exc()
-                    return {"error": f"Processing failed: {str(e)}"}
+                        # Send response back using simple HTTP request to Telegram API
+                        token = os.getenv('TELEGRAM_BOT_TOKEN')
+                        if token:
+                            telegram_url = f"https://api.telegram.org/bot{token}/sendMessage"
+                            
+                            # Clean HTML tags from response for better Telegram compatibility
+                            clean_response = re.sub(r'<br\s*/?>', '\n', response)  # Convert <br> to newlines
+                            clean_response = re.sub(r'<strong>(.*?)</strong>', r'*\1*', clean_response)  # Bold text
+                            clean_response = re.sub(r'<b>(.*?)</b>', r'*\1*', clean_response)  # Bold text
+                            clean_response = re.sub(r'<em>(.*?)</em>', r'_\1_', clean_response)  # Italic text
+                            clean_response = re.sub(r'<i>(.*?)</i>', r'_\1_', clean_response)  # Italic text
+                            clean_response = re.sub(r'<[^>]+>', '', clean_response)  # Remove remaining HTML tags
+                            clean_response = clean_response.replace('&nbsp;', ' ')  # Replace HTML entities
+                            clean_response = clean_response.strip()
+                            
+                            payload = {
+                                "chat_id": chat_id,
+                                "text": clean_response[:4000],  # Telegram message limit
+                                "parse_mode": "Markdown"
+                            }
+                            
+                            async with aiohttp.ClientSession() as session:
+                                async with session.post(telegram_url, json=payload) as resp:
+                                    response_text = await resp.text()
+                                    print(f"🔍 DEBUG: Telegram API response: {response_text}")
+                                    if resp.status == 200:
+                                        print("✅ DEBUG: Response sent successfully via Telegram API")
+                                        return {"ok": True, "message": "Sent successfully"}
+                                    else:
+                                        print(f"❌ ERROR: Failed to send message, status: {resp.status}")
+                                        print(f"❌ ERROR: Response content: {response_text}")
+                                        # For testing with fake chat_id, still return success if processing worked
+                                        if "chat not found" in response_text:
+                                            return {"ok": True, "message": "Query processed successfully (test chat_id)", "response_preview": clean_response[:100]}
+                                        return {"error": f"Failed to send message: {resp.status}"}
+                        else:
+                            print("❌ ERROR: TELEGRAM_BOT_TOKEN not found")
+                            return {"error": "Bot token not configured"}
+                            
+                    except Exception as e:
+                        print(f"❌ ERROR: Failed to process with agri_agent: {e}")
+                        import traceback
+                        traceback.print_exc()
+                        return {"error": f"Processing failed: {str(e)}"}
             else:
                 print("⚠️ WARNING: No chat_id or text found in message")
                 return {"error": "Invalid message format"}
