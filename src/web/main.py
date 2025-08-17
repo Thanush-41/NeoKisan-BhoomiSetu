@@ -1115,6 +1115,20 @@ async def crop_recommender_page(request: Request, lang: Optional[str] = "en"):
         "t": lambda key, **kwargs: t(key, lang, **kwargs)
     })
 
+@app.get("/agrixchange")
+async def agrixchange_page(request: Request, lang: Optional[str] = "en"):
+    """AgriXchange platform information page"""
+    # Validate language code
+    if lang not in LanguageConfig.LANGUAGES:
+        lang = LanguageConfig.DEFAULT_LANGUAGE
+    
+    return templates.TemplateResponse("agrixchange.html", {
+        "request": request,
+        "language": lang,
+        "languages": LanguageConfig.LANGUAGES,
+        "t": lambda key, **kwargs: t(key, lang, **kwargs)
+    })
+
 # ========================================
 # CROP RECOMMENDATION API
 # ========================================
