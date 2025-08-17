@@ -423,8 +423,59 @@ Ask me anything about farming:
                                 
                                 requires_location = any(keyword in text.lower() for keyword in location_required_keywords)
                                 
+                                # Try to extract city name from the query first
+                                extracted_city = None
                                 if requires_location:
-                                    # Location-specific query but no location set
+                                    # List of common Indian cities and towns
+                                    indian_cities = [
+                                        "hyderabad", "bangalore", "mumbai", "delhi", "chennai", "kolkata", "pune", "ahmedabad",
+                                        "surat", "jaipur", "lucknow", "kanpur", "nagpur", "indore", "thane", "bhopal",
+                                        "visakhapatnam", "pimpri", "patna", "vadodara", "ghaziabad", "ludhiana", "agra",
+                                        "nashik", "faridabad", "meerut", "rajkot", "kalyan", "vasai", "varanasi",
+                                        "srinagar", "aurangabad", "dhanbad", "amritsar", "navi mumbai", "allahabad",
+                                        "ranchi", "howrah", "coimbatore", "jabalpur", "gwalior", "vijayawada",
+                                        "jodhpur", "madurai", "raipur", "kota", "chandigarh", "gurgaon", "solapur",
+                                        "hubballi", "tiruchirappalli", "bareilly", "mysore", "tiruppur", "guwahati",
+                                        "salem", "mira", "warangal", "guntur", "bhiwandi", "saharanpur", "gorakhpur",
+                                        "bikaner", "amravati", "noida", "jamshedpur", "bhilai", "cuttack", "firozabad",
+                                        "kochi", "nellore", "bhavnagar", "dehradun", "durgapur", "asansol", "rourkela",
+                                        "nanded", "kolhapur", "ajmer", "akola", "gulbarga", "jamnagar", "ujjain",
+                                        "loni", "siliguri", "jhansi", "ulhasnagar", "jammu", "sangli", "mangalore",
+                                        "erode", "belgaum", "ambattur", "tirunelveli", "malegaon", "karimnagar",
+                                        "nizamabad", "medak", "khammam", "adilabad", "mahbubnagar", "nalgonda",
+                                        "ranga reddy", "kadapa", "kurnool", "anantapur", "chittoor", "east godavari",
+                                        "west godavari", "krishna", "prakasam", "srikakulam", "vizianagaram"
+                                    ]
+                                    
+                                    # Check if any city name appears in the query
+                                    query_lower = text.lower()
+                                    for city in indian_cities:
+                                        if city in query_lower:
+                                            extracted_city = city.title()
+                                            break
+                                
+                                if extracted_city:
+                                    # Found city in query - save it and process the query
+                                    user_session['location'] = extracted_city
+                                    app.telegram_user_sessions[chat_id] = user_session
+                                    
+                                    print(f"🏙️ DEBUG: Extracted city '{extracted_city}' from query: {text}")
+                                    
+                                    # Process the query with the extracted location
+                                    user_context = {
+                                        "location": extracted_city,
+                                        "coordinates": None
+                                    }
+                                    
+                                    response = await agri_agent.process_query(
+                                        query=text,
+                                        location=extracted_city,
+                                        user_context=user_context,
+                                        preferred_language="en"
+                                    )
+                                    
+                                elif requires_location:
+                                    # Location-specific query but no location found in text
                                     response = f"""📍 *I need your location for this query: "{text}"*
 
 For accurate weather forecasts, market prices, and regional advice, please:
