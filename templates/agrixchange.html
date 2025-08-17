@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ffffff">
+    <title>AgriXchange - Direct Farmer-to-Market Platform | BhoomiSetu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Open+Sans&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/dark-theme.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            margin-top: 0px;
+        }
+
+        /* Hero Section */
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-green) 0%, #2d7d14 100%);
+            color: white;
+            padding: 6rem 0 4rem;
+            margin-top: 70px;
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        .hero-content h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .hero-content .subtitle {
+            font-size: 1.4rem;
+            margin-bottom: 2rem;
+            opacity: 0.95;
+        }
+
+        .hero-content .description {
+            font-size: 1.1rem;
+            margin-bottom: 3rem;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #fff;
+            color: var(--primary-green);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+            color: var(--primary-green);
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 4rem 0;
+            background: var(--card-bg);
+        }
+
+        .problem-card {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 15px;
+            padding: 2.5rem;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        [data-theme="dark"] .problem-card {
+            background: #3d3d00;
+            border-color: #ffc107;
+            color: var(--dark-text);
+        }
+
+        .problem-icon {
+            font-size: 3rem;
+            color: #dc3545;
+            margin-bottom: 1.5rem;
+        }
+
+        .problem-card h3 {
+            color: #dc3545;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        /* Solution Section */
+        .solution-section {
+            padding: 4rem 0;
+            background: var(--light-bg);
+        }
+
+        .section-title {
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 3rem;
+            font-weight: 600;
+        }
+
+        .solution-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .solution-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .solution-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: var(--primary-green);
+        }
+
+        .solution-icon {
+            font-size: 3rem;
+            color: var(--primary-green);
+            margin-bottom: 1.5rem;
+        }
+
+        .solution-card h4 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features-section {
+            padding: 4rem 0;
+            background: var(--card-bg);
+        }
+
+        .feature-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 3rem;
+            margin-top: 3rem;
+        }
+
+        .feature-category {
+            background: var(--light-bg);
+            border-radius: 15px;
+            padding: 2.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-category h3 {
+            color: var(--primary-green);
+            font-size: 1.6rem;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--primary-green);
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 4rem 0;
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            text-align: center;
+        }
+
+        .stat-item h3 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-item p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        /* Tech Stack Section */
+        .tech-section {
+            padding: 4rem 0;
+            background: var(--light-bg);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tech-item {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .tech-item i {
+            font-size: 2rem;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        /* CTA Section */
+        .final-cta {
+            padding: 4rem 0;
+            background: linear-gradient(135deg, var(--primary-green) 0%, #2d7d14 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .final-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .final-cta p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero-content .subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .solution-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .feature-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Connection Banner */
+        .connection-banner {
+            background: linear-gradient(45deg, #e8f5e8 0%, #f0f8f0 100%);
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        [data-theme="dark"] .connection-banner {
+            background: linear-gradient(45deg, #1a4a1a 0%, #2d5a2d 100%);
+        }
+
+        .connection-banner h4 {
+            color: var(--primary-green);
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+        }
+
+        .connection-banner p {
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Include Professional Navbar -->
+    {% include 'components/navbar.html' %}
+
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1>🌾 AgriXchange</h1>
+            <p class="subtitle">{{ t('agrixchange.subtitle') if t else 'Direct Farmer-to-Market Platform' }}</p>
+            <p class="description">
+                {{ t('agrixchange.description') if t else 'Revolutionizing agriculture by eliminating middlemen and connecting farmers directly with consumers and retailers. Increase your profits by up to 40% through our transparent marketplace.' }}
+            </p>
+            <a href="https://agri-xchange.vercel.app/" target="_blank" class="cta-button">
+                <i class="fas fa-external-link-alt me-2"></i>
+                {{ t('agrixchange.visit_platform') if t else 'Visit AgriXchange Platform' }}
+            </a>
+        </div>
+    </section>
+
+    <!-- Connection Banner -->
+    <section class="container">
+        <div class="connection-banner">
+            <h4><i class="fas fa-link me-2"></i>{{ t('agrixchange.extension_title') if t else 'Extension to BhoomiSetu' }}</h4>
+            <p>{{ t('agrixchange.extension_description') if t else 'AgriXchange is our marketplace extension that complements BhoomiSetu\'s AI advisory services. Get farming advice here, then sell your produce directly on AgriXchange!' }}</p>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem-section">
+        <div class="container">
+            <h2 class="section-title">{{ t('agrixchange.problem_title') if t else 'The Middleman Problem' }}</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="problem-card">
+                        <div class="problem-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <h3>{{ t('agrixchange.problem_subtitle') if t else 'Farmers Lose 30-60% of Their Profits' }}</h3>
+                        <p>{{ t('agrixchange.problem_description') if t else 'Traditional agricultural supply chains involve multiple intermediaries who take substantial cuts from farmers\' earnings. This leaves farmers with minimal profits despite their hard work, while consumers pay higher prices for fresh produce.' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section class="solution-section">
+        <div class="container">
+            <h2 class="section-title">{{ t('agrixchange.solution_title') if t else 'Our Solution: Direct Trade Platform' }}</h2>
+            <div class="solution-grid">
+                <div class="solution-card">
+                    <div class="solution-icon">
+                        <i class="fas fa-handshake"></i>
+                    </div>
+                    <h4>{{ t('agrixchange.direct_connection') if t else 'Direct Connection' }}</h4>
+                    <p>{{ t('agrixchange.direct_connection_desc') if t else 'Connect farmers directly with consumers, retailers, and wholesalers without any intermediaries taking cuts from profits.' }}</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h4>{{ t('agrixchange.increased_profits') if t else 'Increased Profits' }}</h4>
+                    <p>{{ t('agrixchange.increased_profits_desc') if t else 'Farmers can earn 30-60% more by selling directly to buyers and setting their own fair prices for quality produce.' }}</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h4>{{ t('agrixchange.transparent_trading') if t else 'Transparent Trading' }}</h4>
+                    <p>{{ t('agrixchange.transparent_trading_desc') if t else 'Live bidding system ensures fair pricing with complete transparency in all transactions and quality certifications.' }}</p>
+                </div>
+                <div class="solution-card">
+                    <div class="solution-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h4>{{ t('agrixchange.easy_access') if t else 'Easy Access' }}</h4>
+                    <p>{{ t('agrixchange.easy_access_desc') if t else 'User-friendly platform accessible on any device with support for multiple Indian languages and simple registration.' }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section">
+        <div class="container">
+            <h2 class="section-title">{{ t('agrixchange.features_title') if t else 'Platform Features' }}</h2>
+            <div class="feature-categories">
+                <div class="feature-category">
+                    <h3><i class="fas fa-tractor"></i> {{ t('agrixchange.for_farmers') if t else 'For Farmers' }}</h3>
+                    <ul class="feature-list">
+                        <li>{{ t('agrixchange.farmer_feature_1') if t else 'List produce for both retail and wholesale markets' }}</li>
+                        <li>{{ t('agrixchange.farmer_feature_2') if t else 'Participate in live bidding auctions' }}</li>
+                        <li>{{ t('agrixchange.farmer_feature_3') if t else 'Access weather and agricultural news' }}</li>
+                        <li>{{ t('agrixchange.farmer_feature_4') if t else 'Upload AGMARK quality certificates' }}</li>
+                        <li>{{ t('agrixchange.farmer_feature_5') if t else 'Set your own prices and negotiate directly' }}</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h3><i class="fas fa-store"></i> {{ t('agrixchange.for_traders') if t else 'For Traders' }}</h3>
+                    <ul class="feature-list">
+                        <li>{{ t('agrixchange.trader_feature_1') if t else 'Participate in wholesale bidding auctions' }}</li>
+                        <li>{{ t('agrixchange.trader_feature_2') if t else 'Access to verified quality produce' }}</li>
+                        <li>{{ t('agrixchange.trader_feature_3') if t else 'GSTIN and license verification' }}</li>
+                        <li>{{ t('agrixchange.trader_feature_4') if t else 'Track bidding history and transactions' }}</li>
+                        <li>{{ t('agrixchange.trader_feature_5') if t else 'Direct communication with farmers' }}</li>
+                    </ul>
+                </div>
+                <div class="feature-category">
+                    <h3><i class="fas fa-shopping-cart"></i> {{ t('agrixchange.for_consumers') if t else 'For Consumers' }}</h3>
+                    <ul class="feature-list">
+                        <li>{{ t('agrixchange.consumer_feature_1') if t else 'Buy fresh produce directly from farmers' }}</li>
+                        <li>{{ t('agrixchange.consumer_feature_2') if t else 'Filter by location, price, and quality' }}</li>
+                        <li>{{ t('agrixchange.consumer_feature_3') if t else 'Easy cart management and checkout' }}</li>
+                        <li>{{ t('agrixchange.consumer_feature_4') if t else 'Choose from available delivery partners' }}</li>
+                        <li>{{ t('agrixchange.consumer_feature_5') if t else 'Support local farmers directly' }}</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <h2 class="section-title text-white">{{ t('agrixchange.impact_title') if t else 'Platform Impact' }}</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <h3>40%</h3>
+                    <p>{{ t('agrixchange.stat_profit') if t else 'Average Profit Increase' }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>100+</h3>
+                    <p>{{ t('agrixchange.stat_farmers') if t else 'Active Farmers' }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>24/7</h3>
+                    <p>{{ t('agrixchange.stat_availability') if t else 'Platform Availability' }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>5★</h3>
+                    <p>{{ t('agrixchange.stat_rating') if t else 'User Satisfaction' }}</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Section -->
+    <section class="tech-section">
+        <div class="container">
+            <h2 class="section-title">{{ t('agrixchange.tech_title') if t else 'Built with Modern Technology' }}</h2>
+            <div class="tech-grid">
+                <div class="tech-item">
+                    <i class="fab fa-react"></i>
+                    <p>React</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-js-square"></i>
+                    <p>TypeScript</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-bolt"></i>
+                    <p>Vite</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fab fa-css3-alt"></i>
+                    <p>Tailwind</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-broadcast-tower"></i>
+                    <p>Socket.IO</p>
+                </div>
+                <div class="tech-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    <p>Responsive</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="final-cta">
+        <div class="container">
+            <h2>{{ t('agrixchange.cta_title') if t else 'Ready to Eliminate Middlemen?' }}</h2>
+            <p>{{ t('agrixchange.cta_description') if t else 'Join thousands of farmers already increasing their profits through direct sales' }}</p>
+            <a href="https://agri-xchange.vercel.app/" target="_blank" class="cta-button">
+                <i class="fas fa-rocket me-2"></i>
+                {{ t('agrixchange.start_selling') if t else 'Start Selling on AgriXchange' }}
+            </a>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Theme Toggle Script -->
+    <script>
+        // Theme toggle functionality
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const body = document.body;
+
+        // Check for saved theme or default to light
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        
+        if (currentTheme === 'dark') {
+            themeIcon.className = 'fas fa-sun';
+        } else {
+            themeIcon.className = 'fas fa-moon';
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', function() {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                
+                document.documentElement.setAttribute('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+                
+                if (newTheme === 'dark') {
+                    themeIcon.className = 'fas fa-sun';
+                } else {
+                    themeIcon.className = 'fas fa-moon';
+                }
+            });
+        }
+
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+</body>
+</html>

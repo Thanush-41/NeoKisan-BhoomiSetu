@@ -83,6 +83,15 @@
                     </a>
                 </li>
                 <li class="nav-item">
+                    <a class="nav-link {{ 'active' if '/agrixchange' in request.url.path else '' }}" 
+                       href="/agrixchange?lang={{ language }}"
+                       data-bs-toggle="tooltip" 
+                       data-bs-placement="bottom" 
+                       title="{{ t('nav.agrixchange') if t else 'AgriXchange - Direct Sales Platform' }}">
+                        <i class="fas fa-store"></i>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a class="nav-link {{ 'active' if '/test-queries' in request.url.path else '' }}" 
                        href="/test-queries"
                        data-bs-toggle="tooltip" 
