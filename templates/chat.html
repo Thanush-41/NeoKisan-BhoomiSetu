@@ -490,6 +490,89 @@
             cursor: not-allowed;
         }
 
+        .voice-button {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-green), #2e7d32);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 16px rgba(76, 175, 80, 0.3);
+            margin-right: 0.5rem;
+        }
+
+        .voice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+            background: linear-gradient(135deg, #66bb6a, var(--primary-green));
+        }
+
+        .voice-button:active {
+            transform: translateY(0);
+        }
+
+        .voice-button.recording {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+            animation: pulse 1s infinite;
+        }
+
+        .voice-button.recording:hover {
+            background: linear-gradient(135deg, #f44336, #d32f2f);
+        }
+
+        .voice-button:disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+            transform: none !important;
+            background: #ccc !important;
+        }
+
+        .voice-button:disabled:hover {
+            transform: none !important;
+            box-shadow: 0 4px 16px rgba(204, 204, 204, 0.3) !important;
+            background: #ccc !important;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
+            }
+            50% {
+                box-shadow: 0 6px 24px rgba(244, 67, 54, 0.6);
+            }
+            100% {
+                box-shadow: 0 4px 16px rgba(244, 67, 54, 0.3);
+            }
+        }
+
+        .voice-status {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .voice-status.show {
+            opacity: 1;
+        }
+
         .typing-indicator {
             display: none;
             gap: 1rem;
@@ -626,6 +709,19 @@
                 width: 45px;
                 height: 45px;
                 font-size: 1rem;
+            }
+
+            .voice-button {
+                width: 45px;
+                height: 45px;
+                font-size: 1rem;
+                margin-right: 0.3rem;
+            }
+
+            .voice-status {
+                bottom: 60px;
+                font-size: 0.8rem;
+                padding: 6px 12px;
             }
         }
 
@@ -836,6 +932,7 @@
 
                     <!-- Chat Input -->
                     <div class="chat-input-container">
+                        <div class="voice-status" id="voiceStatus">Listening...</div>
                         <form class="chat-input-form" onsubmit="sendMessage(event)">
                             <div class="input-group">
                                 <textarea 
@@ -847,6 +944,9 @@
                                     oninput="autoResize(this)"
                                 ></textarea>
                             </div>
+                            <button type="button" class="voice-button" id="voiceButton" onclick="toggleVoiceRecognition()" title="Voice input (Ctrl+M)">
+                                <i class="fas fa-microphone" id="voiceIcon"></i>
+                            </button>
                             <button type="submit" class="send-button" id="sendButton">
                                 <i class="fas fa-paper-plane"></i>
                             </button>
@@ -861,6 +961,11 @@
         // Global variables
         let isLoading = false;
 
+        // Voice recognition variables
+        let recognition = null;
+        let isRecording = false;
+        let voiceSupported = false;
+
         // Location storage
         let userLocation = {
             latitude: null,
@@ -868,6 +973,210 @@
             city: null,
             address: null
         };
+
+        // Initialize voice recognition
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                
+                recognition.continuous = false;
+                recognition.interimResults = true;
+                
+                // Set language based on current language preference
+                const currentLang = getCurrentLanguage();
+                const supportedLanguages = getSupportedVoiceLanguage(getVoiceLanguageCode(currentLang));
+                recognition.lang = supportedLanguages[0]; // Use the primary supported language
+                
+                voiceSupported = true;
+                
+                recognition.onstart = function() {
+                    isRecording = true;
+                    updateVoiceButtonState();
+                    showVoiceStatus('Listening...');
+                };
+                
+                recognition.onresult = function(event) {
+                    let finalTranscript = '';
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            finalTranscript += transcript;
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    // Update the input field with the transcript
+                    const messageInput = document.getElementById('messageInput');
+                    if (finalTranscript) {
+                        messageInput.value = finalTranscript;
+                        autoResize(messageInput);
+                        hideVoiceStatus();
+                    } else if (interimTranscript) {
+                        messageInput.value = interimTranscript;
+                        autoResize(messageInput);
+                        showVoiceStatus('Listening... "' + interimTranscript + '"');
+                    }
+                };
+                
+                recognition.onerror = function(event) {
+                    console.error('Speech recognition error:', event.error);
+                    isRecording = false;
+                    updateVoiceButtonState();
+                    hideVoiceStatus();
+                    
+                    let errorMessage = 'Speech recognition error';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage = 'No speech detected. Please try again.';
+                            break;
+                        case 'audio-capture':
+                            errorMessage = 'Microphone not accessible. Please check permissions.';
+                            break;
+                        case 'not-allowed':
+                            errorMessage = 'Microphone access denied. Please allow microphone access and refresh the page.';
+                            break;
+                        case 'network':
+                            errorMessage = 'Network error. Please check your connection.';
+                            break;
+                        case 'service-not-allowed':
+                            errorMessage = 'Speech service not available. Please try again.';
+                            break;
+                        case 'bad-grammar':
+                            errorMessage = 'Speech recognition grammar error.';
+                            break;
+                        case 'language-not-supported':
+                            errorMessage = 'Selected language not supported for voice input.';
+                            break;
+                    }
+                    
+                    showVoiceStatus(errorMessage);
+                    setTimeout(hideVoiceStatus, 4000);
+                };
+                
+                recognition.onend = function() {
+                    isRecording = false;
+                    updateVoiceButtonState();
+                    hideVoiceStatus();
+                };
+            } else {
+                console.log('Speech recognition not supported in this browser');
+                voiceSupported = false;
+                
+                // Update voice button to show unsupported state
+                const voiceButton = document.getElementById('voiceButton');
+                if (voiceButton) {
+                    voiceButton.disabled = true;
+                    voiceButton.title = 'Voice input not supported in this browser';
+                    voiceButton.style.opacity = '0.5';
+                    voiceButton.style.cursor = 'not-allowed';
+                    
+                    // Change icon to indicate unavailable
+                    const voiceIcon = document.getElementById('voiceIcon');
+                    if (voiceIcon) {
+                        voiceIcon.className = 'fas fa-microphone-slash';
+                    }
+                }
+            }
+        }
+
+        // Toggle voice recognition
+        function toggleVoiceRecognition() {
+            if (!voiceSupported) {
+                showVoiceStatus('Voice recognition not supported in your browser');
+                setTimeout(hideVoiceStatus, 3000);
+                return;
+            }
+            
+            if (isRecording) {
+                recognition.stop();
+            } else {
+                recognition.start();
+            }
+        }
+
+        // Update voice button state
+        function updateVoiceButtonState() {
+            const voiceButton = document.getElementById('voiceButton');
+            const voiceIcon = document.getElementById('voiceIcon');
+            
+            if (isRecording) {
+                voiceButton.classList.add('recording');
+                voiceIcon.className = 'fas fa-stop';
+            } else {
+                voiceButton.classList.remove('recording');
+                voiceIcon.className = 'fas fa-microphone';
+            }
+        }
+
+        // Show voice status
+        function showVoiceStatus(message) {
+            const voiceStatus = document.getElementById('voiceStatus');
+            voiceStatus.textContent = message;
+            voiceStatus.classList.add('show');
+        }
+
+        // Hide voice status
+        function hideVoiceStatus() {
+            const voiceStatus = document.getElementById('voiceStatus');
+            voiceStatus.classList.remove('show');
+        }
+
+        // Get voice language code based on current language
+        function getVoiceLanguageCode(langCode) {
+            const languageMap = {
+                'en': 'en-US',
+                'hi': 'hi-IN',
+                'te': 'te-IN',
+                'ta': 'ta-IN',
+                'kn': 'kn-IN',
+                'ml': 'ml-IN',
+                'bn': 'bn-IN',
+                'gu': 'gu-IN',
+                'mr': 'mr-IN',
+                'pa': 'pa-IN',
+                'or': 'or-IN',
+                'as': 'as-IN'
+            };
+            
+            // Return mapped language or fallback to English
+            return languageMap[langCode] || 'en-US';
+        }
+
+        // Check if voice language is supported and provide fallback
+        function getSupportedVoiceLanguage(langCode) {
+            const primaryLang = getVoiceLanguageCode(langCode);
+            
+            // Common fallbacks for unsupported languages
+            const fallbackMap = {
+                'te-IN': ['te-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'ta-IN': ['ta-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'kn-IN': ['kn-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'ml-IN': ['ml-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'bn-IN': ['bn-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'gu-IN': ['gu-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'mr-IN': ['mr-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'pa-IN': ['pa-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'or-IN': ['or-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'as-IN': ['as-IN', 'hi-IN', 'en-IN', 'en-US'],
+                'hi-IN': ['hi-IN', 'en-IN', 'en-US'],
+                'en-US': ['en-US', 'en-IN']
+            };
+            
+            return fallbackMap[primaryLang] || ['en-US'];
+        }
+
+        // Update voice recognition language when language changes
+        function updateVoiceLanguage() {
+            if (recognition && voiceSupported) {
+                const currentLang = getCurrentLanguage();
+                const supportedLanguages = getSupportedVoiceLanguage(getVoiceLanguageCode(currentLang));
+                recognition.lang = supportedLanguages[0];
+            }
+        }
 
         // Load saved location from localStorage
         function loadSavedLocation() {
@@ -943,6 +1252,11 @@
             if (event.key === 'Enter' && !event.shiftKey) {
                 event.preventDefault();
                 sendMessage(event);
+            }
+            // Voice shortcut: Ctrl + M (or Cmd + M on Mac)
+            if ((event.ctrlKey || event.metaKey) && event.key === 'm') {
+                event.preventDefault();
+                toggleVoiceRecognition();
             }
         }
 
@@ -1126,6 +1440,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             loadSavedLocation();
             document.getElementById('messageInput').focus();
+            
+            // Initialize voice recognition
+            initVoiceRecognition();
             
             // Initialize authentication
             initializeAuth();
@@ -2198,6 +2515,9 @@
         function changeLanguage(langCode) {
             // Store selected language in localStorage
             localStorage.setItem('selectedLanguage', langCode);
+            
+            // Update voice recognition language before page reload
+            updateVoiceLanguage();
             
             // Get current URL and update language parameter
             const url = new URL(window.location);
