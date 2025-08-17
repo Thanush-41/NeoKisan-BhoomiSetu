@@ -252,26 +252,101 @@ Type any farming question to get started! 🚀"""
                         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
                         from src.agents.agri_agent import agri_agent
                         
-                        # Extract user location if mentioned in the message
-                        # For now, default to India but could be enhanced to detect location from message
-                        location = "India"  # Could be enhanced with location detection
+                        # Initialize session storage for webhook users (simple in-memory storage)
+                        if not hasattr(app, 'telegram_user_sessions'):
+                            app.telegram_user_sessions = {}
                         
-                        # Build full user context like web chat
-                        user_context = {
-                            "location": location,
-                            "coordinates": None  # Could be enhanced with user's shared location
-                        }
+                        # Check if user has provided location before
+                        user_session = app.telegram_user_sessions.get(chat_id, {})
+                        user_location = user_session.get('location')
                         
-                        # Process the query with the agricultural agent using SAME parameters as web chat
-                        response = await agri_agent.process_query(
-                            query=text,
-                            location=location,
-                            user_context=user_context,
-                            conversation_history=[],  # Could be enhanced to store per-user history
-                            preferred_language="en"   # Could be enhanced with language detection
-                        )
+                        # If no location is set, ask for it first
+                        if not user_location:
+                            response = """📍 *I need your location to provide accurate advice!*
+
+To get personalized weather forecasts, market prices, and farming advice for your area, please:
+
+1️⃣ *Share your location* by tapping 📎 → Location
+2️⃣ *Or type your city* like: `/location Mumbai`
+3️⃣ *Or just tell me* like: "I am in Delhi"
+
+This helps me provide:
+• 🌤️ Local weather forecasts
+• 💰 Nearby market prices  
+• 🌾 Region-specific farming advice
+
+*Share your location first, then ask any farming question!*"""
+                        else:
+                            # User has location - process the query normally
+                            
+                            # Check if user is providing location in this message
+                            if text.strip().lower().startswith('/location '):
+                                new_location = text.strip()[10:].strip()  # Remove '/location ' prefix
+                                user_session['location'] = new_location
+                                app.telegram_user_sessions[chat_id] = user_session
+                                
+                                response = f"""📍 *Location set to: {new_location}*
+
+✅ Perfect! Now I can provide location-specific advice.
+
+Ask me anything about farming:
+• "What's the weather tomorrow?"
+• "Best crops for my soil?"
+• "Market price of rice today"
+• "When to plant cotton?"
+
+🌾 Ready to help you grow better crops!"""
+                            
+                            # Check if user is sharing location information in natural language
+                            elif any(phrase in text.lower() for phrase in ["i am in", "i live in", "my location is", "from "]):
+                                # Try to extract location from natural language
+                                location_phrases = ["i am in", "i live in", "my location is", "from "]
+                                for phrase in location_phrases:
+                                    if phrase in text.lower():
+                                        idx = text.lower().find(phrase)
+                                        potential_location = text[idx + len(phrase):].strip()
+                                        # Take first few words as location
+                                        location_words = potential_location.split()[:3]  # Max 3 words for location
+                                        extracted_location = ' '.join(location_words).strip('.,!?')
+                                        
+                                        if extracted_location:
+                                            user_session['location'] = extracted_location
+                                            app.telegram_user_sessions[chat_id] = user_session
+                                            user_location = extracted_location
+                                            
+                                            response = f"""📍 *Location detected: {extracted_location}*
+
+✅ Great! Now processing your question with location-specific information..."""
+                                            break
+                            
+                            if user_location:
+                                # Build full user context like web chat
+                                user_context = {
+                                    "location": user_location,
+                                    "coordinates": None
+                                }
+                                
+                                # Process the query with the agricultural agent
+                                response = await agri_agent.process_query(
+                                    query=text,
+                                    location=user_location,
+                                    user_context=user_context,
+                                    conversation_history=[],
+                                    preferred_language="en"
+                                )
+                            else:
+                                # Still no location - ask again
+                                response = """📍 *I still need your location to help you!*
+
+Please share your location or tell me your city name so I can provide accurate farming advice for your area.
+
+Type something like: "I am in Mumbai" or use `/location Delhi`"""
                     
-                    print(f"🤖 DEBUG: Generated response: {response[:100]}...")
+                    # Ensure response is defined
+                    if 'response' not in locals():
+                        response = "Sorry, I couldn't process your request. Please try again."
+                    
+                    print(f"🤖 DEBUG: Generated response: {response[:100] if response else 'No response'}...")
                     
                     # Send response back using simple HTTP request to Telegram API
                     token = os.getenv('TELEGRAM_BOT_TOKEN')
